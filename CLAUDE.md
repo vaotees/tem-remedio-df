@@ -5,14 +5,24 @@ App React Native (Expo) que mostra o estoque de remédios das UBSs do Distrito F
 ## Estrutura
 - `packages/shared` — formato do snapshot (schemas zod), semáforo, regras de retirada, `normalizar()`. Usado pelo coletor e pelo app.
 - `pipeline` — coletor diário: extrai (Power BI da SES-DF, CNES, CMED) → limpa → valida → publica `snapshot.json` + `meta.json`.
-- `apps/mobile` — app Expo (ainda não criado; M2).
+- `apps/mobile` — app Expo SDK 57 (Expo Router, rotas em `src/app/`). Fica no 57 até o Expo Go do SDK 58 chegar às lojas (ver `docs/SPEC.md`). Leia `apps/mobile/AGENTS.md`: o Expo muda a cada SDK, consulte a documentação da versão instalada antes de usar uma API.
 - `spike/` — teste de extração (M0) em Python; só referência, não é código de produção.
 
 ## Comandos
 - `pnpm install`
-- `pnpm test` / `pnpm typecheck` — todos os pacotes
+- `pnpm test` / `pnpm typecheck` / `pnpm lint` — todos os pacotes
 - `pnpm coletar` — roda o coletor de verdade (rede), grava em `pipeline/saida/`
 - `pnpm --filter @tem-remedio/pipeline coletar --anterior saida/meta.json` — simula "SES-DF ainda não atualizou"
+- `pnpm snapshot:app` — copia o snapshot gerado pelo coletor para dentro do app (rode `pnpm coletar` antes)
+- `pnpm app` — servidor do Expo (Expo Go no celular; `w` abre a versão web)
+
+## App (apps/mobile)
+- Instalar pacote: `pnpm exec expo install <pacote>` **dentro de `apps/mobile`**. Não use `npx expo`: há um `expo-cli` global antigo (2021) nesta máquina que entra no lugar quando o `expo` local não é achado e instala versões erradas com npm.
+- Testing Library 13 (o Expo Router 57 exige). Os testes já usam `await render(...)`/`await fireEvent...`, que também serve para a 14 (assíncrona) quando subirmos para o SDK 58. Ícones são simulados em `jest.setup.tsx`.
+- Depois de trocar versão do Expo, rode `npx expo-doctor@latest` em `apps/mobile` (pega dependências duplicadas de outro SDK).
+- Cores só de `src/tema/cores.ts`; o teste de contraste (`__tests__/tema-test.ts`) tem que continuar passando.
+- Texto nunca é cortado com "…" (rótulos quebram linha); alvo de toque mínimo `ALVO_MINIMO` (56).
+- Telas usam `Tela` e `ComDados`; dados vêm de `useSnapshot()`, nunca direto da rede.
 
 ## Convenções
 - Código, comentários, testes e mensagens em **português do Brasil**.
