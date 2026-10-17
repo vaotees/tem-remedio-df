@@ -36,6 +36,7 @@ App React Native (Expo) que mostra o estoque de remédios das UBSs do Distrito F
 - O painel cruza todos os locais × produtos; o coletor filtra `i_qtd_rede > 0` na própria consulta.
 - Ao paginar com RestartTokens, o Power BI repete a última linha da página anterior: o cliente descarta.
 - Material (sem `i_abastecimento`), almoxarifados e remédios "aplicados no próprio posto" ficam fora.
+- Unidades prisionais (horário "OUTRO/PRISIONAL" no cadastro ou "PRISIONAL" no nome da farmácia) atendem só a população presa: o coletor as tira do snapshot e o app também filtra, como defesa.
 - Observação de retirada desconhecida vira `sem_informacao` + aviso no log, nunca `qualquer_ubs`.
 - Textos do semáforo nunca prometem que é "seguro ir"; cor sempre acompanhada de ícone e texto.
 - Mesma substância ≠ mesmo remédio: avisar quando a marca é de liberação prolongada e o produto do SUS não.

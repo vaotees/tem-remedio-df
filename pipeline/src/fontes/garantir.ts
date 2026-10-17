@@ -1,5 +1,6 @@
 import { PAINEL_GARANTIR } from "../config";
 import { consultar, type OpcoesConsulta } from "../powerbi/cliente";
+import type { Valor } from "../powerbi/dsr";
 
 /** Uma linha de documento/observação de um remédio dispensado nas UBSs. */
 export interface LinhaRegra {
@@ -42,13 +43,15 @@ export async function buscarCadastroUbs(opcoes: OpcoesConsulta = {}): Promise<Ca
     ["i_estab_cnes", "i_telefone", "i_horario_funcionamento", "psicotropico", "inativo"],
     opcoes,
   );
-  return linhas
-    .filter((l) => l.i_estab_cnes !== null)
-    .map((l) => ({
-      cnes: String(l.i_estab_cnes).padStart(7, "0"),
-      telefone: l.i_telefone ? String(l.i_telefone) : null,
-      horario: l.i_horario_funcionamento ? String(l.i_horario_funcionamento) : null,
-      entregaControlados: String(l.psicotropico ?? "").trim().toUpperCase() === "SIM",
-      inativa: l.inativo === "S",
-    }));
+  return linhas.filter((l) => l.i_estab_cnes !== null).map(converterCadastro);
+}
+
+export function converterCadastro(l: Record<string, Valor>): CadastroUbs {
+  return {
+    cnes: String(l.i_estab_cnes).padStart(7, "0"),
+    telefone: l.i_telefone ? String(l.i_telefone) : null,
+    horario: l.i_horario_funcionamento ? String(l.i_horario_funcionamento) : null,
+    entregaControlados: String(l.psicotropico ?? "").trim().toUpperCase() === "SIM",
+    inativa: l.inativo === "S",
+  };
 }
