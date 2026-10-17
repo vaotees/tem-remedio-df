@@ -1,0 +1,9 @@
+node_modules/
+dist/
+saida/
+.cache/
+*.log
+.DS_Store
+# Dados brutos do teste de extração (centenas de MB)
+spike/raw/
+spike/externo/

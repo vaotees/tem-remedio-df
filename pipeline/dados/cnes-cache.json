@@ -1,0 +1,1406 @@
+{
+ "2360233": {
+  "cnes": "2360233",
+  "nome": "UBS 7 JARDIM RORIZ PLANALTINA",
+  "endereco": "ENTREQUADRAS 3 4 AREA ESPECIAL, PLANALTINA",
+  "cep": "73340340",
+  "telefone": "61 3449-5871",
+  "lat": -15.602834,
+  "lng": -47.648301
+ },
+ "2617269": {
+  "cnes": "2617269",
+  "nome": "UBS 08 TAGUATINGA",
+  "endereco": "EQNL 24 AREA ESPECIAL, TAGUATINGA",
+  "cep": "72155000",
+  "telefone": "(61) 3475-2912",
+  "lat": -15.820931,
+  "lng": -48.092265
+ },
+ "2617293": {
+  "cnes": "2617293",
+  "nome": "UBS 12 CEILANDIA",
+  "endereco": "EQNQ 03 04, CEILANDIA NORTE",
+  "cep": "72270300",
+  "telefone": "(61)33746556",
+  "lat": -15.804724,
+  "lng": -48.14357
+ },
+ "2617358": {
+  "cnes": "2617358",
+  "nome": "UBS 1 VARJAO",
+  "endereco": "VILA VARJAO QUADRA 5, VILA VARJAO DO TORTO",
+  "cep": "71540400",
+  "telefone": "6134494818",
+  "lat": -15.710898044258338,
+  "lng": -47.87633389234543
+ },
+ "2660199": {
+  "cnes": "2660199",
+  "nome": "UBS 03 RIACHO FUNDO II",
+  "endereco": "QN 07 A B LOTES 1 E 2 AREA ESPECIAL, RIACHO FUNDO II",
+  "cep": "71805731",
+  "telefone": "(61) 20171145",
+  "lat": -15.885234803490286,
+  "lng": -48.023402094841
+ },
+ "2672227": {
+  "cnes": "2672227",
+  "nome": "UBS 15 RIO PRETO PLANALTINA",
+  "endereco": "DF 320 NUCLEO RURAL RIO PRETO, PLANALTINA",
+  "cep": "73390200",
+  "telefone": "61 3449-5893",
+  "lat": -15.762626,
+  "lng": -47.492915
+ },
+ "2672235": {
+  "cnes": "2672235",
+  "nome": "UBS 9 SANTOS DUMONT PLANALTINA",
+  "endereco": "NUCLEO RURAL SANTOS DUMONT DF 130 KM 25, PLANALTINA",
+  "cep": "73310000",
+  "telefone": "61 3449-5879",
+  "lat": -15.6792686,
+  "lng": -47.6482898
+ },
+ "2673894": {
+  "cnes": "2673894",
+  "nome": "UBS 10 SANTA MARIA",
+  "endereco": "AREA ESPECIAL DO DVO RUA DO EUCALIPTO N, SANTA MARIA",
+  "cep": "72450150",
+  "telefone": "6134497395",
+  "lat": -16.046349617294645,
+  "lng": -48.04314851760864
+ },
+ "2779331": {
+  "cnes": "2779331",
+  "nome": "UBS 13 GAMA CASA GRANDE",
+  "endereco": "NUCLEO RURAL CASA GRANDE MONJOLO, GAMA",
+  "cep": "72600100",
+  "telefone": "61 3449 7410",
+  "lat": -15.964557717170544,
+  "lng": -48.10042440891266
+ },
+ "2779374": {
+  "cnes": "2779374",
+  "nome": "UBS 01 ESTRUTURAL",
+  "endereco": "AREA ESPECIAL 02 SETOR CENTRAL VILA ESTRUTURAL, ESTRUTURAL",
+  "cep": "71020010",
+  "telefone": "(61) 20171145",
+  "lat": -15.783418349849695,
+  "lng": -47.99715930173493
+ },
+ "2779404": {
+  "cnes": "2779404",
+  "nome": "UBS 9 ENGENHO DAS LAGES GAMA",
+  "endereco": "RUA LIBANIO, GAMA",
+  "cep": "72426010",
+  "telefone": "61 34497398",
+  "lat": -16.043534742598222,
+  "lng": -48.25393795967102
+ },
+ "2804107": {
+  "cnes": "2804107",
+  "nome": "UBS 6 CARIRU PARANOA",
+  "endereco": "COLONIA AGRICOLA DF 120 AE, PARANOA",
+  "cep": "71586300",
+  "telefone": null,
+  "lat": -15.906863880625735,
+  "lng": -47.517263444192345
+ },
+ "2804123": {
+  "cnes": "2804123",
+  "nome": "UBS 12 BICA DO DER PLANALTINA",
+  "endereco": "RODOVIA DF 128 KM 21, PLANALTINA",
+  "cep": "73380900",
+  "telefone": "61 3449-5889",
+  "lat": -15.6564113,
+  "lng": -47.6948355
+ },
+ "2804174": {
+  "cnes": "2804174",
+  "nome": "UBS 10 TAQUARA PLANALTINA",
+  "endereco": "NUCLEO RURAL TAQUARA QUADRA 1 AREA ESPECIAL, PLANALTINA",
+  "cep": "73389003",
+  "telefone": "61 3449-5883",
+  "lat": -15.6332615,
+  "lng": -47.5212356
+ },
+ "2804247": {
+  "cnes": "2804247",
+  "nome": "UBS 08 RECANTO DAS EMAS SAO FRANCISCO",
+  "endereco": "DF 280 KM 03 QD 04 SETOR HABITACIONAL AGUA QUENTE, RECANTO DAS EMAS",
+  "cep": "72600100",
+  "telefone": "61 3359-6733",
+  "lat": -15.93752,
+  "lng": -48.228113
+ },
+ "2804360": {
+  "cnes": "2804360",
+  "nome": "UBS 1 ENGENHO VELHO FERCAL",
+  "endereco": "DF 150 KM 12 QUADRA 10 CASA, FERCAL",
+  "cep": "73150030",
+  "telefone": "3449-5836",
+  "lat": -15.600273175065064,
+  "lng": -47.871556878089905
+ },
+ "2804387": {
+  "cnes": "2804387",
+  "nome": "UBS 6 LAGO OESTE SOBRADINHO",
+  "endereco": "RODOVIA DF 001 KM 120 CHACARA, SOBRADINHO",
+  "cep": "73100011",
+  "telefone": "61 3449-5671",
+  "lat": -15.619113,
+  "lng": -47.948548
+ },
+ "3027635": {
+  "cnes": "3027635",
+  "nome": "UBS 15 PFDF GAMA",
+  "endereco": "GRANJA LUIZ FERNANDO AESP 02, SETOR LESTE",
+  "cep": "72425100",
+  "telefone": "3449-7413",
+  "lat": -16.0049989275819,
+  "lng": -48.0416893959045
+ },
+ "3027651": {
+  "cnes": "3027651",
+  "nome": "UBS 01 SIA CPP",
+  "endereco": "SIA TRECHO 04 LOTES 1600 1680, GUARA",
+  "cep": "71200040",
+  "telefone": "(61) 20171145",
+  "lat": -15.803387562392274,
+  "lng": -47.957929372787476
+ },
+ "3144542": {
+  "cnes": "3144542",
+  "nome": "UBS 13 BOA ESPERANCA CEILANDIA",
+  "endereco": "NUCLEO RURAL BOA ESPERANCA, N R B ESPERANCA",
+  "cep": "72227991",
+  "telefone": "61 3506 2082",
+  "lat": -15.82861,
+  "lng": -48.246674
+ },
+ "3144550": {
+  "cnes": "3144550",
+  "nome": "UBS 3 SANTA MARIA",
+  "endereco": "QR 100 CONJ I LOTE, SANTA MARIA",
+  "cep": "72500413",
+  "telefone": "61 3449-7494",
+  "lat": -16.047370386203777,
+  "lng": -48.037086725234985
+ },
+ "3144569": {
+  "cnes": "3144569",
+  "nome": "UBS 7 SANTA MARIA",
+  "endereco": "AV BRIGADEIRO PINTO DE MOURA, SANTA MARIA",
+  "cep": "72593302",
+  "telefone": "61 34497508",
+  "lat": -15.993210865317081,
+  "lng": -47.988125681877136
+ },
+ "3144577": {
+  "cnes": "3144577",
+  "nome": "UBS 11 PONTE ALTA NORTE GAMA",
+  "endereco": "DF 475 KM 5 NUCLEO RURAL, GAMA",
+  "cep": "72457993",
+  "telefone": null,
+  "lat": -15.9807001141572,
+  "lng": -48.07191252708435
+ },
+ "3144593": {
+  "cnes": "3144593",
+  "nome": "UBS 5 SANTA MARIA",
+  "endereco": "EQ 213 313 LOTE E, SANTA MARIA",
+  "cep": "72542300",
+  "telefone": "61 3449-7500",
+  "lat": -16.010258468486086,
+  "lng": -48.00231456756592
+ },
+ "3144607": {
+  "cnes": "3144607",
+  "nome": "UBS 6 SANTA MARIA",
+  "endereco": "QR 202 302 LOTE 2, SANTA MARIA",
+  "cep": "72505400",
+  "telefone": "6120994325",
+  "lat": -16.040075,
+  "lng": -48.030621
+ },
+ "3144615": {
+  "cnes": "3144615",
+  "nome": "UBS 12 PONTE ALTA GAMA",
+  "endereco": "ANTIGO POSTO DA RECEITA FEDERAL DF, GAMA",
+  "cep": "72457994",
+  "telefone": null,
+  "lat": -16.009113756670548,
+  "lng": -48.15978705883026
+ },
+ "3144623": {
+  "cnes": "3144623",
+  "nome": "UBS 10 RECANTO DAS EMAS",
+  "endereco": "QD 511 311 LOTE 01 AVENIDA MONJOLO, RECANTO DAS EMAS",
+  "cep": "72622400",
+  "telefone": "61 3331-4971",
+  "lat": -15.929679,
+  "lng": -48.106555
+ },
+ "3144666": {
+  "cnes": "3144666",
+  "nome": "UBS 17 JARDIM MORUMBI PLANALTINA",
+  "endereco": "NR JARDIM MORUMBI ROD DF 128 KM 3 GLEBA F, PLANALTINA",
+  "cep": "73307990",
+  "telefone": "61 3449-5904",
+  "lat": -15.5236961,
+  "lng": -47.618671
+ },
+ "3212017": {
+  "cnes": "3212017",
+  "nome": "UBS 6 SAO FRANCISCO SAO SEBASTIAO",
+  "endereco": "PARQUE AGROPECUARIO DE SAO SEBASTIAO, SAO SEBASTIAO",
+  "cep": "71694117",
+  "telefone": "(61)3335-1503",
+  "lat": -15.914413565280515,
+  "lng": -47.758104155125984
+ },
+ "3212025": {
+  "cnes": "3212025",
+  "nome": "UBS 11 RESIDENCIAL DO BOSQUE 2 SAO SEBASTIAO",
+  "endereco": "RUA 26 CONJ B CASA 17, SAO SEBASTIAO",
+  "cep": "71694045",
+  "telefone": null,
+  "lat": -15.91203384835378,
+  "lng": -47.751490643088324
+ },
+ "3212068": {
+  "cnes": "3212068",
+  "nome": "UBS 3 RESIDENCIAL OESTE SAO SEBASTIAO",
+  "endereco": "QUADRA 301 CONJ 06 AE 02, SAO SEBASTIAO",
+  "cep": "71692725",
+  "telefone": null,
+  "lat": -15.907726747417737,
+  "lng": -47.777667362463276
+ },
+ "3254887": {
+  "cnes": "3254887",
+  "nome": "UBS 2 T R E SAO SEBASTIAO",
+  "endereco": "QUADRA 101 AE 01, SAO SEBASTIAO",
+  "cep": "71692061",
+  "telefone": "(61)3335-1503",
+  "lat": -15.90164,
+  "lng": -47.774913
+ },
+ "3286932": {
+  "cnes": "3286932",
+  "nome": "UBS 10 JOAO CANDIDO SAO SEBASTIAO",
+  "endereco": "RUA 14 LOTE 21 LOJAS 1 2 E 3, JARDIM BOTANICO",
+  "cep": "71693214",
+  "telefone": null,
+  "lat": -15.89799674342872,
+  "lng": -47.761255721471635
+ },
+ "3286959": {
+  "cnes": "3286959",
+  "nome": "UBS 2 ITAPOA",
+  "endereco": "AREA ESPECIAL ENTRE QUADRA 61 318, ITAPOA",
+  "cep": "71591500",
+  "telefone": null,
+  "lat": -15.745567467563017,
+  "lng": -47.76979980179746
+ },
+ "3286975": {
+  "cnes": "3286975",
+  "nome": "UBS 2 QUADRA 18 PARANOA",
+  "endereco": "QUADRA 18 AE, PARANOA",
+  "cep": "71571800",
+  "telefone": null,
+  "lat": -15.770648693810273,
+  "lng": -47.778518402627675
+ },
+ "3410196": {
+  "cnes": "3410196",
+  "nome": "UBS 02 RIACHO FUNDO II",
+  "endereco": "QC 01 CONJUNTO 1 LOTE 01, RIACHO FUNDO II",
+  "cep": "71882011",
+  "telefone": "61 20171145",
+  "lat": -15.909129301736343,
+  "lng": -48.04944246309881
+ },
+ "3513564": {
+  "cnes": "3513564",
+  "nome": "UBS 02 ESTRUTURAL",
+  "endereco": "AREA ESPECIAL 19, ESTRUTURAL",
+  "cep": "71255230",
+  "telefone": "61 20171145",
+  "lat": -15.783583911726057,
+  "lng": -47.99709230661392
+ },
+ "3677044": {
+  "cnes": "3677044",
+  "nome": "UBS 14 CONDOMINIO PRIVE CEILANDIA",
+  "endereco": "CONDOMINIO PRIVE LUCENA RORIZ MODULO 12 LOTE, CONDOMINIO PRIVE",
+  "cep": "72268000",
+  "telefone": "61 2017-2069",
+  "lat": -15.785212,
+  "lng": -48.136596
+ },
+ "3742822": {
+  "cnes": "3742822",
+  "nome": "UBS 02 AGUAS CLARAS",
+  "endereco": "QS 08 CONJUNTO 410 A LOTE 15, AREAL",
+  "cep": "72155000",
+  "telefone": null,
+  "lat": -15.859492,
+  "lng": -48.002295
+ },
+ "3742857": {
+  "cnes": "3742857",
+  "nome": "UBS 09 SAMAMBAIA",
+  "endereco": "QN 317 AREA ESPECIAL, SAMAMBAIA SUL",
+  "cep": "72307716",
+  "telefone": "61 3459-7151",
+  "lat": -15.892762,
+  "lng": -48.112735
+ },
+ "3742873": {
+  "cnes": "3742873",
+  "nome": "UBS 9 RESIDENCIAL DO BOSQUE 1 SAO SEBASTIAO",
+  "endereco": "RUA DA ESCOLA 540, SAO SEBASTIAO",
+  "cep": "71693168",
+  "telefone": null,
+  "lat": -15.905034409567238,
+  "lng": -47.75583193378876
+ },
+ "3781402": {
+  "cnes": "3781402",
+  "nome": "UBS 7 MORRO DA CRUZ SAO SEBASTIAO",
+  "endereco": "CHACARA 10 CASA 03, SAO SEBASTIAO",
+  "cep": "71693500",
+  "telefone": "3335-1503",
+  "lat": -15.915879244795049,
+  "lng": -47.77223026914414
+ },
+ "3781437": {
+  "cnes": "3781437",
+  "nome": "UBS 02 RIACHO FUNDO I",
+  "endereco": "QN 01 AREA ESPECIAL 01, RIACHO FUNDO I",
+  "cep": "71805132",
+  "telefone": "61 21071145",
+  "lat": -15.879352818069336,
+  "lng": -48.000635504722595
+ },
+ "4431618": {
+  "cnes": "4431618",
+  "nome": "UBS 1 LAGO SUL",
+  "endereco": "SHIS QI 21, LAGO SUL",
+  "cep": "71655600",
+  "telefone": "613449-4805",
+  "lat": -15.846426008505944,
+  "lng": -47.854342460632324
+ },
+ "5038669": {
+  "cnes": "5038669",
+  "nome": "UBS 01 RIACHO FUNDO II",
+  "endereco": "QC 06 CONJUNTO 16 AREA ESPECIAL 1 LOTE, RIACHO FUNDO II",
+  "cep": "71882266",
+  "telefone": "61 20171291",
+  "lat": -15.922860384455896,
+  "lng": -48.04377383543672
+ },
+ "5050340": {
+  "cnes": "5050340",
+  "nome": "UBS 6 ARAPOANGA PLANALTINA",
+  "endereco": "QUADRA 06 CONJUNTO I AREA ESPECIAL 3, ARAPOANGA",
+  "cep": "73368656",
+  "telefone": "61 3449-5864",
+  "lat": -15.640751055081747,
+  "lng": -47.64041483402252
+ },
+ "5050359": {
+  "cnes": "5050359",
+  "nome": "UBS 8 VALE DO AMANHECER PLANALTINA",
+  "endereco": "AREA ESPECIAL, PLANALTINA",
+  "cep": "73370096",
+  "telefone": "61 3449-5875",
+  "lat": -15.67114,
+  "lng": -47.645447
+ },
+ "5117666": {
+  "cnes": "5117666",
+  "nome": "UBS 5 GRANJA DO TORTO",
+  "endereco": "VILA WESLIAN RORIZ AREA ESPECIAL, GRANJA TORTO",
+  "cep": "70636003",
+  "telefone": "6134494837",
+  "lat": -15.70872398665197,
+  "lng": -47.913627326488495
+ },
+ "5167817": {
+  "cnes": "5167817",
+  "nome": "UBS 1 PLANALTINA",
+  "endereco": "QUADRA 18 CONJUNTO H AREA ESPECIAL, PLANALTINA",
+  "cep": "73356040",
+  "telefone": "61 3449-5845",
+  "lat": -15.617806823948234,
+  "lng": -47.64106817394896
+ },
+ "6216013": {
+  "cnes": "6216013",
+  "nome": "UBS 4 PLANALTINA",
+  "endereco": "ESTANCIA NOVA PLANALTINA QD 02 RUA A AREA ESPECIAL, PLANALTINA",
+  "cep": "73401012",
+  "telefone": "61 3449-5858",
+  "lat": -15.619833746250539,
+  "lng": -47.680519223213196
+ },
+ "6216021": {
+  "cnes": "6216021",
+  "nome": "UBS 5 PLANALTINA",
+  "endereco": "QUADRA 12 CONJUNTO D AREA ESPECIAL, PLANALTINA",
+  "cep": "73368384",
+  "telefone": "61 3449-5864",
+  "lat": -15.639407948056894,
+  "lng": -47.64712035655975
+ },
+ "6268269": {
+  "cnes": "6268269",
+  "nome": "UBS 1 ITAPOA",
+  "endereco": "QUADRA 378 CONJ L AREA ESPECIAL, ITAPOA",
+  "cep": "71593631",
+  "telefone": null,
+  "lat": -15.740243475543059,
+  "lng": -47.76331861961001
+ },
+ "6662358": {
+  "cnes": "6662358",
+  "nome": "UBS 2 BRAZLANDIA",
+  "endereco": "QUADRA 45 AREA ESPECIAL VILA SAO JOSE, VILA SAO JOSE",
+  "cep": "72745000",
+  "telefone": "6133911771",
+  "lat": -15.658907,
+  "lng": -48.192987
+ },
+ "6770657": {
+  "cnes": "6770657",
+  "nome": "UBS 5 BASEVI SOBRADINHO",
+  "endereco": "VILA BASEVI AREA ESPECIAL 01 LOTE, SOBRADINHO",
+  "cep": "73100715",
+  "telefone": "61 3449-5667",
+  "lat": -15.646394,
+  "lng": -47.889475
+ },
+ "6770665": {
+  "cnes": "6770665",
+  "nome": "UBS 4 SETOR DE MANSOES SOBRADINHO II",
+  "endereco": "COND MINI CHACARAS QMS 30 AREA ESPECIAL, SOBRADINHO II",
+  "cep": "73081430",
+  "telefone": "61 3449-5686",
+  "lat": -15.635751,
+  "lng": -47.8375381
+ },
+ "6770681": {
+  "cnes": "6770681",
+  "nome": "UBS 3 VALE DOS PINHEIROS SOBRADINHO II",
+  "endereco": "COND VALE DOS PINHEIROS QD 45 A CONJUNTO A LOTE, SOBRADINHO II",
+  "cep": "73080360",
+  "telefone": "61 3449-5683",
+  "lat": -15.620846339911763,
+  "lng": -47.82162755727768
+ },
+ "6921736": {
+  "cnes": "6921736",
+  "nome": "UBS 05 SAMAMBAIA",
+  "endereco": "QN 523 AREA ESPECIAL, SAMAMBAIA SUL",
+  "cep": "72317520",
+  "telefone": "61 3359-1653",
+  "lat": -15.898024,
+  "lng": -48.120954
+ },
+ "7041594": {
+  "cnes": "7041594",
+  "nome": "UBS 6 VALE DAS ACACIAS SOBRADINHO II",
+  "endereco": "CONDOMINIO VALE DAS ACACIAS QUADRA 12 LOTE, SOBRADINHO II",
+  "cep": "73070056",
+  "telefone": "61 3449-5692",
+  "lat": -15.622850847300713,
+  "lng": -47.83646821975708
+ },
+ "7053754": {
+  "cnes": "7053754",
+  "nome": "UBS 06 SAMAMBAIA",
+  "endereco": "QS 122 CONJUNTO 06 LOTE, SAMAMBAIA SUL",
+  "cep": "72304526",
+  "telefone": "61 3357-4275",
+  "lat": -15.869936,
+  "lng": -48.058807
+ },
+ "7059892": {
+  "cnes": "7059892",
+  "nome": "UBS 05 RECANTO DAS EMAS",
+  "endereco": "QUADRA 804 CONJUNTO 20B LOTE 01, RECANTO DAS EMAS",
+  "cep": "72650760",
+  "telefone": null,
+  "lat": -15.9241,
+  "lng": -48.056108
+ },
+ "7075596": {
+  "cnes": "7075596",
+  "nome": "UBS 7 CAFE SEM TROCO PARANOA",
+  "endereco": "DF 270 KM 2 FAZENDA SANTO ANTONIO, PARANOA",
+  "cep": "71570990",
+  "telefone": null,
+  "lat": -15.936238212690318,
+  "lng": -47.58023234908678
+ },
+ "7108923": {
+  "cnes": "7108923",
+  "nome": "UBS 01 AGUAS CLARAS",
+  "endereco": "QS 05 LOTE 24 AV AREAL, AGUAS CLARAS",
+  "cep": "72130077",
+  "telefone": null,
+  "lat": -15.859615,
+  "lng": -48.036196
+ },
+ "7114397": {
+  "cnes": "7114397",
+  "nome": "UBS 08 SAMAMBAIA",
+  "endereco": "QS 314 CONJUNTO 05 LOTE 01, SAMAMBAIA SUL",
+  "cep": "72308515",
+  "telefone": "61-33575793",
+  "lat": -15.876045,
+  "lng": -48.066794
+ },
+ "7170939": {
+  "cnes": "7170939",
+  "nome": "UBS 03 RECANTO DAS EMAS",
+  "endereco": "QD 104 105 AREA ESPECIAL S N LOTE 25, RECANTO DAS EMAS",
+  "cep": "72600400",
+  "telefone": "61 3404-2964",
+  "lat": -15.901925,
+  "lng": -48.074326
+ },
+ "7236778": {
+  "cnes": "7236778",
+  "nome": "UBS 02 NUCLEO BANDEIRANTE",
+  "endereco": "RUA 02 AREA ESPECIAL ENTRE LOTE 01 02, METROPOLITANA",
+  "cep": "71730000",
+  "telefone": "61 33863031",
+  "lat": -15.879591138453351,
+  "lng": -47.97381773241612
+ },
+ "7299877": {
+  "cnes": "7299877",
+  "nome": "UBS 07 SAMAMBAIA",
+  "endereco": "QUADRA 302 CONJUNTO 5 N, SAMAMBAIA SUL",
+  "cep": "72300639",
+  "telefone": "61 3458-5424",
+  "lat": -15.878026,
+  "lng": -48.08263
+ },
+ "7347715": {
+  "cnes": "7347715",
+  "nome": "UBS 1 CEILANDIA",
+  "endereco": "EQNP 7 11SETOR P NORTE, CEILANDIA",
+  "cep": "72240540",
+  "telefone": "61 2017 2067",
+  "lat": -15.819091,
+  "lng": -48.12995
+ },
+ "7347723": {
+  "cnes": "7347723",
+  "nome": "UBS 15 CEILANDIA",
+  "endereco": "QNR 02 AREA ESPECIAL 12, CEILANDIA",
+  "cep": "72242000",
+  "telefone": "61 2017-2000 (4590)",
+  "lat": -15.809039,
+  "lng": -48.156573
+ },
+ "7368895": {
+  "cnes": "7368895",
+  "nome": "UBS 2 SOBRADINHO II",
+  "endereco": "RODOVIA DF 420 COMPLEXO DE SAUDE SETOR DE MANSOES, SOBRADINHO II",
+  "cep": "73080050",
+  "telefone": "61 3449-5679",
+  "lat": -15.639041174991059,
+  "lng": -47.81979560852051
+ },
+ "7417632": {
+  "cnes": "7417632",
+  "nome": "UBS 04 RECANTO DAS EMAS",
+  "endereco": "QUADRA 308 AREA ESPECIAL, RECANTO DAS EMAS",
+  "cep": "72620400",
+  "telefone": "61 3331-4773",
+  "lat": -15.91967,
+  "lng": -48.101341
+ },
+ "7423489": {
+  "cnes": "7423489",
+  "nome": "UBS 12 SAO JOSE SAO SEBASTIAO",
+  "endereco": "QUADRA 31 CASA 06, SAO SEBASTIAO",
+  "cep": "71693032",
+  "telefone": "(61)3335-1503",
+  "lat": -15.9097586798392,
+  "lng": -47.76494911660132
+ },
+ "7526504": {
+  "cnes": "7526504",
+  "nome": "UBS 05 RIACHO FUNDO II",
+  "endereco": "QS 09 CONJUNTO 01 LOTE, RIACHO FUNDO II",
+  "cep": "71884376",
+  "telefone": "61 20171145",
+  "lat": -15.940087059903828,
+  "lng": -48.0397843
+ },
+ "7559194": {
+  "cnes": "7559194",
+  "nome": "UBS 8 SANTA MARIA",
+  "endereco": "EQ 417 517 MODULO E, SANTA MARIA",
+  "cep": "72547325",
+  "telefone": "61 3449-7511",
+  "lat": -16.01433193928484,
+  "lng": -47.988415360450745
+ },
+ "7686730": {
+  "cnes": "7686730",
+  "nome": "UBS 5 SETOR DE MANSOES SOBRADINHO II",
+  "endereco": "COND MINI CHACARAS QMS 16 RUA 14 CASA, SOBRADINHO II",
+  "cep": "73082120",
+  "telefone": "61 3449-5688",
+  "lat": -15.628401887184364,
+  "lng": -47.83757597208023
+ },
+ "7687079": {
+  "cnes": "7687079",
+  "nome": "UBS 4 ROTA DO CAVALO SOBRADINHO",
+  "endereco": "DF 440 CONDOMINIO RESIDENCIAL SERRA VERDE KM 12, SOBRADINHO",
+  "cep": "73031615",
+  "telefone": null,
+  "lat": -15.702389,
+  "lng": -47.758696
+ },
+ "7771479": {
+  "cnes": "7771479",
+  "nome": "UBS 11 SAMAMBAIA",
+  "endereco": "QR 831 CONJUNTO 02 LOTE 01, SAMAMBAIA NORTE",
+  "cep": "72338712",
+  "telefone": "61 3359-5500",
+  "lat": -15.887541,
+  "lng": -48.147153
+ },
+ "7975295": {
+  "cnes": "7975295",
+  "nome": "UBS 8 CAVAS DE BAIXO SAO SEBASTIAO",
+  "endereco": "BR 251 KM 29, SAO SEBASTIAO",
+  "cep": "71693990",
+  "telefone": "3335-1703",
+  "lat": -15.984492472903673,
+  "lng": -47.69663391164205
+ },
+ "9056963": {
+  "cnes": "9056963",
+  "nome": "UBS 01 VICENTE PIRES",
+  "endereco": "RUA 4C CHACARA 12 COLONIA AGRICOLA SAMAMBAIA, SETOR HABITACIONAL V",
+  "cep": "72001185",
+  "telefone": null,
+  "lat": -15.8193,
+  "lng": -48.020231
+ },
+ "9263632": {
+  "cnes": "9263632",
+  "nome": "UBS 05 GUARA",
+  "endereco": "QE 38 CONJUNTO U, GUARA II",
+  "cep": "70297400",
+  "telefone": "61 21071145",
+  "lat": -15.8493127474169,
+  "lng": -47.97025803544594
+ },
+ "9475931": {
+  "cnes": "9475931",
+  "nome": "UBS 16 CEILANDIA",
+  "endereco": "QUADRA 500 AE S N TRECHO 1 SOL NASCENTE, CEILANDIA",
+  "cep": "72236800",
+  "telefone": null,
+  "lat": -15.834473,
+  "lng": -48.133699
+ },
+ "9480587": {
+  "cnes": "9480587",
+  "nome": "UBS 12 SAMAMBAIA",
+  "endereco": "QR 210 CONJUNTO 22 LOTE, SAMAMBAIA NORTE",
+  "cep": "72316223",
+  "telefone": null,
+  "lat": -15.865519,
+  "lng": -48.07305
+ },
+ "9509356": {
+  "cnes": "9509356",
+  "nome": "UBS 17 CEILANDIA",
+  "endereco": "EQNP 16 20 AREA ESPECIAL E F, CEILANDIA SUL",
+  "cep": "72231560",
+  "telefone": "61 3349-6239",
+  "lat": -15.846983,
+  "lng": -48.114366
+ },
+ "9543945": {
+  "cnes": "9543945",
+  "nome": "UBS 11 RECANTO DAS EMAS",
+  "endereco": "QUADRA 01 LOTE 23 SALOMAO ELIAS, RECANTO DAS EMAS",
+  "cep": "72650030",
+  "telefone": null,
+  "lat": -15.941873,
+  "lng": -48.240666
+ },
+ "9566961": {
+  "cnes": "9566961",
+  "nome": "UBS 18 PLANALTINA",
+  "endereco": "SETOR RECREATIVO E CULTURAL MODULO ESPORTIVO, PLANALTINA",
+  "cep": "73310400",
+  "telefone": "61 3449-5907",
+  "lat": -15.615005775539,
+  "lng": -47.651481628417
+ },
+ "9566988": {
+  "cnes": "9566988",
+  "nome": "UBS 19 PLANALTINA",
+  "endereco": "SETOR RESIDENCIAL OESTE VILA NOSSA SRA DE FATIMA, PLANALTINA",
+  "cep": "73340710",
+  "telefone": "61 3449-5910",
+  "lat": -15.6053476,
+  "lng": -47.6601626
+ },
+ "9572481": {
+  "cnes": "9572481",
+  "nome": "UBS 3 ITAPOA",
+  "endereco": "QUADRA 378 CONJ A DEL LAGO N 4, ITAPOA",
+  "cep": "71593620",
+  "telefone": "RAMAL 2241",
+  "lat": -15.744862783258741,
+  "lng": -47.76092827157706
+ },
+ "9572511": {
+  "cnes": "9572511",
+  "nome": "UBS 3 PARANOA PARQUE",
+  "endereco": "QUADRA 2 CONJUNTO 6 AREA ESPECIAL 4, PARANOA",
+  "cep": "71587134",
+  "telefone": null,
+  "lat": -15.767980272989352,
+  "lng": -47.79170827826765
+ },
+ "9643338": {
+  "cnes": "9643338",
+  "nome": "UBS 18 CAIC BERNARDO SAYAO",
+  "endereco": "QNN 28 LOTES H I J K GUARIROBA, CEILANDIA",
+  "cep": "72220280",
+  "telefone": null,
+  "lat": -15.832347,
+  "lng": -48.114516
+ },
+ "9647597": {
+  "cnes": "9647597",
+  "nome": "UBS 13 SAMAMBAIA",
+  "endereco": "QS 615 AREA ESPECIAL, SAMAMBAIA NORTE",
+  "cep": "72322583",
+  "telefone": null,
+  "lat": -15.875261,
+  "lng": -48.109817
+ },
+ "9768637": {
+  "cnes": "9768637",
+  "nome": "UBS 20 PLANALTINA",
+  "endereco": "AREA ESPECIAL 9 A SETOR NORTE, PLANALTINA",
+  "cep": "73310690",
+  "telefone": "61 3449-5853",
+  "lat": -15.6123495,
+  "lng": -47.6517498
+ },
+ "0010626": {
+  "cnes": "0010626",
+  "nome": "UBS 05 TAGUATINGA",
+  "endereco": "SETOR D SUL AE 23, TAGUATINGA SUL",
+  "cep": "72155000",
+  "telefone": "(61) 3563-9176",
+  "lat": -15.851049,
+  "lng": -48.047118
+ },
+ "0010634": {
+  "cnes": "0010634",
+  "nome": "UBS 1 PARANOA",
+  "endereco": "QD 21 AREA ESPECIAL CONJUNTO 15, PARANOA",
+  "cep": "71572117",
+  "telefone": null,
+  "lat": -15.76919515774397,
+  "lng": -47.779919329447786
+ },
+ "0010642": {
+  "cnes": "0010642",
+  "nome": "UBS 01 SAMAMBAIA",
+  "endereco": "QS 408 AREA ESPECIAL 01, SAMAMBAIA NORTE",
+  "cep": "72318599",
+  "telefone": null,
+  "lat": -15.862526,
+  "lng": -48.077073
+ },
+ "0010650": {
+  "cnes": "0010650",
+  "nome": "UBS 2 PLANALTINA",
+  "endereco": "ENTRE QUADRAS 1 10 AREA ESPECIAL, PLANALTINA",
+  "cep": "73350100",
+  "telefone": "61 3449-5849",
+  "lat": -15.6123694,
+  "lng": -47.6432971
+ },
+ "0010669": {
+  "cnes": "0010669",
+  "nome": "UBS 2 SANTA MARIA",
+  "endereco": "EQ 217 317 LOTE E, SANTA MARIA",
+  "cep": "72547305",
+  "telefone": "6134497490",
+  "lat": -16.007247140447177,
+  "lng": -47.98956871032715
+ },
+ "0010685": {
+  "cnes": "0010685",
+  "nome": "UBS 04 SAMAMBAIA",
+  "endereco": "QN 512 CONJUNTO 2 LOTE, SAMAMBAIA SUL",
+  "cep": "72312702",
+  "telefone": "61 3358-1335",
+  "lat": -15.878955,
+  "lng": -48.068554
+ },
+ "0010707": {
+  "cnes": "0010707",
+  "nome": "UBS 1 ASA NORTE",
+  "endereco": "SGAN, ASA NORTE",
+  "cep": "70790054",
+  "telefone": "61334494826",
+  "lat": -15.773349675527177,
+  "lng": -47.89260685443878
+ },
+ "0010723": {
+  "cnes": "0010723",
+  "nome": "UBS 2 ASA NORTE",
+  "endereco": "EQN 114 115, ASA NORTE",
+  "cep": "70764400",
+  "telefone": "6134494830",
+  "lat": -15.743074996438855,
+  "lng": -47.89173781871796
+ },
+ "0010731": {
+  "cnes": "0010731",
+  "nome": "UBS 1 CRUZEIRO",
+  "endereco": "SHCES QUADRA 601, CRUZEIRO NOVO",
+  "cep": "70655610",
+  "telefone": "6134494810",
+  "lat": -15.800749940431798,
+  "lng": -47.94215261936188
+ },
+ "0010758": {
+  "cnes": "0010758",
+  "nome": "UBS 2 CRUZEIRO",
+  "endereco": "SRES LOTE, CRUZEIRO VELHO",
+  "cep": "70640008",
+  "telefone": "6134494814",
+  "lat": -15.783483249623332,
+  "lng": -47.93586552143097
+ },
+ "0010774": {
+  "cnes": "0010774",
+  "nome": "UBS 02 SAMAMBAIA",
+  "endereco": "QS 611 AREA ESPECIAL, SAMAMBAIA NORTE",
+  "cep": "72331565",
+  "telefone": "(61) 3359-9316",
+  "lat": -15.875508,
+  "lng": -48.109087
+ },
+ "0010782": {
+  "cnes": "0010782",
+  "nome": "UBS 1 SANTA MARIA",
+  "endereco": "QR 207 307 CONJ T LOTE, SANTA MARIA",
+  "cep": "72507520",
+  "telefone": "6134497486",
+  "lat": -16.026466570296016,
+  "lng": -48.02629920944501
+ },
+ "0010790": {
+  "cnes": "0010790",
+  "nome": "UBS 1 SAO SEBASTIAO",
+  "endereco": "CENTRO DE MULTIPLAS ATIVIDADES CONJ 10, SAO SEBASTIAO",
+  "cep": "71691047",
+  "telefone": "(61)33351503",
+  "lat": -15.902438624241869,
+  "lng": -47.77261823415756
+ },
+ "0010804": {
+  "cnes": "0010804",
+  "nome": "UBS 01 RECANTO DAS EMAS",
+  "endereco": "QUADRA 307 AREA ESPECIAL 01, RECANTO DAS EMAS",
+  "cep": "72620400",
+  "telefone": null,
+  "lat": -15.919114,
+  "lng": -48.10147
+ },
+ "0010820": {
+  "cnes": "0010820",
+  "nome": "UBS 1 GAMA",
+  "endereco": "EQ 6 12 AREAS ESPECIAIS, SETOR SUL GAMA",
+  "cep": "72415318",
+  "telefone": "6134497367",
+  "lat": -16.020679169244765,
+  "lng": -48.084760308265686
+ },
+ "0010839": {
+  "cnes": "0010839",
+  "nome": "UBS 2 GAMA",
+  "endereco": "QUADRA, SETOR SUL",
+  "cep": "72410110",
+  "telefone": "61 34497371",
+  "lat": -16.03646493849597,
+  "lng": -48.06116184586904
+ },
+ "0010847": {
+  "cnes": "0010847",
+  "nome": "UBS 3 GAMA",
+  "endereco": "EQ 3 5 AREA ESPECIAL SETOR LESTE GAMA, GAMA",
+  "cep": "72450035",
+  "telefone": "6134497375",
+  "lat": -16.005834275683597,
+  "lng": -48.0527400970459
+ },
+ "0010855": {
+  "cnes": "0010855",
+  "nome": "UBS 4 GAMA",
+  "endereco": "PRACA 3 AREA ESPECIAL N, GAMA DF",
+  "cep": "72460120",
+  "telefone": "61 34497379",
+  "lat": -16.026092975141744,
+  "lng": -48.056854605674744
+ },
+ "0010863": {
+  "cnes": "0010863",
+  "nome": "UBS 5 GAMA",
+  "endereco": "QUADRA 38 AREA ESPECIAL LESTE SC, GAMA",
+  "cep": "72405380",
+  "telefone": "61 3449-7383",
+  "lat": -16.0232691,
+  "lng": -48.06166343155779
+ },
+ "0010871": {
+  "cnes": "0010871",
+  "nome": "UBS 6 GAMA",
+  "endereco": "ENTRE QUADRA, SETOR OESTE",
+  "cep": "72465390",
+  "telefone": "61 34497387",
+  "lat": -16.011547550512397,
+  "lng": -48.07398319244385
+ },
+ "0010898": {
+  "cnes": "0010898",
+  "nome": "UBS 7 GAMA",
+  "endereco": "AREA ESPECIAL N 17, GAMA",
+  "cep": "72405170",
+  "telefone": "61 34497391",
+  "lat": -16.013811158411322,
+  "lng": -48.067535161972046
+ },
+ "0010901": {
+  "cnes": "0010901",
+  "nome": "UBS 01 TAGUATINGA",
+  "endereco": "QNG AE 18 19, TAGUATINGA NORTE",
+  "cep": "72155000",
+  "telefone": null,
+  "lat": -15.795495,
+  "lng": -48.059349
+ },
+ "0010928": {
+  "cnes": "0010928",
+  "nome": "UBS 02 TAGUATINGA",
+  "endereco": "QND LOTE A PRACA DO BICALHO, TAGUATINGA NORTE",
+  "cep": "72155000",
+  "telefone": "(61) 3355-6110",
+  "lat": -15.810484,
+  "lng": -48.063039
+ },
+ "0010936": {
+  "cnes": "0010936",
+  "nome": "UBS 03 TAGUATINGA",
+  "endereco": "QNL 01 AE 02, TAGUATINGA NORTE",
+  "cep": "72155000",
+  "telefone": "(61) 3336-3028",
+  "lat": -15.832884,
+  "lng": -48.076236
+ },
+ "0010952": {
+  "cnes": "0010952",
+  "nome": "UBS 06 TAGUATINGA",
+  "endereco": "SETOR C SUL AE 01 TAGUATINGA SUL, TAGUATINGA CENTRO",
+  "cep": "72155000",
+  "telefone": "(61)3352-8508",
+  "lat": -15.836187,
+  "lng": -48.063018
+ },
+ "0010960": {
+  "cnes": "0010960",
+  "nome": "UBS 07 TAGUATINGA",
+  "endereco": "QNM 36 AREA ESPECIAL N, TAGUATINGA NORTE",
+  "cep": "72155000",
+  "telefone": "(61) 3471-4767",
+  "lat": -15.800636,
+  "lng": -48.09323
+ },
+ "0010987": {
+  "cnes": "0010987",
+  "nome": "UBS 2 CEILANDIA",
+  "endereco": "QNN 15 LOTE F, CEILANDIA NORTE",
+  "cep": "72225150",
+  "telefone": "61 2017 2064",
+  "lat": -15.807759,
+  "lng": -48.120503
+ },
+ "0010995": {
+  "cnes": "0010995",
+  "nome": "UBS 3 CEILANDIA",
+  "endereco": "QNM 15 LOTE D AREA ESPECIAL, CEILANDIA SUL",
+  "cep": "72215150",
+  "telefone": "61 2017 2074",
+  "lat": -15.830964,
+  "lng": -48.09647
+ },
+ "0011002": {
+  "cnes": "0011002",
+  "nome": "UBS 4 CEILANDIA",
+  "endereco": "QNN 16 LOTE F, CEILANDIA SUL",
+  "cep": "72220160",
+  "telefone": "61 20171145",
+  "lat": -15.835526,
+  "lng": -48.105032
+ },
+ "0011010": {
+  "cnes": "0011010",
+  "nome": "UBS 5 CEILANDIA",
+  "endereco": "QNM 16 LOTE F AREA ESPECIAL, CEILANDIA NORTE",
+  "cep": "72210160",
+  "telefone": "61 20172076",
+  "lat": -15.803237,
+  "lng": -48.111877
+ },
+ "0011029": {
+  "cnes": "0011029",
+  "nome": "UBS 6 CEILANDIA",
+  "endereco": "EQNP 10 14 LOTES E F G H, CEILANDIA",
+  "cep": "72231413",
+  "telefone": "(61)33767512",
+  "lat": -15.840109,
+  "lng": -48.114345
+ },
+ "0011037": {
+  "cnes": "0011037",
+  "nome": "UBS 7 CEILANDIA",
+  "endereco": "QNO 10 AREA ESPECIAL D E, SETOR O",
+  "cep": "72255000",
+  "telefone": "(61) 20174481",
+  "lat": -15.795681,
+  "lng": -48.131103
+ },
+ "0011045": {
+  "cnes": "0011045",
+  "nome": "UBS 8 CEILANDIA",
+  "endereco": "EQNP 13 17 LOTES A B C D P NORTE, CEILANDIA NORTE",
+  "cep": "72241540",
+  "telefone": "(61)35859880",
+  "lat": -15.806933,
+  "lng": -48.130009
+ },
+ "0011061": {
+  "cnes": "0011061",
+  "nome": "UBS 11 CEILANDIA",
+  "endereco": "EQNO 17 AREA ESPECIAL, CEILANDIA",
+  "cep": "72260744",
+  "telefone": "(61) 34496209",
+  "lat": -15.79821,
+  "lng": -48.133603
+ },
+ "0011096": {
+  "cnes": "0011096",
+  "nome": "UBS 3 PLANALTINA",
+  "endereco": "SETOR HOSPITALAR AREA ESPECIAL S N, PLANALTINA",
+  "cep": "73310902",
+  "telefone": "61 3449-5853",
+  "lat": -15.6247279,
+  "lng": -47.6551879
+ },
+ "0011118": {
+  "cnes": "0011118",
+  "nome": "UBS 01 GUARA",
+  "endereco": "QE 06 LOTE C AREA ESPECIAL, GUARA I",
+  "cep": "71010006",
+  "telefone": "(61) 34495040",
+  "lat": -15.81994031,
+  "lng": -47.98600674
+ },
+ "0011126": {
+  "cnes": "0011126",
+  "nome": "UBS 01 NUCLEO BANDEIRANTE",
+  "endereco": "3 AVENIDA AREA ESPECIAL N 3, NUCLEO BANDEIRANTE",
+  "cep": "71720585",
+  "telefone": "(61) 21071145",
+  "lat": -15.870117592660918,
+  "lng": -47.96659722531585
+ },
+ "0011134": {
+  "cnes": "0011134",
+  "nome": "UBS 02 RECANTO DAS EMAS",
+  "endereco": "QUADRA 102 AREA ESPECIAL, RECANTO DAS EMAS",
+  "cep": "72600200",
+  "telefone": null,
+  "lat": -15.901553,
+  "lng": -48.058533
+ },
+ "0011150": {
+  "cnes": "0011150",
+  "nome": "UBS 1 ASA SUL",
+  "endereco": "SGAS QUADRA 612 LOTES, ASA SUL",
+  "cep": "70200720",
+  "telefone": "6134494806",
+  "lat": -15.8327733004566,
+  "lng": -47.90950745344162
+ },
+ "0011169": {
+  "cnes": "0011169",
+  "nome": "UBS 01 RIACHO FUNDO I",
+  "endereco": "QN 09 AREA ESPECIAL 11 RIACHO FUNDO I, RIACHO FUNDO",
+  "cep": "71805821",
+  "telefone": "(61) 21071145",
+  "lat": -15.885245122611966,
+  "lng": -48.023396730422974
+ },
+ "0011177": {
+  "cnes": "0011177",
+  "nome": "UBS 1 LAGO NORTE",
+  "endereco": "SHIN QI 3, LAGO NORTE",
+  "cep": "71505600",
+  "telefone": "6134494822",
+  "lat": -15.72591958000638,
+  "lng": -47.873903810977936
+ },
+ "0011185": {
+  "cnes": "0011185",
+  "nome": "UBS 01 CANDANGOLANDIA",
+  "endereco": "EQ 5 7 AREA ESPECIAL CANDANGOLANDIA, CANDANGOLANDIA",
+  "cep": "71725510",
+  "telefone": "(61)20171145",
+  "lat": -15.849772600247151,
+  "lng": -47.95138478279114
+ },
+ "0011207": {
+  "cnes": "0011207",
+  "nome": "UBS 10 CEILANDIA",
+  "endereco": "QNN 12 AREA ESPECIAL 1, CEILANDIA SUL",
+  "cep": "72220120",
+  "telefone": "(61)33713048",
+  "lat": -15.824358,
+  "lng": -48.113465
+ },
+ "0011215": {
+  "cnes": "0011215",
+  "nome": "UBS 1 BRAZLANDIA",
+  "endereco": "ENTRE QUADRA 6 8 AREA ESPECIAL 3 SETOR NORTE, SETOR NORTE",
+  "cep": "72710065",
+  "telefone": "(61) 33913515",
+  "lat": -15.677171,
+  "lng": -48.194983
+ },
+ "0011223": {
+  "cnes": "0011223",
+  "nome": "UBS 1 SOBRADINHO",
+  "endereco": "QUADRA 14 AREA ESPECIAL 22 23, SOBRADINHO",
+  "cep": "73050063",
+  "telefone": "61 3449-5651",
+  "lat": -15.650839573325188,
+  "lng": -47.781912088394165
+ },
+ "0011231": {
+  "cnes": "0011231",
+  "nome": "UBS 2 SOBRADINHO",
+  "endereco": "QUADRA 3 AREA ESPECIAL ENTRE CONJUNTOS D E, SOBRADINHO",
+  "cep": "73030030",
+  "telefone": "61 3449-5654",
+  "lat": -15.654831,
+  "lng": -47.809573
+ },
+ "0011258": {
+  "cnes": "0011258",
+  "nome": "UBS 1 SOBRADINHO II",
+  "endereco": "AR 13 AREA ESPECIAL CONJUNTO 7 LOTE, SOBRADINHO II",
+  "cep": "73062307",
+  "telefone": "61 3449-5675",
+  "lat": -15.644568530374748,
+  "lng": -47.82445728778839
+ },
+ "0011266": {
+  "cnes": "0011266",
+  "nome": "UBS 02 GUARA",
+  "endereco": "QE 23 LOTE C AREA ESPECIAL, GUARA II",
+  "cep": "71025000",
+  "telefone": "(61) 20171145",
+  "lat": -15.832765559101615,
+  "lng": -47.97327697277069
+ },
+ "0011274": {
+  "cnes": "0011274",
+  "nome": "UBS 03 GUARA",
+  "endereco": "QE 38 AREA ESPECIAL, GUARA II",
+  "cep": "71070380",
+  "telefone": "(61) 20171145",
+  "lat": -15.849194626917619,
+  "lng": -47.96999394893646
+ },
+ "0011355": {
+  "cnes": "0011355",
+  "nome": "UBS 3 ASA NORTE VILA PLANALTO",
+  "endereco": "RUA PIAU ACAMPAMENTO PACHECO FERNANDES, VILA PLANALTO",
+  "cep": "70804190",
+  "telefone": "6134494834",
+  "lat": -15.795422974875835,
+  "lng": -47.848345041275024
+ },
+ "0011363": {
+  "cnes": "0011363",
+  "nome": "UBS 5 NOVA BETANIA SAO SEBASTIAO",
+  "endereco": "DF 140 KM 7 5, JARDIM BOTANICO",
+  "cep": "71693990",
+  "telefone": null,
+  "lat": -15.99093195138926,
+  "lng": -47.81321398085175
+ },
+ "0011517": {
+  "cnes": "0011517",
+  "nome": "UBS 2 CATINGUEIRO FERCAL",
+  "endereco": "RODOVIA DF 205 OESTE KM 13 NUCLEO RURAL, FERCAL",
+  "cep": "73151010",
+  "telefone": "3449-5839",
+  "lat": -15.563422887971905,
+  "lng": -47.93531133554826
+ },
+ "0011568": {
+  "cnes": "0011568",
+  "nome": "UBS 3 NOVA COLINA SOBRADINHO",
+  "endereco": "AREA ESPECIAL NOVO SETOR DE MANSOES NOVA COLINA, SOBRADINHO",
+  "cep": "73017017",
+  "telefone": "61 3449-5658",
+  "lat": -15.6480293,
+  "lng": -47.7552849
+ },
+ "0011576": {
+  "cnes": "0011576",
+  "nome": "UBS 11 RAJADINHA PLANALTINA",
+  "endereco": "NUCLEO RURAL RAJADINHA II RUA 2 LOTE 16 17, PLANALTINA",
+  "cep": "73370992",
+  "telefone": "61 3449-5886",
+  "lat": -15.747268,
+  "lng": -47.662576
+ },
+ "0011584": {
+  "cnes": "0011584",
+  "nome": "UBS 14 TABATINGA PLANALTINA",
+  "endereco": "DF 120 NUCLEO RURAL TABATINGA S N, PLANALTINA",
+  "cep": "73307997",
+  "telefone": "61 3449-5897",
+  "lat": -15.8203842,
+  "lng": -47.5711038
+ },
+ "0011592": {
+  "cnes": "0011592",
+  "nome": "UBS 16 PIPIRIPAU PLANALTINA",
+  "endereco": "NUCLEO RURAL PIPIRIPAU II AREA ESPECIAL, PLANALTINA",
+  "cep": "73307992",
+  "telefone": "61 3449-5901",
+  "lat": -15.534638,
+  "lng": -47.511159
+ },
+ "0011606": {
+  "cnes": "0011606",
+  "nome": "UBS 4 JARDIM II PARANOA",
+  "endereco": "NUCLEO RURAL JARDIM II DF 285 KM 19, PARANOA",
+  "cep": "73370994",
+  "telefone": null,
+  "lat": -16.016344090470348,
+  "lng": -47.379658517013596
+ },
+ "0011614": {
+  "cnes": "0011614",
+  "nome": "UBS 5 QUEBRADA DOS NERES",
+  "endereco": "DF 130 KM 56 QUEBRADA DOS NERES PARANOA, PARANOA",
+  "cep": "71570990",
+  "telefone": null,
+  "lat": -15.907924526306179,
+  "lng": -47.60884904462244
+ },
+ "0011622": {
+  "cnes": "0011622",
+  "nome": "UBS 13 SAO JOSE PLANALTINA",
+  "endereco": "DF 250 NUCLEO RURAL SAO JOSE AREA ESPECIAL, PLANALTINA",
+  "cep": "73499899",
+  "telefone": "61 3449-5894",
+  "lat": -15.704136,
+  "lng": -47.373487
+ },
+ "0011630": {
+  "cnes": "0011630",
+  "nome": "UBS 8 PADDF PARANOA",
+  "endereco": "COLONIA AGRICOLA BR 251 KM 07, PARANOA",
+  "cep": "71586000",
+  "telefone": null,
+  "lat": -16.01340682706938,
+  "lng": -47.55843958246178
+ },
+ "0011657": {
+  "cnes": "0011657",
+  "nome": "UBS 04 GUARA",
+  "endereco": "EQ 02 03 CONJUNTO LUCIO COSTA, GUARA I",
+  "cep": "71100100",
+  "telefone": "(61) 20171145",
+  "lat": -15.81022147583909,
+  "lng": -47.98854947090149
+ },
+ "0011681": {
+  "cnes": "0011681",
+  "nome": "UBS 01 PARK WAY",
+  "endereco": "AREA ESPECIAL VARGEM BONITA, PARK WAY",
+  "cep": "71715520",
+  "telefone": "61 21071145",
+  "lat": -15.93367941225517,
+  "lng": -47.93968075262487
+ },
+ "0161616": {
+  "cnes": "0161616",
+  "nome": "UBS 3 LOBEIRAL FERCAL",
+  "endereco": "SITIO PATRICIA DF 326 KM 8 NUCLEO RURAL LOBEIRAL, FERCAL",
+  "cep": "73017017",
+  "telefone": null,
+  "lat": -15.5883961,
+  "lng": -47.8443777
+ },
+ "0263680": {
+  "cnes": "0263680",
+  "nome": "UBS 01 DCCP",
+  "endereco": "SPO LOTE 23 CONJ D EDIF DO DEPART POLICIA ESP, ASA SUL",
+  "cep": "70610907",
+  "telefone": "61 20171145",
+  "lat": -15.808874325362382,
+  "lng": -47.928457260131836
+ },
+ "0736260": {
+  "cnes": "0736260",
+  "nome": "UBS 1 JARDINS MANGUEIRAL",
+  "endereco": "PRACA DE ATIVIDADES 02 LOTE 01, JARDIM BOTANICO",
+  "cep": "71699195",
+  "telefone": null,
+  "lat": -15.889197,
+  "lng": -47.813541
+ },
+ "0957755": {
+  "cnes": "0957755",
+  "nome": "UBS 7 BURITIZINHO SOBRADINHO II",
+  "endereco": "QUADRA 05 AREA ESPECIAL A, SOBRADINHO II",
+  "cep": "73061345",
+  "telefone": "61 3449-5658",
+  "lat": -15.651387118195753,
+  "lng": -47.82814264297485
+ }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@tem-remedio/pipeline",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Coletor diário: extrai o estoque da SES-DF, limpa, valida e publica o snapshot do app.",
+  "scripts": {
+    "coletar": "tsx src/index.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tem-remedio/shared": "workspace:*",
+    "csv-parse": "^7.0.3",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

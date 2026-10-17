@@ -1,0 +1,14 @@
+{
+  "name": "tem-remedio-df",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.2",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "coletar": "pnpm --filter @tem-remedio/pipeline coletar"
+  }
+}

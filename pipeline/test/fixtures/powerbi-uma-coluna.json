@@ -1,0 +1,45 @@
+{
+ "jobIds": [
+  "50941426-4117-4997-82cf-402c03ef1dc1"
+ ],
+ "results": [
+  {
+   "jobId": "50941426-4117-4997-82cf-402c03ef1dc1",
+   "result": {
+    "data": {
+     "timestamp": "2026-10-17T09:46:53.952Z",
+     "rootActivityId": "6da5001a-5800-42a9-82a9-86ba5234cec6",
+     "fromCache": false,
+     "dsr": {
+      "Version": 2,
+      "MinorVersion": 1,
+      "DS": [
+       {
+        "N": "DS0",
+        "PH": [
+         {
+          "DM0": [
+           {
+            "S": [
+             {
+              "N": "G0",
+              "T": 7
+             }
+            ]
+           },
+           {
+            "G0": 1792196193957
+           }
+          ]
+         }
+        ],
+        "IC": true,
+        "HAD": true
+       }
+      ]
+     }
+    }
+   }
+  }
+ ]
+}

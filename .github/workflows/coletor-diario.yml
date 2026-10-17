@@ -1,0 +1,63 @@
+name: Coletor diário
+
+# A SES-DF atualiza o painel de madrugada (~00:30) e à tarde (~13:30), horário de Brasília.
+on:
+  schedule:
+    - cron: "0 4 * * *" # 01:00 em Brasília
+    - cron: "0 17 * * *" # 14:00 em Brasília
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: coletor
+  cancel-in-progress: false
+
+jobs:
+  coletar:
+    runs-on: ubuntu-latest
+    outputs:
+      publicar: ${{ steps.coletor.outputs.publicar }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - id: pages
+        uses: actions/configure-pages@v5
+
+      # Cópia da CMED, usada se a Anvisa estiver fora do ar.
+      - uses: actions/cache@v4
+        with:
+          path: pipeline/.cache
+          key: cmed-${{ github.run_id }}
+          restore-keys: cmed-
+
+      - id: coletor
+        working-directory: pipeline
+        env:
+          ANTERIOR_URL: ${{ steps.pages.outputs.base_url }}/meta.json
+        run: pnpm coletar --saida saida
+
+      - if: steps.coletor.outputs.publicar == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: pipeline/saida
+
+  publicar:
+    needs: coletar
+    if: needs.coletar.outputs.publicar == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

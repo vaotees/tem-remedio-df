@@ -1,0 +1,21 @@
+{
+  "name": "@tem-remedio/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Formato do snapshot e regras comuns ao coletor e ao app.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}
