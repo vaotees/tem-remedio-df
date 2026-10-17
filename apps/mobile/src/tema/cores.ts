@@ -16,6 +16,11 @@ export interface Cores {
   borda: string;
   divisoria: string;
   aviso: CoresSemaforo;
+  /** Caixas de informação neutra (ex.: "Retire na UBS do seu bairro"). */
+  info: CoresSemaforo;
+  /** Selo "Aberto agora" / "Fechado agora" (sempre com ícone e texto). */
+  aberto: CoresSemaforo;
+  fechado: CoresSemaforo;
   semaforo: Record<NivelEstoque, CoresSemaforo>;
 }
 
@@ -33,6 +38,9 @@ export const coresClaras: Cores = {
   borda: "#6B7280",
   divisoria: "#D1D5DB",
   aviso: { texto: "#7A4A00", fundo: "#FFF3D6" },
+  info: { texto: "#1F3A5F", fundo: "#E8EEF6" },
+  aberto: { texto: "#1B5E20", fundo: "#E7F4E8" },
+  fechado: { texto: "#374151", fundo: "#ECEEF1" },
   semaforo: {
     alto: { texto: "#1B5E20", fundo: "#E7F4E8" },
     baixo: { texto: "#7A4A00", fundo: "#FFF3D6" },
@@ -51,6 +59,9 @@ export const coresEscuras: Cores = {
   borda: "#8A93A0",
   divisoria: "#2E3440",
   aviso: { texto: "#FFD27A", fundo: "#3A2C0B" },
+  info: { texto: "#B9D3F0", fundo: "#1C2A3D" },
+  aberto: { texto: "#A5D6A7", fundo: "#16301A" },
+  fechado: { texto: "#C9CED6", fundo: "#262B34" },
   semaforo: {
     alto: { texto: "#A5D6A7", fundo: "#16301A" },
     baixo: { texto: "#FFD27A", fundo: "#3A2C0B" },

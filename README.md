@@ -4,7 +4,7 @@
 
 App para idosos (e seus cuidadores) descobrirem **qual posto de saúde do DF tem o remédio hoje**, antes de sair de casa. Usa só dados públicos e oficiais da Secretaria de Saúde do DF.
 
-Projeto de portfólio em React Native (Expo) + TypeScript. Status: **coletor de dados (M1) e base do app (M2) prontos**; busca e mapa em construção.
+Projeto de portfólio em React Native (Expo) + TypeScript. Status: **coletor de dados (M1), base do app (M2) e fluxo principal (M3: busca → dose → postos mais perto → detalhe) prontos**; mapa e Meus remédios em construção.
 
 ## Como funciona
 

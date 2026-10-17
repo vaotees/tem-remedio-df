@@ -1,0 +1,54 @@
+import type { Ubs } from "@tem-remedio/shared";
+import { capitalizarNome } from "@/busca/remedios";
+
+/** Rota até o posto no Google Maps (abre o app, se instalado, ou o site). */
+export function linkGoogleMaps(ubs: Ubs): string {
+  return `https://www.google.com/maps/dir/?api=1&destination=${ubs.lat},${ubs.lng}`;
+}
+
+/** Rota até o posto no Mapas da Apple (vem em todo iPhone). */
+export function linkAppleMaps(ubs: Ubs): string {
+  return `https://maps.apple.com/?daddr=${ubs.lat},${ubs.lng}&q=${encodeURIComponent(capitalizarNome(ubs.nome))}`;
+}
+
+/**
+ * "(61) 3563-9176" → "tel:+556135639176". Com o +55 a ligação funciona de qualquer celular,
+ * sem código de operadora. Número sem DDD ganha o 61 do DF.
+ */
+export function linkTelefone(telefone: string): string | null {
+  let digitos = telefone.replace(/\D/g, "").replace(/^0+/, "");
+  if (digitos.length === 8 || digitos.length === 9) digitos = `61${digitos}`;
+  if (digitos.length < 10) return null;
+  return `tel:+55${digitos}`;
+}
+
+/** "72155000" → "72155-000". */
+export function formatarCep(cep: string): string {
+  return cep.replace(/^(\d{5})(\d{3})$/, "$1-$2");
+}
+
+export function linkWhatsApp(texto: string): string {
+  return `https://wa.me/?text=${encodeURIComponent(texto)}`;
+}
+
+interface Compartilhar {
+  ubs: Ubs;
+  remedio: string | null;
+  /** "hoje às 00h16" */
+  atualizacao: string;
+}
+
+/** Mensagem para mandar no WhatsApp: o filho manda para a mãe, ou a pessoa guarda para si. */
+export function textoCompartilhar({ ubs, remedio, atualizacao }: Compartilhar): string {
+  return [
+    remedio && `${remedio}`,
+    capitalizarNome(ubs.nome),
+    ubs.endereco,
+    ubs.telefone && `Telefone: ${ubs.telefone}`,
+    ubs.horario && `Horário: ${ubs.horario}`,
+    `Como chegar: ${linkGoogleMaps(ubs)}`,
+    remedio && `Estoque de ${atualizacao} (SES-DF). Ligue antes de ir.`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}

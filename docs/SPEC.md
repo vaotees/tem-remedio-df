@@ -66,6 +66,8 @@ Vem do painel oficial "Como garantir seu medicamento", **remédio por remédio**
 
 Remédios **aplicados no próprio posto** (injetáveis de uso na UBS) ficam fora do snapshot.
 
+**Unidades prisionais** (horário "OUTRO/PRISIONAL" no cadastro: UBS DCCP, PFDF Gama, CPP SIA) atendem só a população presa: nunca aparecem como posto para o público. Hoje o app filtra; o certo é o coletor tirá-las do snapshot.
+
 Ressalva: "sem observação" = sem restrição publicada, não uma regra escrita de "qualquer UBS". Confirmar com a Ouvidoria da SES-DF.
 
 ### Tradutor de marcas
@@ -88,7 +90,7 @@ Tabela CMED (Anvisa)          ─┘
 
 ### Stack
 - Monorepo pnpm: `packages/shared` (schemas zod + regras), `pipeline` (coletor), `apps/mobile` (Expo).
-- App: Expo SDK 57 + TypeScript + Expo Router (abas em JS), TanStack Query, expo-file-system; a seguir Fuse.js, react-native-maps, expo-sqlite (Meus remédios).
+- App: Expo SDK 57 + TypeScript + Expo Router (abas em JS), TanStack Query, expo-file-system, Fuse.js (busca), expo-location; a seguir react-native-maps, expo-sqlite (Meus remédios).
 - **Por que SDK 57:** o SDK 58 saiu em 15/10/2026, mas o Expo Go para ele ainda não está nas lojas. Quando chegar, o novo Expo Go só abre SDK 58: aí subimos o projeto (`pnpm exec expo install expo@~58.0.0` + `expo install --fix`, Testing Library 14 e Jest 30).
 - Testes: Vitest (coletor e shared); Jest 29 + Testing Library 13 (app); Maestro (E2E, M6).
 
@@ -105,10 +107,20 @@ Tabela CMED (Anvisa)          ─┘
 - Fonte base 18 (títulos 28), respeitando o tamanho de letra do celular. Alvo de toque mínimo 56.
 - Rótulos das abas quebram em 2 linhas; nunca cortam com "…".
 
+### Fluxo principal (M3)
+- Navegação: pilha dentro da aba Buscar (`src/app/(abas)/(buscar)/`), para a barra de abas ficar sempre visível. Rotas: `/` busca → `/remedio/[codigo]` "Qual destes?" → `/postos/[codigo]` → `/posto/[cnes]?farmacia=…&produto=…`. As rotas usam o código SES-DF do produto e o CNES (+ farmácia, porque 3 UBSs têm duas farmácias), que não mudam quando o snapshot atualiza. Cada tela tem um "Voltar" grande, escrito.
+- **Busca** (`src/busca/`): Fuse.js sobre `produtos[].busca` e `marcas[].nome`, com o texto passado por `normalizar()`. Cada palavra digitada precisa casar (tolerando erro de digitação), em qualquer parte do nome; resultados muito piores que o melhor são descartados ("puran" acha Puran T4, não alopurinol). Resultados agrupados por substância (sem sal entre parênteses e sem acento: "ACIDO FOLICO" = "ACIDO FÓLICO"). Marca que é só o nome genérico na CMED ("DIPIRONA SODICA") não aparece como nome comercial. O índice é montado logo depois que a tela abre (~100 ms).
+- Uma forma e dose só: o resultado vai direto para os postos. Mais de uma: "Qual destes?", com quantos postos têm cada uma; doses repetidas mostram a descrição da SES-DF (ex.: prednisona comum × hanseníase).
+- **Liberação prolongada**: buscou por marca de liberação prolongada e o produto do SUS não é → aviso em "Qual destes?" e na lista de postos.
+- **Lista de postos** (`src/postos/`): distância em linha reta pela localização do aparelho (expo-location, pedida ao abrir a lista; a localização não sai do celular). Sem permissão, sem GPS ou fora do DF (posto mais perto a mais de 60 km): ordem por Região Administrativa, com aviso de que a escolha da região vem no M4. 10 postos por vez ("Mostrar mais postos"). Cada posto: nome, RA, distância, semáforo e "Aberto agora / Fechado agora, abre …" quando o horário do cadastro dá para interpretar (não conhece feriados). Avisos de retirada conforme `retirada`; controlado mostra só UBSs com `entregaControlados`.
+- Tela vazia: "Nenhum posto tem X hoje" + convite para Meus remédios (salvar é M5).
+- **Detalhe do posto**: estoque do remédio escolhido com "Estoque de hoje às HHhMM, ligue antes de ir", regra de retirada, Como chegar (Mapas da Apple no iPhone, com opção do Google Maps; Google Maps no resto), Ligar (`tel:+55…`), Enviar no WhatsApp (folha de compartilhar do celular; na web, link `wa.me`), endereço, horário, telefone e documentos.
+- **Busca por voz** ficou para depois: precisa de módulo nativo, que não roda no Expo Go (entra com o development build/APK do M6).
+
 ### Como testar no celular
 - **Expo Go** no celular (de preferência Android), lendo o QR code do `pnpm app`.
 - **Web** para conferência rápida de layout.
-- **EAS Build** (nuvem) quando entrar módulo nativo fora do Expo Go (busca por voz, M3) e para o APK (M6). Xcode/Android SDK locais não são necessários.
+- **EAS Build** (nuvem) quando entrar módulo nativo fora do Expo Go (busca por voz) e para o APK (M6). Xcode/Android SDK locais não são necessários.
 
 ## Marcos
 
@@ -117,10 +129,10 @@ Tabela CMED (Anvisa)          ─┘
 | M0. Teste de extração | Feito — ver `spike/RESULTADOS.md` |
 | M1. Coletor diário | Feito — `pipeline/` |
 | M2. Base do app | Feito — `apps/mobile/`: abas, tema acessível, snapshot embutido + cache + atualização |
-| M3. Fluxo principal (busca → dose → lista → detalhe) | |
+| M3. Fluxo principal (busca → dose → lista → detalhe) | Feito — busca tolerante com marcas, "Qual destes?", postos por distância, detalhe com Como chegar/Ligar/WhatsApp. Busca por voz adiada (precisa de development build) |
 | M4. Mapa e região manual | |
 | M5. Meus remédios, tela vazia, Ajuda | |
-| M6. Acabamento (E2E, acessibilidade, APK, README com GIF) | |
+| M6. Acabamento (E2E, acessibilidade, APK, busca por voz, README com GIF) | |
 
 ## Riscos
 - O endpoint do Power BI não é API oficial. Mitigação: validação + pedido dos dados em formato aberto por LAI.

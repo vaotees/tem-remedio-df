@@ -39,4 +39,22 @@ describe("navegação", () => {
     await fireEvent.press(screen.getByRole("button", { name: "Buscar um remédio" }));
     expect(r.getPathname()).toBe("/");
   });
+
+  it("fluxo completo com os dados de verdade: busca → postos → detalhe", async () => {
+    const r = await renderRouter(APP, { initialUrl: "/" });
+    await fireEvent.changeText(await screen.findByLabelText("Nome do remédio"), "losartana");
+    await fireEvent.press(await screen.findByRole("button", { name: /^Losartana potassica/ }));
+    expect(r.getPathname()).toMatch(/^\/postos\//);
+
+    // Sem GPS no teste: a lista vai por região, 10 postos de cada vez.
+    expect(await screen.findByText(/^\d+ postos têm hoje$/)).toBeOnTheScreen();
+    expect(screen.getAllByRole("button", { name: /^UBS / })).toHaveLength(10);
+    await fireEvent.press(screen.getByRole("button", { name: "Mostrar mais postos" }));
+    expect(screen.getAllByRole("button", { name: /^UBS / })).toHaveLength(20);
+
+    await fireEvent.press(screen.getAllByRole("button", { name: /^UBS / })[0]!);
+    expect(r.getPathname()).toMatch(/^\/posto\/\d{7}$/);
+    expect(await screen.findByRole("button", { name: "Como chegar" })).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Enviar no WhatsApp" })).toBeOnTheScreen();
+  });
 });

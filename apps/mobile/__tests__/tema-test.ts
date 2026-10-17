@@ -22,6 +22,9 @@ describe.each([
       ["botão primário", c.textoSobrePrimaria, c.primaria],
       ["botão secundário", c.primaria, c.fundo],
       ["aviso", c.aviso.texto, c.aviso.fundo],
+      ["informação", c.info.texto, c.info.fundo],
+      ["aberto", c.aberto.texto, c.aberto.fundo],
+      ["fechado", c.fechado.texto, c.fechado.fundo],
       ...Object.entries(c.semaforo).map(([nivel, s]) => [`semáforo ${nivel}`, s.texto, s.fundo] as [string, string, string]),
     ];
     for (const [nome, frente, fundo] of pares) {
