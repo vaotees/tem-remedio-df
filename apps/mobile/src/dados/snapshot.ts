@@ -49,26 +49,38 @@ export async function atualizarDaRede(atual: Snapshot, deps: Dependencias): Prom
   const fetchFn = deps.fetchFn ?? fetch;
   const base = deps.urlBase.replace(/\/$/, "");
 
-  const meta = await buscarJson(fetchFn, `${base}/meta.json`);
+  // O GitHub Pages guarda em cache por 10 min: a hora na URL garante o meta.json atual.
+  const meta = (await buscarJson(fetchFn, `${base}/meta.json?t=${Date.now()}`)) as {
+    versaoSchema?: unknown;
+    atualizadoEm?: unknown;
+    sha256?: unknown;
+  } | null;
   if (
     typeof meta !== "object" ||
     meta === null ||
-    (meta as { versaoSchema?: unknown }).versaoSchema !== VERSAO_SCHEMA ||
-    typeof (meta as { atualizadoEm?: unknown }).atualizadoEm !== "string" ||
-    (meta as { atualizadoEm: string }).atualizadoEm <= atual.meta.atualizadoEm
+    meta.versaoSchema !== VERSAO_SCHEMA ||
+    typeof meta.atualizadoEm !== "string" ||
+    meta.atualizadoEm <= atual.meta.atualizadoEm
   ) {
     return null;
   }
 
-  const novo = validar(await buscarJson(fetchFn, `${base}/snapshot.json`));
+  // O hash do conteúdo na URL: só muda quando os dados mudam (pode usar o cache).
+  const versao = typeof meta.sha256 === "string" ? meta.sha256 : meta.atualizadoEm;
+  const novo = validar(await buscarJson(fetchFn, `${base}/snapshot.json?v=${encodeURIComponent(versao)}`));
   if (!novo || novo.meta.atualizadoEm <= atual.meta.atualizadoEm) return null;
 
   await deps.armazenamento.gravar(ARQUIVO_CACHE, JSON.stringify(novo));
   return { snapshot: novo, origem: "rede" };
 }
 
+/**
+ * GET simples, sem cabeçalhos extras: qualquer cabeçalho como `Cache-Control` faz o
+ * navegador pedir permissão antes (preflight CORS), que o GitHub Pages recusa, e a
+ * versão web nunca receberia dados novos.
+ */
 async function buscarJson(fetchFn: typeof fetch, url: string): Promise<unknown> {
-  const resp = await fetchFn(url, { headers: { "Cache-Control": "no-cache" } });
-  if (!resp.ok) throw new Error(`${url} respondeu ${resp.status}`);
+  const resp = await fetchFn(url);
+  if (!resp.ok) throw new Error(`${url.split("?")[0]} respondeu ${resp.status}`);
   return resp.json();
 }

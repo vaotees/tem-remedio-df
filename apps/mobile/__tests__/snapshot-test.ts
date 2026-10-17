@@ -20,7 +20,7 @@ const comData = (atualizadoEm: string): Snapshot => ({ ...embutido, meta: { ...e
 
 function respostas(mapa: Record<string, unknown>) {
   return jest.fn(async (url: string) => {
-    const caminho = Object.keys(mapa).find((k) => url.endsWith(k));
+    const caminho = Object.keys(mapa).find((k) => url.split("?")[0]!.endsWith(k));
     if (!caminho) return new Response("não encontrado", { status: 404 });
     return new Response(JSON.stringify(mapa[caminho]), { status: 200 });
   }) as unknown as jest.Mock & typeof fetch;
@@ -95,6 +95,16 @@ describe("atualizarDaRede", () => {
     expect(r?.origem).toBe("rede");
     expect(r?.snapshot.meta.atualizadoEm).toBe("2099-01-01T13:30:00");
     expect(JSON.parse(armazenamento.dados["snapshot.json"]!).meta.atualizadoEm).toBe("2099-01-01T13:30:00");
+  });
+
+  it("faz GET simples, sem cabeçalhos (na web, cabeçalho extra dispara preflight CORS e o GitHub Pages recusa)", async () => {
+    const fetchFn = respostas({ "/meta.json": { ...novo.meta, sha256: "abc123" }, "/snapshot.json": novo });
+    await atualizarDaRede(embutido, deps({ fetchFn }));
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    for (const chamada of fetchFn.mock.calls) expect(chamada).toHaveLength(1);
+    const [urlMeta, urlSnapshot] = fetchFn.mock.calls.map((c) => String(c[0]));
+    expect(urlMeta).toMatch(/\/meta\.json\?t=\d+$/);
+    expect(urlSnapshot).toMatch(/\/snapshot\.json\?v=abc123$/);
   });
 
   it("não guarda snapshot inválido", async () => {
