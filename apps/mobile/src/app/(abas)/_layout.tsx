@@ -48,7 +48,7 @@ export default function LayoutAbas() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="(buscar)"
         options={{ title: "Buscar", tabBarIcon: ({ focused }) => <IconeAba nome="search" focused={focused} />, tabBarAccessibilityLabel: "Buscar remédio" }}
       />
       <Tabs.Screen

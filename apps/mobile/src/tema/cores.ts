@@ -15,7 +15,14 @@ export interface Cores {
   /** Bordas de campos e botões secundários: contraste mínimo 3:1 com o fundo. */
   borda: string;
   divisoria: string;
+  /** Véu escuro atrás de uma folha que sobe da parte de baixo da tela. */
+  veu: string;
   aviso: CoresSemaforo;
+  /** Caixas de informação neutra (ex.: "Retire na UBS do seu bairro"). */
+  info: CoresSemaforo;
+  /** Selo "Aberto agora" / "Fechado agora" (sempre com ícone e texto). */
+  aberto: CoresSemaforo;
+  fechado: CoresSemaforo;
   semaforo: Record<NivelEstoque, CoresSemaforo>;
 }
 
@@ -32,7 +39,11 @@ export const coresClaras: Cores = {
   textoSobrePrimaria: "#FFFFFF",
   borda: "#6B7280",
   divisoria: "#D1D5DB",
+  veu: "rgba(0, 0, 0, 0.5)",
   aviso: { texto: "#7A4A00", fundo: "#FFF3D6" },
+  info: { texto: "#1F3A5F", fundo: "#E8EEF6" },
+  aberto: { texto: "#1B5E20", fundo: "#E7F4E8" },
+  fechado: { texto: "#374151", fundo: "#ECEEF1" },
   semaforo: {
     alto: { texto: "#1B5E20", fundo: "#E7F4E8" },
     baixo: { texto: "#7A4A00", fundo: "#FFF3D6" },
@@ -50,7 +61,11 @@ export const coresEscuras: Cores = {
   textoSobrePrimaria: "#0F1115",
   borda: "#8A93A0",
   divisoria: "#2E3440",
+  veu: "rgba(0, 0, 0, 0.7)",
   aviso: { texto: "#FFD27A", fundo: "#3A2C0B" },
+  info: { texto: "#B9D3F0", fundo: "#1C2A3D" },
+  aberto: { texto: "#A5D6A7", fundo: "#16301A" },
+  fechado: { texto: "#C9CED6", fundo: "#262B34" },
   semaforo: {
     alto: { texto: "#A5D6A7", fundo: "#16301A" },
     baixo: { texto: "#FFD27A", fundo: "#3A2C0B" },
