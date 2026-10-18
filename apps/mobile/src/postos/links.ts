@@ -16,14 +16,6 @@ export function linkWaze(ubs: Ubs): string {
   return `https://waze.com/ul?ll=${ubs.lat},${ubs.lng}&navigate=yes`;
 }
 
-/**
- * Street View do Google Maps no ponto do posto, para a pessoa reconhecer a fachada antes de sair.
- * Link grátis e sem chave de API (a foto embutida no app exigiria chave, cobrança e internet).
- */
-export function linkStreetView(ubs: Ubs): string {
-  return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${ubs.lat},${ubs.lng}`;
-}
-
 export interface AppDeMapa {
   nome: string;
   url: string;

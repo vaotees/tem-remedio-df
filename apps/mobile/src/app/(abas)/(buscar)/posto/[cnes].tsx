@@ -13,14 +13,7 @@ import { Tela } from "@/componentes/Tela";
 import { Texto } from "@/componentes/Texto";
 import { Voltar } from "@/componentes/Voltar";
 import { capitalizarNome, indiceProduto, nomeSubstancia, rotuloProduto } from "@/busca/remedios";
-import {
-  formatarCep,
-  linkStreetView,
-  linkTelefone,
-  linkWhatsApp,
-  linkWhatsAppApp,
-  textoCompartilhar,
-} from "@/postos/links";
+import { formatarCep, linkTelefone, linkWhatsApp, linkWhatsAppApp, textoCompartilhar } from "@/postos/links";
 import { acharUbs, estoqueNoPosto, temOutraFarmacia } from "@/postos/postos";
 import { espaco } from "@/tema";
 import { formatarAtualizacao } from "@/util/datas";
@@ -134,17 +127,6 @@ function Detalhe({ snapshot, cnes, farmacia, codigoProduto }: Props) {
         <Texto secundario>
           {ubs.ra}
           {ubs.cep ? ` · CEP ${formatarCep(ubs.cep)}` : ""}
-        </Texto>
-        <Botao
-          titulo="Ver a fachada"
-          icone="eye-outline"
-          variante="secundario"
-          dica="Abre a foto da rua no Google Street View"
-          onPress={() => Linking.openURL(linkStreetView(ubs))}
-        />
-        <Texto variante="legenda" secundario>
-          Foto da rua do Google. A localização vem do cadastro e pode cair num prédio vizinho: gire a imagem se
-          precisar.
         </Texto>
       </Cartao>
 
