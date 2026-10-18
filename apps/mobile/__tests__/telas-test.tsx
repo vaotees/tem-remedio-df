@@ -254,6 +254,14 @@ describe("detalhe do posto", () => {
     expect(screen.queryByText("Abrir o caminho com qual app?")).toBeNull();
   });
 
+  it("Ver a fachada abre o Street View", async () => {
+    await renderRouter(APP, { initialUrl: "/posto/0010626?produto=8944" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Ver a fachada" }));
+    expect(Linking.openURL).toHaveBeenLastCalledWith(
+      "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=-15.851049,-48.047118",
+    );
+  });
+
   it("Ligar e Enviar no WhatsApp (abre o WhatsApp direto, já com a mensagem)", async () => {
     await renderRouter(APP, { initialUrl: "/posto/0010626?produto=8944" });
 

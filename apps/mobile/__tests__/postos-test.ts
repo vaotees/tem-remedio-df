@@ -6,6 +6,7 @@ import {
   formatarCep,
   linkAppleMaps,
   linkGoogleMaps,
+  linkStreetView,
   linkTelefone,
   linkWaze,
   linkWhatsAppApp,
@@ -180,6 +181,12 @@ describe("links", () => {
     expect(linkGoogleMaps(ubs)).toBe("https://www.google.com/maps/dir/?api=1&destination=-15.851049,-48.047118");
     expect(linkAppleMaps(ubs)).toBe("https://maps.apple.com/?daddr=-15.851049,-48.047118&q=UBS%2005%20Taguatinga");
     expect(linkWaze(ubs)).toBe("https://waze.com/ul?ll=-15.851049,-48.047118&navigate=yes");
+  });
+
+  it("Street View no ponto do posto", () => {
+    expect(linkStreetView(ubs)).toBe(
+      "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=-15.851049,-48.047118",
+    );
   });
 
   it("apps de mapa oferecidos: o Mapas da Apple só no iPhone", () => {
