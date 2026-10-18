@@ -1,7 +1,16 @@
 import { TEXTO_RETIRADA, type Snapshot } from "@tem-remedio/shared";
 import { distanciaKm, formatarDistancia } from "@/postos/distancia";
 import { interpretarHorario, situacaoHorario } from "@/postos/horario";
-import { formatarCep, linkAppleMaps, linkGoogleMaps, linkTelefone, textoCompartilhar } from "@/postos/links";
+import {
+  appsDeMapa,
+  formatarCep,
+  linkAppleMaps,
+  linkGoogleMaps,
+  linkTelefone,
+  linkWaze,
+  linkWhatsAppApp,
+  textoCompartilhar,
+} from "@/postos/links";
 import {
   acharUbs,
   avisoRetirada,
@@ -167,9 +176,20 @@ describe("horário", () => {
 describe("links", () => {
   const ubs = snapshotTeste.ubs[0]!;
 
-  it("como chegar no Google Maps e no Mapas da Apple", () => {
+  it("como chegar no Google Maps, no Mapas da Apple e no Waze", () => {
     expect(linkGoogleMaps(ubs)).toBe("https://www.google.com/maps/dir/?api=1&destination=-15.851049,-48.047118");
     expect(linkAppleMaps(ubs)).toBe("https://maps.apple.com/?daddr=-15.851049,-48.047118&q=UBS%2005%20Taguatinga");
+    expect(linkWaze(ubs)).toBe("https://waze.com/ul?ll=-15.851049,-48.047118&navigate=yes");
+  });
+
+  it("apps de mapa oferecidos: o Mapas da Apple só no iPhone", () => {
+    expect(appsDeMapa(ubs, "ios").map((a) => a.nome)).toEqual(["Mapas", "Google Maps", "Waze"]);
+    expect(appsDeMapa(ubs, "android").map((a) => a.nome)).toEqual(["Google Maps", "Waze"]);
+    expect(appsDeMapa(ubs, "web").map((a) => a.nome)).toEqual(["Google Maps", "Waze"]);
+  });
+
+  it("WhatsApp do celular com a mensagem pronta", () => {
+    expect(linkWhatsAppApp("UBS 05 Taguatinga\nLigue antes")).toBe("whatsapp://send?text=UBS%2005%20Taguatinga%0ALigue%20antes");
   });
 
   it("telefone com +55, de qualquer jeito que veio no cadastro", () => {

@@ -1,9 +1,11 @@
 import { DOCUMENTOS_UBS, TEXTO_RETIRADA, type Snapshot } from "@tem-remedio/shared";
 import { useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import { Linking, Platform, Share, StyleSheet, View } from "react-native";
 import { Botao } from "@/componentes/Botao";
 import { Cartao } from "@/componentes/Cartao";
 import { ComDados } from "@/componentes/ComDados";
+import { EscolherMapa } from "@/componentes/EscolherMapa";
 import { NaoEncontrado } from "@/componentes/NaoEncontrado";
 import { SeloEstoque } from "@/componentes/SeloEstoque";
 import { SeloHorario } from "@/componentes/SeloHorario";
@@ -11,14 +13,7 @@ import { Tela } from "@/componentes/Tela";
 import { Texto } from "@/componentes/Texto";
 import { Voltar } from "@/componentes/Voltar";
 import { capitalizarNome, indiceProduto, nomeSubstancia, rotuloProduto } from "@/busca/remedios";
-import {
-  formatarCep,
-  linkAppleMaps,
-  linkGoogleMaps,
-  linkTelefone,
-  linkWhatsApp,
-  textoCompartilhar,
-} from "@/postos/links";
+import { formatarCep, linkTelefone, linkWhatsApp, linkWhatsAppApp, textoCompartilhar } from "@/postos/links";
 import { acharUbs, estoqueNoPosto, temOutraFarmacia } from "@/postos/postos";
 import { espaco } from "@/tema";
 import { formatarAtualizacao } from "@/util/datas";
@@ -44,22 +39,23 @@ interface Props {
 }
 
 /**
- * No celular, a folha de compartilhar do sistema (o WhatsApp aparece nela).
- * Na web, ou se o celular não tiver como compartilhar, abre o WhatsApp direto.
+ * Abre o WhatsApp direto, já com a mensagem: a pessoa só escolhe o contato.
+ * Celular sem WhatsApp: a folha de compartilhar do sistema (SMS, e-mail...). Na web: WhatsApp Web.
  */
 async function enviar(texto: string) {
-  if (Platform.OS !== "web") {
-    try {
-      await Share.share({ message: texto });
-      return;
-    } catch {
-      // segue para o link do WhatsApp
-    }
+  if (Platform.OS === "web") {
+    await Linking.openURL(linkWhatsApp(texto));
+    return;
   }
-  await Linking.openURL(linkWhatsApp(texto));
+  try {
+    await Linking.openURL(linkWhatsAppApp(texto));
+  } catch {
+    await Share.share({ message: texto });
+  }
 }
 
 function Detalhe({ snapshot, cnes, farmacia, codigoProduto }: Props) {
+  const [escolhendoMapa, setEscolhendoMapa] = useState(false);
   const ubs = acharUbs(snapshot, cnes, farmacia);
   if (!ubs) return <NaoEncontrado oQue="posto" />;
 
@@ -105,17 +101,9 @@ function Detalhe({ snapshot, cnes, farmacia, codigoProduto }: Props) {
         <Botao
           titulo="Como chegar"
           icone="navigate"
-          dica={Platform.OS === "ios" ? "Abre o Mapas" : "Abre o Google Maps"}
-          onPress={() => Linking.openURL(Platform.OS === "ios" ? linkAppleMaps(ubs) : linkGoogleMaps(ubs))}
+          dica="Pergunta qual app de mapa você quer usar"
+          onPress={() => setEscolhendoMapa(true)}
         />
-        {Platform.OS === "ios" ? (
-          <Botao
-            titulo="Abrir no Google Maps"
-            icone="map-outline"
-            variante="secundario"
-            onPress={() => Linking.openURL(linkGoogleMaps(ubs))}
-          />
-        ) : null}
         {telefone ? (
           <Botao
             titulo="Ligar"
@@ -128,7 +116,7 @@ function Detalhe({ snapshot, cnes, farmacia, codigoProduto }: Props) {
           titulo="Enviar no WhatsApp"
           icone="logo-whatsapp"
           variante="secundario"
-          dica="Manda o endereço e o horário deste posto"
+          dica="Abre o WhatsApp com o endereço e o horário deste posto"
           onPress={() => enviar(textoCompartilhar({ ubs, remedio, atualizacao }))}
         />
       </View>
@@ -165,6 +153,8 @@ function Detalhe({ snapshot, cnes, farmacia, codigoProduto }: Props) {
           <Texto>• Receita de controle especial em 2 vias (não aceitam xerox)</Texto>
         ) : null}
       </Cartao>
+
+      <EscolherMapa ubs={escolhendoMapa ? ubs : null} aoFechar={() => setEscolhendoMapa(false)} />
     </>
   );
 }

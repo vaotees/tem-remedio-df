@@ -46,6 +46,8 @@ const APP = "src/app";
 jest.setTimeout(30_000);
 
 beforeEach(() => {
+  // O Linking do React Native já é um mock único: sem limpar, as chamadas de um teste passam para o outro.
+  jest.clearAllMocks();
   mockGps.permissao = { granted: true, canAskAgain: true, status: "granted" };
   mockGps.posicao = { coords: { latitude: NO_PLANO_PILOTO.lat, longitude: NO_PLANO_PILOTO.lng } };
   mockGps.desligado = false;
@@ -222,26 +224,57 @@ describe("detalhe do posto", () => {
     expect(screen.getByText("• Documento oficial com foto")).toBeOnTheScreen();
   });
 
-  it("Como chegar, Ligar e Enviar no WhatsApp", async () => {
+  it("Como chegar pergunta qual app de mapa usar", async () => {
     await renderRouter(APP, { initialUrl: "/posto/0010626?produto=8944" });
+    const comoChegar = await screen.findByRole("button", { name: "Como chegar" });
 
-    await fireEvent.press(await screen.findByRole("button", { name: "Como chegar" }));
+    // No iPhone: Mapas, Google Maps e Waze.
+    await fireEvent.press(comoChegar);
+    expect(screen.getByText("Abrir o caminho com qual app?")).toBeOnTheScreen();
+    expect(Linking.openURL).not.toHaveBeenCalled();
+    await fireEvent.press(screen.getByRole("button", { name: "Waze" }));
+    expect(Linking.openURL).toHaveBeenLastCalledWith("https://waze.com/ul?ll=-15.851049,-48.047118&navigate=yes");
+    expect(screen.queryByText("Abrir o caminho com qual app?")).toBeNull();
+
+    await fireEvent.press(comoChegar);
+    await fireEvent.press(screen.getByRole("button", { name: "Mapas" }));
     expect(Linking.openURL).toHaveBeenLastCalledWith(
       "https://maps.apple.com/?daddr=-15.851049,-48.047118&q=UBS%2005%20Taguatinga",
     );
 
-    await fireEvent.press(screen.getByRole("button", { name: "Abrir no Google Maps" }));
+    await fireEvent.press(comoChegar);
+    await fireEvent.press(screen.getByRole("button", { name: "Google Maps" }));
     expect(Linking.openURL).toHaveBeenLastCalledWith(
       "https://www.google.com/maps/dir/?api=1&destination=-15.851049,-48.047118",
     );
 
-    await fireEvent.press(screen.getByRole("button", { name: "Ligar" }));
+    await fireEvent.press(comoChegar);
+    await fireEvent.press(screen.getByRole("button", { name: "Cancelar" }));
+    expect(Linking.openURL).toHaveBeenCalledTimes(3);
+    expect(screen.queryByText("Abrir o caminho com qual app?")).toBeNull();
+  });
+
+  it("Ligar e Enviar no WhatsApp (abre o WhatsApp direto, já com a mensagem)", async () => {
+    await renderRouter(APP, { initialUrl: "/posto/0010626?produto=8944" });
+
+    await fireEvent.press(await screen.findByRole("button", { name: "Ligar" }));
     expect(Linking.openURL).toHaveBeenLastCalledWith("tel:+556135639176");
 
     await fireEvent.press(screen.getByRole("button", { name: "Enviar no WhatsApp" }));
-    const mensagem = (Share.share as jest.Mock).mock.calls[0][0].message as string;
+    const url = (Linking.openURL as jest.Mock).mock.lastCall[0] as string;
+    expect(url).toMatch(/^whatsapp:\/\/send\?text=/);
+    const mensagem = decodeURIComponent(url.split("text=")[1]!);
     expect(mensagem).toContain("Losartana potassica, comprimido 50 mg\nUBS 05 Taguatinga\nSETOR D SUL AE 23");
     expect(mensagem).toContain("Ligue antes de ir.");
+    expect(Share.share).not.toHaveBeenCalled();
+  });
+
+  it("sem WhatsApp no celular: oferece a folha de compartilhar", async () => {
+    jest.spyOn(Linking, "openURL").mockRejectedValue(new Error("Unable to open URL"));
+    await renderRouter(APP, { initialUrl: "/posto/0010626?produto=8944" });
+
+    await fireEvent.press(await screen.findByRole("button", { name: "Enviar no WhatsApp" }));
+    expect(Share.share).toHaveBeenCalledWith({ message: expect.stringContaining("UBS 05 Taguatinga") });
   });
 
   it("controlado: lembra a receita especial; sem telefone, não mostra Ligar", async () => {
