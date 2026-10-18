@@ -23,7 +23,13 @@
     },
     "plugins": [
       "expo-router",
-      "expo-status-bar"
+      "expo-status-bar",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "O Tem Remédio DF usa sua localização só para mostrar os postos de saúde mais perto de você. Ela não sai do celular."
+        }
+      ]
     ],
     "scheme": "temremedio",
     "experiments": {
