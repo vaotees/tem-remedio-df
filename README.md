@@ -4,7 +4,7 @@
 
 App para idosos (e seus cuidadores) descobrirem **qual posto de saúde do DF tem o remédio hoje**, antes de sair de casa. Usa só dados públicos e oficiais da Secretaria de Saúde do DF.
 
-Projeto de portfólio em React Native (Expo) + TypeScript. Status: **coletor de dados (M1), base do app (M2) e fluxo principal (M3: busca → dose → postos mais perto → detalhe) prontos**; mapa e Meus remédios em construção.
+Projeto de portfólio em React Native (Expo) + TypeScript. Status: **coletor de dados (M1), base do app (M2), fluxo principal (M3: busca → dose → postos mais perto → detalhe) e mapa com escolha da região (M4) prontos**; Meus remédios em construção.
 
 ## Como funciona
 
@@ -58,7 +58,7 @@ Leia o QR code com o **Expo Go** no celular, ou aperte `w` para abrir no navegad
 |---|---|
 | `packages/shared` | Formato do snapshot (zod), semáforo, regras de retirada |
 | `pipeline` | Coletor: Power BI → limpeza → tradutor de marcas → validação → publicação |
-| `apps/mobile` | App Expo: abas, tema acessível (contraste testado), snapshot embutido + cache |
+| `apps/mobile` | App Expo: busca, postos (lista e mapa), tema acessível (contraste testado), snapshot embutido + cache |
 | `docs/SPEC.md` | Escopo, telas, regras e decisões |
 | `spike/` | Teste de extração (M0) |
 
