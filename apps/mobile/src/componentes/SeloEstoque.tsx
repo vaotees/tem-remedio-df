@@ -5,7 +5,8 @@ import { StyleSheet, View } from "react-native";
 import { espaco, useTema } from "@/tema";
 import { Texto } from "./Texto";
 
-const ICONE: Record<NivelEstoque, ComponentProps<typeof Ionicons>["name"]> = {
+/** Ícone de cada nível do semáforo (no selo e nos pinos do mapa). */
+export const ICONE_NIVEL: Record<NivelEstoque, ComponentProps<typeof Ionicons>["name"]> = {
   alto: "checkmark-circle",
   baixo: "alert-circle",
   critico: "warning",
@@ -27,7 +28,7 @@ export function SeloEstoque({ dias }: { dias: number | null }) {
       accessibilityLabel={`Estoque: ${TEXTO_NIVEL[nivel]}`}
       testID={`selo-${nivel}`}
     >
-      <Ionicons name={ICONE[nivel]} size={22} color={texto} />
+      <Ionicons name={ICONE_NIVEL[nivel]} size={22} color={texto} />
       <Texto variante="legenda" cor={texto} style={estilos.texto}>
         {TEXTO_NIVEL[nivel]}
       </Texto>

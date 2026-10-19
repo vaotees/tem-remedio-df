@@ -1,8 +1,9 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { nivelEstoque, TEXTO_NIVEL, type Produto, type Snapshot } from "@tem-remedio/shared";
+import type { Produto, Snapshot } from "@tem-remedio/shared";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Fragment, useMemo, useState } from "react";
 import { ActivityIndicator, Linking, Platform, StyleSheet, View } from "react-native";
+import { Alternancia } from "@/componentes/Alternancia";
 import { Aviso } from "@/componentes/Aviso";
 import { AvisoLiberacao } from "@/componentes/AvisoLiberacao";
 import { Botao } from "@/componentes/Botao";
@@ -10,21 +11,23 @@ import { Cartao } from "@/componentes/Cartao";
 import { ComDados } from "@/componentes/ComDados";
 import { FaixaAtualizacao } from "@/componentes/FaixaAtualizacao";
 import { ItemLista } from "@/componentes/ItemLista";
+import { MAPA_DISPONIVEL, MapaPostos } from "@/componentes/MapaPostos";
 import { NaoEncontrado } from "@/componentes/NaoEncontrado";
 import { SeloEstoque } from "@/componentes/SeloEstoque";
 import { SeloHorario } from "@/componentes/SeloHorario";
 import { Tela } from "@/componentes/Tela";
 import { Texto } from "@/componentes/Texto";
 import { Voltar } from "@/componentes/Voltar";
-import { acharMarca, capitalizarNome, indiceProduto, nomeSubstancia, precisaAvisoLiberacao, rotuloProduto } from "@/busca/remedios";
-import { formatarDistancia } from "@/postos/distancia";
-import { interpretarHorario, situacaoHorario } from "@/postos/horario";
-import { useLocalizacao, type Localizacao } from "@/postos/localizacao";
-import { avisoRetirada, estaForaDoDf, postosComEstoque, type PostoComEstoque } from "@/postos/postos";
+import { acharMarca, indiceProduto, nomeSubstancia, precisaAvisoLiberacao, rotuloProduto } from "@/busca/remedios";
+import { descreverPosto } from "@/postos/descricao";
+import { useOrigem } from "@/postos/origem";
+import { avisoRetirada, postosComEstoque, type Ordem, type PostoComEstoque } from "@/postos/postos";
 import { espaco, useTema } from "@/tema";
 
 /** Quantos postos aparecem de cada vez: lista curta é mais fácil de ler. */
 const POR_PAGINA = 10;
+
+type Modo = "lista" | "mapa";
 
 export default function Postos() {
   const { codigo, marca } = useLocalSearchParams<{ codigo: string; marca?: string }>();
@@ -49,21 +52,26 @@ interface Props {
 
 function ListaPostos({ snapshot, codigo, nomeMarca, procurandoNovos }: Props) {
   const router = useRouter();
-  const { localizacao, procurando, tentarDeNovo } = useLocalizacao();
+  const origem = useOrigem(snapshot);
+  const { ordem } = origem;
   const [quantos, setQuantos] = useState(POR_PAGINA);
+  const [modo, setModo] = useState<Modo>("lista");
 
   const iProduto = indiceProduto(snapshot, codigo);
   const produto = snapshot.produtos[iProduto];
-  const foraDoDf = localizacao?.situacao === "ok" && estaForaDoDf(snapshot, localizacao);
-  const origem = localizacao?.situacao === "ok" && !foraDoDf ? localizacao : null;
-
-  const postos = useMemo(() => postosComEstoque(snapshot, iProduto, origem), [snapshot, iProduto, origem]);
+  const postos = useMemo(() => postosComEstoque(snapshot, iProduto, ordem), [snapshot, iProduto, ordem]);
 
   if (!produto) return <NaoEncontrado oQue="remédio" />;
 
   const nome = nomeSubstancia([produto]);
   const marca = acharMarca(snapshot, nomeMarca);
   const retirada = avisoRetirada(produto);
+  const escolherRegiao = () => router.push("/regiao");
+  const abrir = (p: PostoComEstoque) =>
+    router.push({
+      pathname: "/posto/[cnes]",
+      params: { cnes: p.ubs.cnes, farmacia: p.ubs.farmacia, produto: produto.codigo },
+    });
 
   return (
     <>
@@ -93,93 +101,145 @@ function ListaPostos({ snapshot, codigo, nomeMarca, procurandoNovos }: Props) {
         </Aviso>
       ) : null}
 
-      {!localizacao && procurando ? (
+      {postos.length === 0 ? (
+        <Vazio produto={produto} />
+      ) : origem.carregando ? (
         <View style={estilos.procurando} accessibilityLiveRegion="polite">
           <ActivityIndicator size="large" />
           <Texto secundario>Procurando sua localização para mostrar os postos mais perto…</Texto>
         </View>
-      ) : postos.length === 0 ? (
-        <Vazio produto={produto} />
+      ) : origem.perguntar ? (
+        <PerguntarOrigem procurando={origem.procurando} usarLocalizacao={origem.usarLocalizacao} escolherRegiao={escolherRegiao} />
       ) : (
         <>
-          <SituacaoLocalizacao localizacao={localizacao} foraDoDf={foraDoDf} procurando={procurando} tentarDeNovo={tentarDeNovo} />
+          <SituacaoOrigem origem={origem} escolherRegiao={escolherRegiao} />
+          {ordem.por === "regiao" && !postos.some((p) => p.ubs.ra === ordem.ra) ? (
+            <Texto>Nenhum posto da sua região ({ordem.ra}) tem hoje. Abaixo, os das regiões mais perto.</Texto>
+          ) : null}
           <Texto variante="subtitulo" accessibilityLiveRegion="polite">
             {postos.length === 1 ? "1 posto tem hoje" : `${postos.length} postos têm hoje`}
           </Texto>
-          <View style={estilos.lista}>
-            {postos.slice(0, quantos).map((p, n, visiveis) => (
-              <Fragment key={`${p.ubs.cnes}-${p.ubs.farmacia}`}>
-                {!origem && p.ubs.ra !== visiveis[n - 1]?.ubs.ra ? (
-                  <Texto variante="destaque" accessibilityRole="header" style={estilos.regiao}>
-                    {p.ubs.ra}
-                  </Texto>
-                ) : null}
-                <ItemPosto
-                  posto={p}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/posto/[cnes]",
-                      params: { cnes: p.ubs.cnes, farmacia: p.ubs.farmacia, produto: produto.codigo },
-                    })
-                  }
-                />
-              </Fragment>
-            ))}
-          </View>
-          {quantos < postos.length ? (
-            <Botao
-              titulo="Mostrar mais postos"
-              icone="chevron-down"
-              variante="secundario"
-              dica={`Faltam ${postos.length - quantos}`}
-              onPress={() => setQuantos((q) => q + POR_PAGINA)}
+
+          {MAPA_DISPONIVEL ? (
+            <Alternancia
+              valor={modo}
+              aoMudar={setModo}
+              opcoes={[
+                { valor: "lista", titulo: "Lista", icone: "list" },
+                { valor: "mapa", titulo: "Mapa", icone: "map-outline" },
+              ]}
             />
-          ) : null}
+          ) : (
+            <SemMapa />
+          )}
+
+          {MAPA_DISPONIVEL && modo === "mapa" ? (
+            <MapaPostos postos={postos} ordem={ordem} aoAbrir={abrir} />
+          ) : (
+            <>
+              <View style={estilos.lista}>
+                {postos.slice(0, quantos).map((p, n, visiveis) => {
+                  const cabecalho = cabecalhoAntes(ordem, p, visiveis[n - 1]);
+                  return (
+                    <Fragment key={`${p.ubs.cnes}-${p.ubs.farmacia}`}>
+                      {cabecalho ? (
+                        <Texto variante="destaque" accessibilityRole="header" style={estilos.regiao}>
+                          {cabecalho}
+                        </Texto>
+                      ) : null}
+                      <ItemPosto posto={p} onPress={() => abrir(p)} />
+                    </Fragment>
+                  );
+                })}
+              </View>
+              {quantos < postos.length ? (
+                <Botao
+                  titulo="Mostrar mais postos"
+                  icone="chevron-down"
+                  variante="secundario"
+                  dica={`Faltam ${postos.length - quantos}`}
+                  onPress={() => setQuantos((q) => q + POR_PAGINA)}
+                />
+              ) : null}
+            </>
+          )}
         </>
       )}
     </>
   );
 }
 
-function ItemPosto({ posto, onPress }: { posto: PostoComEstoque; onPress: () => void }) {
-  const { ubs, dias, distanciaKm } = posto;
-  const nome = capitalizarNome(ubs.nome);
-  const distancia = distanciaKm !== null ? formatarDistancia(distanciaKm) : null;
-  const faixas = interpretarHorario(ubs.horario);
-  const horario = faixas ? situacaoHorario(faixas).texto : null;
-  const rotulo = [
-    nome,
-    distancia ? `${ubs.ra}, a ${distancia} em linha reta` : ubs.ra,
-    `Estoque: ${TEXTO_NIVEL[nivelEstoque(dias)]}`,
-    horario,
-  ]
-    .filter(Boolean)
-    .join(". ");
+/**
+ * Títulos que separam a lista: por Região Administrativa sem localização;
+ * com a região escolhida, o nome dela e depois "Outras regiões"; por distância, nenhum.
+ */
+function cabecalhoAntes(ordem: Ordem, posto: PostoComEstoque, anterior: PostoComEstoque | undefined): string | null {
+  if (ordem.por === "nome") return posto.ubs.ra !== anterior?.ubs.ra ? posto.ubs.ra : null;
+  if (ordem.por === "regiao") {
+    const daRegiao = posto.ubs.ra === ordem.ra;
+    if (daRegiao && !anterior) return ordem.ra;
+    if (!daRegiao && (!anterior || anterior.ubs.ra === ordem.ra)) return "Outras regiões, da mais perto para a mais longe";
+  }
+  return null;
+}
 
+function ItemPosto({ posto, onPress }: { posto: PostoComEstoque; onPress: () => void }) {
+  const { nome, onde, rotulo } = descreverPosto(posto);
   return (
     <ItemLista onPress={onPress} rotulo={rotulo} dica="Mostra endereço, telefone e como chegar">
       <Texto variante="destaque">{nome}</Texto>
-      <Texto secundario>{distancia ? `${ubs.ra} · ${distancia}` : ubs.ra}</Texto>
-      <SeloEstoque dias={dias} />
-      <SeloHorario horario={ubs.horario} />
+      <Texto secundario>{onde}</Texto>
+      <SeloEstoque dias={posto.dias} />
+      <SeloHorario horario={posto.ubs.horario} />
     </ItemLista>
   );
 }
 
-interface PropsSituacao {
-  localizacao: Localizacao | undefined;
-  foraDoDf: boolean;
-  procurando: boolean;
-  tentarDeNovo: () => void;
+/** Na web não há mapa: um aviso pequeno, para ninguém procurar o botão. */
+function SemMapa() {
+  const { cores } = useTema();
+  return (
+    <View style={estilos.linha}>
+      <Ionicons name="map-outline" size={20} color={cores.textoSecundario} />
+      <Texto variante="legenda" secundario style={estilos.flex}>
+        O mapa dos postos aparece no app do celular. Aqui no navegador, só a lista.
+      </Texto>
+    </View>
+  );
 }
 
-/** Explica a ordem da lista e, sem localização, como ter os postos mais perto. */
-function SituacaoLocalizacao({ localizacao, foraDoDf, procurando, tentarDeNovo }: PropsSituacao) {
-  const { cores } = useTema();
+interface PropsPerguntar {
+  procurando: boolean;
+  usarLocalizacao: () => void;
+  escolherRegiao: () => void;
+}
 
-  if (localizacao?.situacao === "ok" && !foraDoDf) {
+/** Primeira vez: antes do pedido do celular, explica e deixa escolher a região em vez da localização. */
+function PerguntarOrigem({ procurando, usarLocalizacao, escolherRegiao }: PropsPerguntar) {
+  return (
+    <Cartao>
+      <Texto variante="subtitulo">Como achar os postos perto de você?</Texto>
+      <Texto>O app pode usar a localização do celular, ou você escolhe a sua região.</Texto>
+      <Texto secundario>A localização e a região ficam só neste celular.</Texto>
+      <Botao titulo="Usar minha localização" icone="navigate" carregando={procurando} onPress={usarLocalizacao} />
+      <Botao titulo="Escolher minha região" icone="list" variante="secundario" onPress={escolherRegiao} />
+    </Cartao>
+  );
+}
+
+interface PropsSituacao {
+  origem: ReturnType<typeof useOrigem>;
+  escolherRegiao: () => void;
+}
+
+/** Explica a ordem da lista e oferece a outra forma de achar os postos perto. */
+function SituacaoOrigem({ origem, escolherRegiao }: PropsSituacao) {
+  const { cores } = useTema();
+  const { ordem, localizacao, foraDoDf, ra, usarRegiao, procurando, usarLocalizacao } = origem;
+
+  if (ordem.por === "distancia") {
     return (
-      <View style={estilos.ordem}>
+      <View style={estilos.linha}>
         <Ionicons name="navigate" size={20} color={cores.textoSecundario} />
         <Texto secundario style={estilos.flex}>
           Do mais perto para o mais longe de você, em linha reta.
@@ -188,16 +248,52 @@ function SituacaoLocalizacao({ localizacao, foraDoDf, procurando, tentarDeNovo }
     );
   }
 
-  const regiao = "Os postos aparecem por Região Administrativa. Em breve você vai poder escolher a sua região.";
+  const textoRegiao = ra
+    ? `Sua região: ${ra}. Primeiro os postos dela, depois os das regiões mais perto.`
+    : "Os postos aparecem por Região Administrativa. Escolha a sua para ver primeiro os postos perto de você.";
+  const botaoRegiao = (
+    <Botao
+      titulo={ra ? "Trocar minha região" : "Escolher minha região"}
+      icone="list"
+      variante={ra ? "secundario" : "primario"}
+      onPress={escolherRegiao}
+    />
+  );
+  const botaoLocalizacao = (titulo = "Usar minha localização") => (
+    <Botao titulo={titulo} icone="navigate" variante="secundario" carregando={procurando} onPress={usarLocalizacao} />
+  );
+
+  // A pessoa escolheu a região: não é aviso, é a escolha dela.
+  if (usarRegiao) {
+    return (
+      <Cartao>
+        <View style={estilos.linha}>
+          <Ionicons name="location" size={24} color={cores.primaria} />
+          <Texto variante="destaque" style={estilos.flex}>
+            Sua região: {ra}
+          </Texto>
+        </View>
+        <Texto secundario>Primeiro os postos dela, depois os das regiões mais perto.</Texto>
+        {botaoRegiao}
+        {botaoLocalizacao()}
+      </Cartao>
+    );
+  }
+
   if (foraDoDf) {
-    return <Aviso tipo="info" titulo="Você parece estar fora do DF" texto={regiao} />;
+    return (
+      <Aviso tipo="info" titulo="Você parece estar fora do DF" texto={textoRegiao}>
+        {botaoRegiao}
+      </Aviso>
+    );
   }
   if (localizacao?.situacao === "sem_permissao") {
     const nosAjustes = !localizacao.podePedir && Platform.OS !== "web";
     return (
-      <Aviso tipo="info" titulo="Sem a sua localização" texto={regiao}>
+      <Aviso tipo="info" titulo="Sem a sua localização" texto={textoRegiao}>
+        {botaoRegiao}
         {localizacao.podePedir ? (
-          <Botao titulo="Usar minha localização" icone="navigate" variante="secundario" carregando={procurando} onPress={tentarDeNovo} />
+          botaoLocalizacao()
         ) : nosAjustes ? (
           <Botao
             titulo="Permitir nos ajustes"
@@ -211,8 +307,9 @@ function SituacaoLocalizacao({ localizacao, foraDoDf, procurando, tentarDeNovo }
     );
   }
   return (
-    <Aviso tipo="info" titulo="Não consegui achar sua localização" texto={regiao}>
-      <Botao titulo="Tentar de novo" icone="refresh" variante="secundario" carregando={procurando} onPress={tentarDeNovo} />
+    <Aviso tipo="info" titulo="Não consegui achar sua localização" texto={textoRegiao}>
+      {botaoRegiao}
+      {botaoLocalizacao("Tentar de novo")}
     </Aviso>
   );
 }
@@ -239,6 +336,6 @@ const estilos = StyleSheet.create({
   procurando: { alignItems: "center", gap: espaco.md, paddingVertical: espaco.xl },
   lista: { gap: espaco.sm },
   regiao: { marginTop: espaco.sm },
-  ordem: { flexDirection: "row", alignItems: "center", gap: espaco.sm },
+  linha: { flexDirection: "row", alignItems: "center", gap: espaco.sm },
   flex: { flex: 1 },
 });

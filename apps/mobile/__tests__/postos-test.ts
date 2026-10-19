@@ -18,13 +18,16 @@ import {
   estaForaDoDf,
   postosComEstoque,
   temOutraFarmacia,
+  type Ordem,
 } from "@/postos/postos";
 import { EM_SAO_PAULO, NO_PLANO_PILOTO, snapshotTeste } from "../fixtures/snapshot-teste";
 
 const real = require("../assets/dados/snapshot-inicial.json") as Snapshot;
 
-const nomes = (iProduto: number, origem: typeof NO_PLANO_PILOTO | null) =>
-  postosComEstoque(snapshotTeste, iProduto, origem).map((p) => p.ubs.nome);
+const PERTO: Ordem = { por: "distancia", origem: NO_PLANO_PILOTO };
+const POR_NOME: Ordem = { por: "nome" };
+
+const nomes = (iProduto: number, ordem: Ordem) => postosComEstoque(snapshotTeste, iProduto, ordem).map((p) => p.ubs.nome);
 
 describe("distância", () => {
   it("em linha reta, em km", () => {
@@ -44,40 +47,40 @@ describe("distância", () => {
 
 describe("postosComEstoque", () => {
   it("ordena do mais perto para o mais longe", () => {
-    expect(nomes(0, NO_PLANO_PILOTO)).toEqual(["UBS 1 ASA NORTE", "UBS 05 TAGUATINGA", "UBS 01 SAMAMBAIA", "UBS 3 CEILANDIA"]);
-    const distancias = postosComEstoque(snapshotTeste, 0, NO_PLANO_PILOTO).map((p) => p.distanciaKm!);
+    expect(nomes(0, PERTO)).toEqual(["UBS 1 ASA NORTE", "UBS 05 TAGUATINGA", "UBS 01 SAMAMBAIA", "UBS 3 CEILANDIA"]);
+    const distancias = postosComEstoque(snapshotTeste, 0, PERTO).map((p) => p.distanciaKm!);
     expect([...distancias].sort((a, b) => a - b)).toEqual(distancias);
   });
 
   it("sem localização, ordena por Região Administrativa e nome", () => {
-    expect(nomes(0, null)).toEqual(["UBS 3 CEILANDIA", "UBS 1 ASA NORTE", "UBS 01 SAMAMBAIA", "UBS 05 TAGUATINGA"]);
-    expect(postosComEstoque(snapshotTeste, 0, null).every((p) => p.distanciaKm === null)).toBe(true);
+    expect(nomes(0, POR_NOME)).toEqual(["UBS 3 CEILANDIA", "UBS 1 ASA NORTE", "UBS 01 SAMAMBAIA", "UBS 05 TAGUATINGA"]);
+    expect(postosComEstoque(snapshotTeste, 0, POR_NOME).every((p) => p.distanciaKm === null)).toBe(true);
   });
 
   it("leva quantidade e dias de estoque da própria UBS", () => {
-    const [asaNorte] = postosComEstoque(snapshotTeste, 0, NO_PLANO_PILOTO);
+    const [asaNorte] = postosComEstoque(snapshotTeste, 0, PERTO);
     expect(asaNorte).toMatchObject({ quantidade: 80, dias: 3 });
   });
 
   it("controlado: só UBSs que entregam controlados", () => {
     // Samambaia tem clonazepam no estoque, mas não entrega controlados.
-    expect(nomes(2, NO_PLANO_PILOTO)).toEqual(["UBS 1 ASA NORTE", "UBS 05 TAGUATINGA"]);
+    expect(nomes(2, PERTO)).toEqual(["UBS 1 ASA NORTE", "UBS 05 TAGUATINGA"]);
   });
 
   it("unidade prisional nunca aparece para o público, mesmo com estoque e sendo a mais perto", () => {
-    expect(nomes(0, NO_PLANO_PILOTO)).not.toContain("UBS 01 DCCP");
+    expect(nomes(0, PERTO)).not.toContain("UBS 01 DCCP");
     const prisionais = real.ubs.filter(ehUnidadePrisional).map((u) => u.nome);
     expect(prisionais.sort()).toEqual(["UBS 01 DCCP", "UBS 01 SIA CPP", "UBS 15 PFDF GAMA"]);
   });
 
   it("nenhum posto tem: lista vazia", () => {
-    expect(nomes(9, NO_PLANO_PILOTO)).toEqual([]);
-    expect(nomes(99, NO_PLANO_PILOTO)).toEqual([]);
+    expect(nomes(9, PERTO)).toEqual([]);
+    expect(nomes(99, PERTO)).toEqual([]);
   });
 
   it("controlado no snapshot de verdade: nunca aparece UBS que não entrega", () => {
     const iClonazepam = real.produtos.findIndex((p) => p.retirada === "controlado");
-    const postos = postosComEstoque(real, iClonazepam, NO_PLANO_PILOTO);
+    const postos = postosComEstoque(real, iClonazepam, PERTO);
     expect(postos.length).toBeGreaterThan(0);
     expect(postos.every((p) => p.ubs.entregaControlados)).toBe(true);
   });

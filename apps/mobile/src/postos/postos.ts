@@ -1,13 +1,22 @@
 import { TEXTO_RETIRADA, type Produto, type Snapshot, type Ubs } from "@tem-remedio/shared";
 import { distanciaKm, type Coordenadas } from "./distancia";
+import { acharRegiao } from "./regioes";
 
 export interface PostoComEstoque {
   ubs: Ubs;
   quantidade: number;
   dias: number | null;
-  /** null quando não há localização: aí a lista vai por Região Administrativa. */
+  /** Distância da pessoa, em linha reta. null sem localização (aí a lista vai por região). */
   distanciaKm: number | null;
 }
+
+/**
+ * Como ordenar os postos:
+ * - `distancia`: do mais perto para o mais longe da pessoa (GPS);
+ * - `regiao`: primeiro os da Região Administrativa escolhida, depois os mais perto dela;
+ * - `nome`: sem localização nem região, por Região Administrativa e nome.
+ */
+export type Ordem = { por: "distancia"; origem: Coordenadas } | { por: "regiao"; ra: string } | { por: "nome" };
 
 /**
  * UBSs do sistema prisional (horário "OUTRO/PRISIONAL" no cadastro da SES-DF) atendem só a população
@@ -18,11 +27,10 @@ export function ehUnidadePrisional(ubs: Ubs): boolean {
 }
 
 /**
- * Postos que têm o produto hoje, do mais perto para o mais longe.
- * Sem localização, por Região Administrativa e nome (a escolha manual da região vem no M4).
+ * Postos que têm o produto hoje, na ordem pedida (ver `Ordem`).
  * Remédio controlado só aparece nas UBSs que entregam controlados; unidades prisionais nunca aparecem.
  */
-export function postosComEstoque(snapshot: Snapshot, iProduto: number, origem: Coordenadas | null): PostoComEstoque[] {
+export function postosComEstoque(snapshot: Snapshot, iProduto: number, ordem: Ordem): PostoComEstoque[] {
   const produto = snapshot.produtos[iProduto];
   if (!produto) return [];
 
@@ -32,14 +40,20 @@ export function postosComEstoque(snapshot: Snapshot, iProduto: number, origem: C
     const ubs = snapshot.ubs[iUbs];
     if (!ubs || ehUnidadePrisional(ubs)) continue;
     if (produto.retirada === "controlado" && !ubs.entregaControlados) continue;
-    postos.push({ ubs, quantidade, dias, distanciaKm: origem ? distanciaKm(origem, ubs) : null });
+    postos.push({ ubs, quantidade, dias, distanciaKm: ordem.por === "distancia" ? distanciaKm(ordem.origem, ubs) : null });
   }
 
-  return postos.sort((a, b) =>
-    a.distanciaKm !== null && b.distanciaKm !== null
-      ? a.distanciaKm - b.distanciaKm
-      : a.ubs.ra.localeCompare(b.ubs.ra, "pt-BR") || a.ubs.nome.localeCompare(b.ubs.nome, "pt-BR"),
-  );
+  const porNome = (a: PostoComEstoque, b: PostoComEstoque) =>
+    a.ubs.ra.localeCompare(b.ubs.ra, "pt-BR") || a.ubs.nome.localeCompare(b.ubs.nome, "pt-BR");
+
+  if (ordem.por === "distancia") return postos.sort((a, b) => a.distanciaKm! - b.distanciaKm!);
+  if (ordem.por === "nome") return postos.sort(porNome);
+
+  // Pela região: a distância do centro dela só ordena, não aparece (não é a distância da pessoa).
+  const centro = acharRegiao(ordem.ra);
+  const daRegiao = (p: PostoComEstoque) => (p.ubs.ra === ordem.ra ? 0 : 1);
+  const doCentro = new Map(postos.map((p) => [p, centro ? distanciaKm(centro, p.ubs) : 0]));
+  return postos.sort((a, b) => daRegiao(a) - daRegiao(b) || doCentro.get(a)! - doCentro.get(b)! || porNome(a, b));
 }
 
 /** Mais longe que isso do posto mais perto, a pessoa não está no DF: distância não ajuda. */

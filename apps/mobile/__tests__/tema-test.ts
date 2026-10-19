@@ -9,6 +9,10 @@ describe("contraste", () => {
   });
 });
 
+/** Cores típicas do mapa (Apple Maps e Google Maps), onde o pino precisa aparecer (3:1). */
+const CHAO_DO_MAPA_CLARO = { rua: "#F5F3EE", parque: "#CFE8C4", agua: "#AADAFF" };
+const CHAO_DO_MAPA_ESCURO = "#2C2C2E";
+
 describe.each([
   ["claro", coresClaras],
   ["escuro", coresEscuras],
@@ -21,6 +25,7 @@ describe.each([
       ["secundário/superfície", c.textoSecundario, c.superficie],
       ["botão primário", c.textoSobrePrimaria, c.primaria],
       ["botão secundário", c.primaria, c.fundo],
+      ["primária/superfície (região escolhida)", c.primaria, c.superficie],
       ["aviso", c.aviso.texto, c.aviso.fundo],
       ["informação", c.info.texto, c.info.fundo],
       ["aberto", c.aberto.texto, c.aberto.fundo],
@@ -34,5 +39,15 @@ describe.each([
 
   it("bordas de campo passam de 3:1 (componentes de interface)", () => {
     expect(contraste(c.borda, c.fundo)).toBeGreaterThanOrEqual(3);
+  });
+
+  it("pinos do mapa: ícone legível e pino visível no mapa claro e no escuro", () => {
+    for (const [nivel, miolo] of Object.entries(c.pino.miolo)) {
+      expect({ nivel, icone: contraste(c.pino.icone, miolo) >= 4.5 }).toEqual({ nivel, icone: true });
+      for (const [chao, cor] of Object.entries(CHAO_DO_MAPA_CLARO)) {
+        expect({ nivel, chao, visivel: contraste(miolo, cor) >= 3 }).toEqual({ nivel, chao, visivel: true });
+      }
+    }
+    expect(contraste(c.pino.borda, CHAO_DO_MAPA_ESCURO)).toBeGreaterThanOrEqual(3);
   });
 });

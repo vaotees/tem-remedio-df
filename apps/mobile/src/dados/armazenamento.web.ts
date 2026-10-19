@@ -2,7 +2,7 @@ import type { Armazenamento } from "./armazenamento";
 
 export type { Armazenamento } from "./armazenamento";
 
-/** Na web o expo-file-system não existe: usamos o localStorage (o snapshot tem ~0,5 MB). */
+/** Na web o expo-file-system não existe: usamos o localStorage do navegador (o snapshot tem ~0,5 MB). */
 export const armazenamento: Armazenamento = {
   async ler(nome) {
     try {

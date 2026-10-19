@@ -35,7 +35,7 @@ Em até 3 toques, a pessoa (idosa, ou o filho/cuidador) descobre **qual posto de
 4. Mapa.
 5. Detalhe do posto.
 6. Meus remédios.
-- Abas fixas: Buscar, Meus remédios, Ajuda. Antes da primeira tela: pedido de localização com "Escolher minha região".
+- Abas fixas: Buscar, Meus remédios, Ajuda. Na primeira vez que a lista de postos abre, antes do pedido do celular: "Como achar os postos perto de você?" com "Usar minha localização" e "Escolher minha região" (M4).
 - Tela vazia: "Nenhum posto perto tem X hoje" + ver mais longe + salvar em Meus remédios.
 
 ## Regras de negócio
@@ -90,7 +90,7 @@ Tabela CMED (Anvisa)          ─┘
 
 ### Stack
 - Monorepo pnpm: `packages/shared` (schemas zod + regras), `pipeline` (coletor), `apps/mobile` (Expo).
-- App: Expo SDK 57 + TypeScript + Expo Router (abas em JS), TanStack Query, expo-file-system, Fuse.js (busca), expo-location; a seguir react-native-maps, expo-sqlite (Meus remédios).
+- App: Expo SDK 57 + TypeScript + Expo Router (abas em JS), TanStack Query, expo-file-system, Fuse.js (busca), expo-location, react-native-maps; a seguir expo-sqlite (Meus remédios).
 - **Por que SDK 57:** o SDK 58 saiu em 15/10/2026, mas o Expo Go para ele ainda não está nas lojas. Quando chegar, o novo Expo Go só abre SDK 58: aí subimos o projeto (`pnpm exec expo install expo@~58.0.0` + `expo install --fix`, Testing Library 14 e Jest 30).
 - Testes: Vitest (coletor e shared); Jest 29 + Testing Library 13 (app); Maestro (E2E, M6).
 
@@ -112,11 +112,23 @@ Tabela CMED (Anvisa)          ─┘
 - **Busca** (`src/busca/`): Fuse.js sobre `produtos[].busca` e `marcas[].nome`, com o texto passado por `normalizar()`. Cada palavra digitada precisa casar (tolerando erro de digitação), em qualquer parte do nome; resultados muito piores que o melhor são descartados ("puran" acha Puran T4, não alopurinol). Resultados agrupados por substância (sem sal entre parênteses e sem acento: "ACIDO FOLICO" = "ACIDO FÓLICO"). Marca que é só o nome genérico na CMED ("DIPIRONA SODICA") não aparece como nome comercial. O índice é montado logo depois que a tela abre (~100 ms).
 - Uma forma e dose só: o resultado vai direto para os postos. Mais de uma: "Qual destes?", com quantos postos têm cada uma; doses repetidas mostram a descrição da SES-DF (ex.: prednisona comum × hanseníase).
 - **Liberação prolongada**: buscou por marca de liberação prolongada e o produto do SUS não é → aviso em "Qual destes?" e na lista de postos.
-- **Lista de postos** (`src/postos/`): distância em linha reta pela localização do aparelho (expo-location, pedida ao abrir a lista; a localização não sai do celular). Sem permissão, sem GPS ou fora do DF (posto mais perto a mais de 60 km): ordem por Região Administrativa, com aviso de que a escolha da região vem no M4. 10 postos por vez ("Mostrar mais postos"). Cada posto: nome, RA, distância, semáforo e "Aberto agora / Fechado agora, abre …" quando o horário do cadastro dá para interpretar (não conhece feriados). Avisos de retirada conforme `retirada`; controlado mostra só UBSs com `entregaControlados`.
+- **Lista de postos** (`src/postos/`): distância em linha reta pela localização do aparelho (expo-location; a localização não sai do celular). Sem permissão, sem GPS ou fora do DF (posto mais perto a mais de 60 km): pela região escolhida ou, sem ela, por Região Administrativa (ver M4). 10 postos por vez ("Mostrar mais postos"). Cada posto: nome, RA, distância, semáforo e "Aberto agora / Fechado agora, abre …" quando o horário do cadastro dá para interpretar (não conhece feriados). Avisos de retirada conforme `retirada`; controlado mostra só UBSs com `entregaControlados`.
 - Tela vazia: "Nenhum posto tem X hoje" + convite para Meus remédios (salvar é M5).
 - **Detalhe do posto**: estoque do remédio escolhido com "Estoque de hoje às HHhMM, ligue antes de ir", regra de retirada, Como chegar (pergunta qual app usar: Mapas, só no iPhone, Google Maps ou Waze; links https, que abrem no navegador se o app não estiver instalado, porque o Expo Go não deixa consultar os apps instalados), Ligar (`tel:+55…`), Enviar no WhatsApp (abre o WhatsApp direto com a mensagem pronta, `whatsapp://send`; sem WhatsApp, a folha de compartilhar do celular; na web, `wa.me`), endereço, horário, telefone e documentos.
 - **Fachada (Street View) testada e retirada.** Um botão "Ver a fachada" abria o Street View do Google Maps por link, sem chave de API. No iPhone, o Google escolheu o panorama mais próximo da coordenada, que era uma foto enviada por usuário: uma imagem antiga, em preto e branco, do "SAMDU Posto de Taguatinga" (UBS 5 Taguatinga). Para um idoso, isso confunde mais do que ajuda, e o link não deixa escolher só a foto oficial e recente da rua. Caminho para depois, se valer a pena: o coletor consulta a metadata API do Street View (`source=outdoor`; as consultas não são cobradas, mas exigem chave de um projeto do Google Cloud, guardada só no segredo do GitHub Actions) e guarda no snapshot o id do panorama oficial e a data da foto. O app abre esse panorama já virado para o posto e mostra a data ("foto de maio de 2026"), sem chave no celular.
 - **Busca por voz** ficou para depois: precisa de módulo nativo, que não roda no Expo Go (entra com o development build/APK do M6).
+
+### Mapa e região (M4)
+- Rota nova: `/regiao` ("Qual é a sua região?"), fora das abas, aberta pela lista de postos e pela aba Ajuda; ao escolher, volta para onde estava.
+- **Lista | Mapa** na tela de postos (abas lado a lado; a escolhida fica preenchida e com ícone de marcado). O mapa (react-native-maps 1.27.2, a versão do SDK 57, que já vem no Expo Go: Mapas da Apple no iPhone, Google Maps no Android, sem chave) mostra os mesmos postos, na mesma ordem e com o mesmo filtro de retirada da lista. Abre enquadrando a pessoa (ou o centro da região escolhida) e os 5 primeiros postos.
+- **Pinos**: bolinha com a cor e o ícone do semáforo, borda branca e área de toque de 56; o escolhido fica maior. Cores próprias (`cores.pino`), iguais nos dois temas porque o mapa do Android continua claro no tema escuro. O teste de contraste confere o ícone sobre o pino (4,5:1) e o pino sobre o chão do mapa claro e do escuro (3:1). Legenda com os níveis que aparecem no mapa.
+- **Cartão embaixo do mapa**: começa no mais perto (ou no primeiro da lista, sem localização), com nome, região, distância, semáforo (cor + ícone + texto), horário, **Ver posto** e **Ver o próximo mais perto**, que anda pela lista sem precisar acertar o pino (mais fácil para quem treme a mão e para quem usa leitor de tela). O leitor de tela anuncia "Mapa com N postos que têm hoje" quando o mapa aparece, e o posto novo a cada "Ver o próximo".
+- **Web**: o react-native-maps não funciona no navegador. `MapaPostos.web.tsx` faz o Metro nunca carregá-lo; a tela mostra só a lista, com um aviso discreto ("O mapa dos postos aparece no app do celular").
+- **Regiões** (`src/postos/regioes.ts`): as 35 Regiões Administrativas, em ordem alfabética, uma por linha, com um ponto de referência no centro urbano de cada uma (não o centro geográfico, que nas regiões rurais cai no mato). Conferido com o cadastro: todo ponto fica a menos de 5 km de um posto da própria região. Cinco regiões não aparecem no cadastro da SES-DF (Sudoeste/Octogonal, Sol Nascente/Pôr do Sol, Arniqueira, Arapoanga e Água Quente): quem escolhe uma delas vê primeiro os postos mais perto dela.
+- **Ordem pela região**: primeiro os postos dela, depois os outros pela distância do ponto de referência. A distância não aparece: não é a distância da pessoa.
+- **Qual vale**: a região, se a pessoa a escolheu por último (vale mesmo com o GPS ligado, ex.: o filho procurando para a mãe); senão a localização; se o GPS falhar ou a pessoa estiver fora do DF, a região escolhida antes; sem nada, por Região Administrativa e nome. "Usar minha localização" volta para o GPS e guarda a região como reserva.
+- **Primeira vez**: a lista não pede a localização sozinha. Mostra "Como achar os postos perto de você?" com **Usar minha localização** (aí o celular pergunta) e **Escolher minha região**. Se a pessoa negar, o aviso oferece "Escolher minha região" e "Permitir nos ajustes".
+- A região fica só no aparelho (`regiao.json` com expo-file-system; `localStorage` na web) e pode ser trocada pela tela de postos e pela aba Ajuda ("Postos perto de você").
 
 ### Como testar no celular
 - **Expo Go** no celular (de preferência Android), lendo o QR code do `pnpm app`.
@@ -131,7 +143,7 @@ Tabela CMED (Anvisa)          ─┘
 | M1. Coletor diário | Feito — `pipeline/` |
 | M2. Base do app | Feito — `apps/mobile/`: abas, tema acessível, snapshot embutido + cache + atualização |
 | M3. Fluxo principal (busca → dose → lista → detalhe) | Feito — busca tolerante com marcas, "Qual destes?", postos por distância, detalhe com Como chegar/Ligar/WhatsApp. Busca por voz adiada (precisa de development build) |
-| M4. Mapa e região manual | |
+| M4. Mapa e região manual | Feito — Lista \| Mapa com pinos do semáforo e cartão do mais perto (na web, só a lista); Região Administrativa escolhida à mão, salva no aparelho, trocável pela lista e pela Ajuda; pergunta antes do pedido de localização |
 | M5. Meus remédios, tela vazia, Ajuda | |
 | M6. Acabamento (E2E, acessibilidade, APK, busca por voz, README com GIF) | |
 
