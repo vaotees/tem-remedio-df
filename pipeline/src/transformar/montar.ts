@@ -37,6 +37,7 @@ export function montarSnapshot(e: EntradaSnapshot): ResultadoMontagem {
   const avisos: string[] = [];
   const descartes: Record<string, number> = {
     almoxarifado: 0,
+    unidade_prisional: 0,
     material_ou_outro_grupo: 0,
     aplicado_no_posto: 0,
     ubs_sem_coordenada: 0,
@@ -60,6 +61,10 @@ export function montarSnapshot(e: EntradaSnapshot): ResultadoMontagem {
   for (const l of e.estoque) {
     if (/^ALMOXARIFADO/i.test(l.local)) {
       descartar("almoxarifado");
+      continue;
+    }
+    if (ehUnidadePrisional(l.local, cadastro.get(l.cnes)?.horario ?? null)) {
+      descartar("unidade_prisional");
       continue;
     }
     // Sem fonte de abastecimento = material (agulha, gaze); fora do elenco da UBS = não é entregue ao paciente.
@@ -163,6 +168,14 @@ export function montarSnapshot(e: EntradaSnapshot): ResultadoMontagem {
     avisos,
     descartes,
   };
+}
+
+/**
+ * UBSs do sistema prisional atendem só a população presa. O cadastro da SES-DF marca todas com
+ * horário "OUTRO/PRISIONAL"; o nome da farmácia é a segunda pista (a da DCCP não diz "PRISIONAL").
+ */
+function ehUnidadePrisional(local: string, horario: string | null) {
+  return /PRISIONAL/i.test(`${horario ?? ""} ${local}`);
 }
 
 function dentroDoDf(lat: number, lng: number) {

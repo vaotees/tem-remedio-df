@@ -1,0 +1,180 @@
+{
+ "estoque": [
+  {
+   "cnes": "0010626",
+   "i_cod_local_estoque": "500705",
+   "i_desc_local_estoque": "FARMÁCIA - UBS 5 TAGUATINGA (CST05)",
+   "i_desc_regiao_saude": "Região Sudoeste",
+   "i_desc_radf": "Taguatinga",
+   "i_grupo": "UBS",
+   "i_cod_produto": "18458",
+   "i_desc_produto": "ANLODIPINO (BESILATO) COMPRIMIDO 5 MG",
+   "psicotropico": "Outros",
+   "i_abastecimento": "SES-DF",
+   "i_qtd_rede": 18740,
+   "i_cmml": "12791"
+  },
+  {
+   "cnes": "263680",
+   "i_cod_local_estoque": "507909",
+   "i_desc_local_estoque": "FARMÁCIA - UBS 1 - DCCP",
+   "i_desc_regiao_saude": "Região Central",
+   "i_desc_radf": "Plano Piloto",
+   "i_grupo": "UBS",
+   "i_cod_produto": "18458",
+   "i_desc_produto": "ANLODIPINO (BESILATO) COMPRIMIDO 5 MG",
+   "psicotropico": "Outros",
+   "i_abastecimento": "SES-DF",
+   "i_qtd_rede": 40,
+   "i_cmml": "40"
+  },
+  {
+   "cnes": "3027635",
+   "i_cod_local_estoque": "500609",
+   "i_desc_local_estoque": "FARMÁCIA - UBS 15 PRISIONAL PFDF GAMA",
+   "i_desc_regiao_saude": "Região Sul",
+   "i_desc_radf": "Gama",
+   "i_grupo": "UBS",
+   "i_cod_produto": "18458",
+   "i_desc_produto": "ANLODIPINO (BESILATO) COMPRIMIDO 5 MG",
+   "psicotropico": "Outros",
+   "i_abastecimento": "SES-DF",
+   "i_qtd_rede": 1000,
+   "i_cmml": "424"
+  },
+  {
+   "cnes": "3027651",
+   "i_cod_local_estoque": "507907",
+   "i_desc_local_estoque": "FARMÁCIA - UBS 1 CPP PRISIONAL SIA",
+   "i_desc_regiao_saude": "Região Centro-Sul",
+   "i_desc_radf": "SIA",
+   "i_grupo": "UBS",
+   "i_cod_produto": "18458",
+   "i_desc_produto": "ANLODIPINO (BESILATO) COMPRIMIDO 5 MG",
+   "psicotropico": "Outros",
+   "i_abastecimento": "SES-DF",
+   "i_qtd_rede": 2510,
+   "i_cmml": "318"
+  }
+ ],
+ "cadastro": [
+  {
+   "i_estab_cnes": "0010626",
+   "i_desc_sigla_estab_cnes": "UBS 5 - Taguatinga",
+   "i_telefone": "(61) 3563-9176",
+   "i_horario_funcionamento": "das 07h às 22h de segunda a sexta",
+   "psicotropico": "SIM",
+   "inativo": null
+  },
+  {
+   "i_estab_cnes": "0207225",
+   "i_desc_sigla_estab_cnes": "UBS 20 - São Sebastião - CDP II",
+   "i_telefone": "(61) 3335-9470",
+   "i_horario_funcionamento": "OUTRO/PRISIONAL",
+   "psicotropico": null,
+   "inativo": null
+  },
+  {
+   "i_estab_cnes": "0263680",
+   "i_desc_sigla_estab_cnes": "UBS 1 - DCCP",
+   "i_telefone": "61 20171145",
+   "i_horario_funcionamento": "OUTRO/PRISIONAL",
+   "psicotropico": "NÃO",
+   "inativo": null
+  },
+  {
+   "i_estab_cnes": "3027635",
+   "i_desc_sigla_estab_cnes": "UBS 15 - Gama - Prisional",
+   "i_telefone": "3449-7413",
+   "i_horario_funcionamento": "OUTRO/PRISIONAL",
+   "psicotropico": "NÃO",
+   "inativo": null
+  },
+  {
+   "i_estab_cnes": "3027643",
+   "i_desc_sigla_estab_cnes": "UBS 17 - São Sebastião - PDF II",
+   "i_telefone": "(61)33359619",
+   "i_horario_funcionamento": "OUTRO/PRISIONAL",
+   "psicotropico": "NÃO",
+   "inativo": null
+  },
+  {
+   "i_estab_cnes": "3027651",
+   "i_desc_sigla_estab_cnes": "UBS 1 - SIA - CPP",
+   "i_telefone": "(61) 20171145",
+   "i_horario_funcionamento": "OUTRO/PRISIONAL",
+   "psicotropico": "SIM",
+   "inativo": null
+  },
+  {
+   "i_estab_cnes": "3028003",
+   "i_desc_sigla_estab_cnes": "UBS 14 - São Sebastião - CDP",
+   "i_telefone": "(61)33359470",
+   "i_horario_funcionamento": "OUTRO/PRISIONAL",
+   "psicotropico": "NÃO",
+   "inativo": null
+  },
+  {
+   "i_estab_cnes": "3028011",
+   "i_desc_sigla_estab_cnes": "UBS 15 - São Sebastião - CIR",
+   "i_telefone": "(61)33359525",
+   "i_horario_funcionamento": "OUTRO/PRISIONAL",
+   "psicotropico": "NÃO",
+   "inativo": null
+  },
+  {
+   "i_estab_cnes": "7566530",
+   "i_desc_sigla_estab_cnes": "UBS 16 - São Sebastião - PDF I",
+   "i_telefone": "(61)33359641",
+   "i_horario_funcionamento": "OUTRO/PRISIONAL",
+   "psicotropico": "NÃO",
+   "inativo": null
+  },
+  {
+   "i_estab_cnes": "7843135",
+   "i_desc_sigla_estab_cnes": "UBS 16 - Gama - Prisional",
+   "i_telefone": "3449-7416",
+   "i_horario_funcionamento": "OUTRO/PRISIONAL",
+   "psicotropico": "NÃO",
+   "inativo": null
+  }
+ ],
+ "cnes": {
+  "3027635": {
+   "cnes": "3027635",
+   "nome": "UBS 15 PFDF GAMA",
+   "endereco": "GRANJA LUIZ FERNANDO AESP 02, SETOR LESTE",
+   "cep": "72425100",
+   "telefone": "3449-7413",
+   "lat": -16.0049989275819,
+   "lng": -48.0416893959045
+  },
+  "3027651": {
+   "cnes": "3027651",
+   "nome": "UBS 01 SIA CPP",
+   "endereco": "SIA TRECHO 04 LOTES 1600 1680, GUARA",
+   "cep": "71200040",
+   "telefone": "(61) 20171145",
+   "lat": -15.803387562392274,
+   "lng": -47.957929372787476
+  },
+  "0010626": {
+   "cnes": "0010626",
+   "nome": "UBS 05 TAGUATINGA",
+   "endereco": "SETOR D SUL AE 23, TAGUATINGA SUL",
+   "cep": "72155000",
+   "telefone": "(61) 3563-9176",
+   "lat": -15.851049,
+   "lng": -48.047118
+  },
+  "0263680": {
+   "cnes": "0263680",
+   "nome": "UBS 01 DCCP",
+   "endereco": "SPO LOTE 23 CONJ D EDIF DO DEPART POLICIA ESP, ASA SUL",
+   "cep": "70610907",
+   "telefone": "61 20171145",
+   "lat": -15.808874325362382,
+   "lng": -47.928457260131836
+  }
+ }
+}

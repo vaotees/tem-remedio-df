@@ -1,9 +1,11 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { snapshotSchema } from "@tem-remedio/shared";
 import type { RegistroCmed } from "../src/fontes/cmed";
 import type { CacheCnes } from "../src/fontes/cnes";
-import type { LinhaEstoque } from "../src/fontes/estoque";
-import type { CadastroUbs, LinhaRegra } from "../src/fontes/garantir";
+import { converterLinha, type LinhaEstoque } from "../src/fontes/estoque";
+import { converterCadastro, type CadastroUbs, type LinhaRegra } from "../src/fontes/garantir";
+import type { Valor } from "../src/powerbi/dsr";
 import { montarSnapshot } from "../src/transformar/montar";
 
 const base: LinhaEstoque = {
@@ -126,5 +128,45 @@ describe("montarSnapshot", () => {
   it("remédio sem regra publicada fica 'sem informação'", () => {
     const { snapshot } = montar([linha({ codProduto: "12345", descricao: "CAPTOPRIL COMPRIMIDO SULCADO 25 MG" })]);
     expect(snapshot.produtos[0]!.retirada).toBe("sem_informacao");
+  });
+});
+
+// Dados reais de 17/10/2026: anlodipino 5 mg numa UBS comum e nas 3 unidades prisionais que tinham
+// estoque (linhas do painel), o cadastro da SES-DF (as 9 unidades com horário "OUTRO/PRISIONAL") e o CNES.
+const prisionais = JSON.parse(
+  readFileSync(new URL("fixtures/unidades-prisionais.json", import.meta.url), "utf8"),
+) as { estoque: Record<string, Valor>[]; cadastro: Record<string, Valor>[]; cnes: CacheCnes };
+
+function montarComPrisionais(cadastroUbs: CadastroUbs[]) {
+  return montarSnapshot({
+    atualizadoEm: "2026-10-17T00:16:33",
+    estoque: prisionais.estoque.map(converterLinha),
+    regras: [],
+    cadastroUbs,
+    cnes: prisionais.cnes,
+    cmed: [],
+    agora: new Date("2026-10-17T04:00:00Z"),
+  });
+}
+
+describe("unidades prisionais", () => {
+  it("ficam fora do snapshot: atendem só a população presa", () => {
+    const cadastro = prisionais.cadastro.map(converterCadastro);
+    expect(cadastro.filter((c) => c.horario === "OUTRO/PRISIONAL")).toHaveLength(9);
+
+    const { snapshot, descartes } = montarComPrisionais(cadastro);
+    expect(snapshot.ubs.map((u) => u.nome)).toEqual(["UBS 05 TAGUATINGA"]);
+    expect(snapshot.estoque).toEqual([[0, 0, 18740, 44]]);
+    expect(descartes.unidade_prisional).toBe(3);
+    // Têm coordenada no DF: sem este filtro, entrariam no app.
+    expect(descartes.ubs_sem_coordenada).toBe(0);
+  });
+
+  it("sem o cadastro, o nome da farmácia ainda denuncia as que dizem PRISIONAL", () => {
+    const { snapshot } = montarComPrisionais([]);
+    const farmacias = snapshot.ubs.map((u) => u.farmacia);
+    expect(farmacias).toContain("FARMÁCIA - UBS 5 TAGUATINGA (CST05)");
+    expect(farmacias).not.toContain("FARMÁCIA - UBS 15 PRISIONAL PFDF GAMA");
+    expect(farmacias).not.toContain("FARMÁCIA - UBS 1 CPP PRISIONAL SIA");
   });
 });

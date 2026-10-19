@@ -66,7 +66,7 @@ Vem do painel oficial "Como garantir seu medicamento", **remédio por remédio**
 
 Remédios **aplicados no próprio posto** (injetáveis de uso na UBS) ficam fora do snapshot.
 
-**Unidades prisionais** (horário "OUTRO/PRISIONAL" no cadastro: UBS DCCP, PFDF Gama, CPP SIA) atendem só a população presa: nunca aparecem como posto para o público. Hoje o app filtra; o certo é o coletor tirá-las do snapshot.
+**Unidades prisionais** atendem só a população presa: o coletor tira do snapshot (`pipeline/src/transformar/montar.ts`). O cadastro da SES-DF marca as 9 com horário "OUTRO/PRISIONAL"; o nome da farmácia ("… PRISIONAL …") é a segunda pista. Em 17/10/2026, 3 tinham estoque: UBS DCCP, PFDF Gama e CPP SIA. O app continua filtrando (`ehUnidadePrisional` em `apps/mobile/src/postos/postos.ts`), como defesa.
 
 Ressalva: "sem observação" = sem restrição publicada, não uma regra escrita de "qualquer UBS". Confirmar com a Ouvidoria da SES-DF.
 
