@@ -1,9 +1,20 @@
 // Nos testes, os ícones não carregam a fonte (o Jest não tem o registro de assets do Metro).
-// Troca por uma View com testID, escondida do leitor de tela como no app.
+// Troca por uma View com testID. Como o ícone de verdade (uma letra que o leitor de tela lê), ela só fica
+// escondida do leitor se o app pedir: os testes conferem que nenhum ícone aparece para ele.
+type MockIcone = { name: string } & Pick<
+  import("react-native").ViewProps,
+  "accessibilityElementsHidden" | "importantForAccessibility"
+>;
 jest.mock("@expo/vector-icons/Ionicons", () => {
   const { View } = jest.requireActual<typeof import("react-native")>("react-native");
-  function Icone({ name }: { name: string }) {
-    return <View testID={`icone-${name}`} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" />;
+  function Icone({ name, accessibilityElementsHidden, importantForAccessibility }: MockIcone) {
+    return (
+      <View
+        testID={`icone-${name}`}
+        accessibilityElementsHidden={accessibilityElementsHidden}
+        importantForAccessibility={importantForAccessibility}
+      />
+    );
   }
   return { __esModule: true, default: Icone };
 });

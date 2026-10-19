@@ -21,7 +21,8 @@ App React Native (Expo) que mostra o estoque de remédios das UBSs do Distrito F
 - Testing Library 13 (o Expo Router 57 exige). Os testes já usam `await render(...)`/`await fireEvent...`, que também serve para a 14 (assíncrona) quando subirmos para o SDK 58. Ícones são simulados em `jest.setup.tsx`.
 - Depois de trocar versão do Expo, rode `npx expo-doctor@latest` em `apps/mobile` (pega dependências duplicadas de outro SDK).
 - Cores só de `src/tema/cores.ts`; o teste de contraste (`__tests__/tema-test.ts`) tem que continuar passando.
-- Texto nunca é cortado com "…" (rótulos quebram linha); alvo de toque mínimo `ALVO_MINIMO` (56).
+- Texto nunca é cortado com "…" (rótulos quebram linha; texto ao lado de ícone leva `flexShrink: 1`); alvo de toque mínimo `ALVO_MINIMO` (56). O ESLint barra `numberOfLines` e companhia.
+- Ícones só pelo `Icone` (`src/componentes/Icone.tsx`), que os esconde do leitor de tela. Texto que muda sem toque (resultado, contagem) leva `accessibilityLiveRegion` (Android/web) e `useAnuncio` (iPhone).
 - Telas usam `Tela` e `ComDados`; dados vêm de `useSnapshot()`, nunca direto da rede.
 - Lógica sem tela em `src/busca` (busca, agrupamento por substância), `src/postos` (distância, horário, regras de retirada, links, regiões, ordem dos postos, mapa) e `src/meus-remedios` (lista guardada no aparelho, situação de hoje). Rotas: `src/app/(abas)/(buscar)/` (busca, "Qual destes?"), `(abas)/(meus)/` (Meus remédios) e `(abas)/(buscar,meus)/` (postos e detalhe, compartilhados pelas duas abas: abertos por uma, ficam nela); a escolha da região em `src/app/regiao.tsx`.
 - Mapa só no celular: `react-native-maps` é importado apenas em `src/componentes/MapaPostos.tsx`; na web vale `MapaPostos.web.tsx` (sem mapa). No Jest ele é simulado em `jest.setup.tsx`.

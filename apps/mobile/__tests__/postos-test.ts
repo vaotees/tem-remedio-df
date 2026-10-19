@@ -9,6 +9,7 @@ import {
   linkTelefone,
   linkWaze,
   linkWhatsAppApp,
+  telefoneParaLeitor,
   textoCompartilhar,
 } from "@/postos/links";
 import {
@@ -201,6 +202,21 @@ describe("links", () => {
     expect(linkTelefone("061 3449-5849")).toBe("tel:+556134495849");
     expect(linkTelefone("3449-5849")).toBe("tel:+556134495849");
     expect(linkTelefone("123")).toBeNull();
+  });
+
+  it("telefone para o leitor de tela: dígito por dígito, em grupos, de qualquer jeito que veio no cadastro", () => {
+    expect(telefoneParaLeitor("(61) 3563-9176")).toBe("6 1, 3 5 6 3, 9 1 7 6");
+    expect(telefoneParaLeitor("61 2017 2074")).toBe("6 1, 2 0 1 7, 2 0 7 4");
+    expect(telefoneParaLeitor("6134497490")).toBe("6 1, 3 4 4 9, 7 4 9 0");
+    expect(telefoneParaLeitor("61991234567")).toBe("6 1, 9 9 1 2 3, 4 5 6 7");
+    expect(telefoneParaLeitor("61 3449-5849 (2074)")).toBe("6 1, 3 4 4 9, 5 8 4 9, 2 0 7 4");
+    expect(telefoneParaLeitor("RAMAL 2074")).toBe("ramal, 2 0 7 4");
+  });
+
+  it("todo telefone do snapshot de verdade vira só dígitos e palavras para o leitor", () => {
+    for (const { telefone } of real.ubs) {
+      if (telefone) expect(telefoneParaLeitor(telefone)).toMatch(/^(\d( \d)*|\p{L}+)(, (\d( \d)*|\p{L}+))*$/u);
+    }
   });
 
   it("CEP formatado", () => {

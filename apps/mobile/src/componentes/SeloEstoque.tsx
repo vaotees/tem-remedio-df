@@ -1,12 +1,11 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { nivelEstoque, TEXTO_NIVEL, type NivelEstoque } from "@tem-remedio/shared";
-import type { ComponentProps } from "react";
 import { StyleSheet, View } from "react-native";
 import { espaco, useTema } from "@/tema";
+import { Icone, type NomeIcone } from "./Icone";
 import { Texto } from "./Texto";
 
 /** Ícone de cada nível do semáforo (no selo e nos pinos do mapa). */
-export const ICONE_NIVEL: Record<NivelEstoque, ComponentProps<typeof Ionicons>["name"]> = {
+export const ICONE_NIVEL: Record<NivelEstoque, NomeIcone> = {
   alto: "checkmark-circle",
   baixo: "alert-circle",
   critico: "warning",
@@ -28,7 +27,7 @@ export function SeloEstoque({ dias }: { dias: number | null }) {
       accessibilityLabel={`Estoque: ${TEXTO_NIVEL[nivel]}`}
       testID={`selo-${nivel}`}
     >
-      <Ionicons name={ICONE_NIVEL[nivel]} size={22} color={texto} />
+      <Icone name={ICONE_NIVEL[nivel]} size={22} color={texto} />
       <Texto variante="legenda" cor={texto} style={estilos.texto}>
         {TEXTO_NIVEL[nivel]}
       </Texto>
@@ -45,6 +44,7 @@ const estilos = StyleSheet.create({
     paddingHorizontal: espaco.sm,
     paddingVertical: espaco.xs,
     borderRadius: 8,
+    maxWidth: "100%",
   },
-  texto: { fontWeight: "600" },
+  texto: { fontWeight: "600", flexShrink: 1 },
 });

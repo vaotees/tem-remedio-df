@@ -1,7 +1,7 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
-import type { ReactNode } from "react";
+import type { ReactNode, Ref } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { ALVO_MINIMO, espaco, raio, useTema } from "@/tema";
+import { Icone } from "./Icone";
 
 interface Props {
   onPress: () => void;
@@ -9,13 +9,16 @@ interface Props {
   rotulo: string;
   dica?: string;
   children: ReactNode;
+  /** Para levar o foco do leitor de tela até o item (ex.: o primeiro posto novo em "Mostrar mais postos"). */
+  ref?: Ref<View>;
 }
 
 /** Cartão tocável inteiro (não só o título), com borda visível e seta indicando que abre outra tela. */
-export function ItemLista({ onPress, rotulo, dica, children }: Props) {
+export function ItemLista({ onPress, rotulo, dica, children, ref }: Props) {
   const { cores } = useTema();
   return (
     <Pressable
+      ref={ref}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={rotulo}
@@ -27,7 +30,7 @@ export function ItemLista({ onPress, rotulo, dica, children }: Props) {
       ]}
     >
       <View style={estilos.conteudo}>{children}</View>
-      <Ionicons name="chevron-forward" size={28} color={cores.primaria} />
+      <Icone name="chevron-forward" size={28} color={cores.primaria} />
     </Pressable>
   );
 }

@@ -1,11 +1,11 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
-import type { ComponentProps, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { ActivityIndicator, Linking, Platform, StyleSheet, View } from "react-native";
 import type { useOrigem } from "@/postos/origem";
 import { espaco, useTema } from "@/tema";
 import { Aviso } from "./Aviso";
 import { Botao } from "./Botao";
 import { Cartao } from "./Cartao";
+import { Icone, type NomeIcone } from "./Icone";
 import { Texto } from "./Texto";
 
 type Origem = ReturnType<typeof useOrigem>;
@@ -85,7 +85,7 @@ export function SituacaoOrigem({ origem, escolherRegiao, resumida }: PropsSituac
     return (
       <Cartao>
         <View style={estilos.linha}>
-          <Ionicons name="location" size={24} color={cores.primaria} />
+          <Icone name="location" size={24} color={cores.primaria} />
           <Texto variante="destaque" style={estilos.flex}>
             Sua região: {ra}
           </Texto>
@@ -131,11 +131,11 @@ export function SituacaoOrigem({ origem, escolherRegiao, resumida }: PropsSituac
   );
 }
 
-function Linha({ icone, children }: { icone: ComponentProps<typeof Ionicons>["name"]; children: ReactNode }) {
+function Linha({ icone, children }: { icone: NomeIcone; children: ReactNode }) {
   const { cores } = useTema();
   return (
     <View style={estilos.linha}>
-      <Ionicons name={icone} size={20} color={cores.textoSecundario} />
+      <Icone name={icone} size={20} color={cores.textoSecundario} />
       <Texto secundario style={estilos.flex}>
         {children}
       </Texto>

@@ -13,7 +13,14 @@ import { Tela } from "@/componentes/Tela";
 import { Texto } from "@/componentes/Texto";
 import { Voltar } from "@/componentes/Voltar";
 import { capitalizarNome, indiceProduto, nomeSubstancia, rotuloProduto } from "@/busca/remedios";
-import { formatarCep, linkTelefone, linkWhatsApp, linkWhatsAppApp, textoCompartilhar } from "@/postos/links";
+import {
+  formatarCep,
+  linkTelefone,
+  linkWhatsApp,
+  linkWhatsAppApp,
+  telefoneParaLeitor,
+  textoCompartilhar,
+} from "@/postos/links";
 import { acharUbs, estoqueNoPosto, temOutraFarmacia } from "@/postos/postos";
 import { espaco } from "@/tema";
 import { formatarAtualizacao } from "@/util/datas";
@@ -65,6 +72,8 @@ function Detalhe({ snapshot, cnes, farmacia, codigoProduto }: Props) {
   const remedio = produto ? `${nomeSubstancia([produto])}, ${rotuloProduto(produto).toLocaleLowerCase("pt-BR")}` : null;
   const atualizacao = formatarAtualizacao(snapshot.meta.atualizadoEm);
   const telefone = ubs.telefone ? linkTelefone(ubs.telefone) : null;
+  // O leitor de tela fala o número dígito por dígito.
+  const telefoneFalado = ubs.telefone ? telefoneParaLeitor(ubs.telefone) : undefined;
   const nome = capitalizarNome(ubs.nome);
 
   return (
@@ -108,7 +117,7 @@ function Detalhe({ snapshot, cnes, farmacia, codigoProduto }: Props) {
           <Botao
             titulo="Ligar"
             icone="call"
-            dica={`Liga para ${ubs.telefone}`}
+            dica={`Liga para ${telefoneFalado}`}
             onPress={() => Linking.openURL(telefone)}
           />
         ) : null}
@@ -141,7 +150,9 @@ function Detalhe({ snapshot, cnes, farmacia, codigoProduto }: Props) {
 
       <Cartao>
         <Texto variante="subtitulo">Telefone</Texto>
-        <Texto selectable>{ubs.telefone ?? "A SES-DF não informou o telefone deste posto."}</Texto>
+        <Texto selectable accessibilityLabel={telefoneFalado}>
+          {ubs.telefone ?? "A SES-DF não informou o telefone deste posto."}
+        </Texto>
       </Cartao>
 
       <Cartao>

@@ -1,13 +1,12 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
-import type { ComponentProps } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { ALVO_MINIMO, espaco, raio, useTema } from "@/tema";
+import { Icone, type NomeIcone } from "./Icone";
 import { Texto } from "./Texto";
 
 interface Props {
   titulo: string;
   onPress: () => void;
-  icone?: ComponentProps<typeof Ionicons>["name"];
+  icone?: NomeIcone;
   variante?: "primario" | "secundario";
   carregando?: boolean;
   /** Texto extra para o leitor de tela, quando o título sozinho não basta. */
@@ -39,9 +38,9 @@ export function Botao({ titulo, onPress, icone, variante = "primario", carregand
         {carregando ? (
           <ActivityIndicator color={corTexto} />
         ) : (
-          icone && <Ionicons name={icone} size={24} color={corTexto} accessibilityElementsHidden importantForAccessibility="no" />
+          icone && <Icone name={icone} size={24} color={corTexto} />
         )}
-        <Texto variante="destaque" cor={corTexto}>
+        <Texto variante="destaque" cor={corTexto} style={estilos.titulo}>
           {titulo}
         </Texto>
       </View>
@@ -58,4 +57,6 @@ const estilos = StyleSheet.create({
     justifyContent: "center",
   },
   conteudo: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: espaco.sm },
+  // Com letra grande, o título quebra linha dentro do botão (sem isso, ele vaza para fora da tela).
+  titulo: { flexShrink: 1, textAlign: "center" },
 });

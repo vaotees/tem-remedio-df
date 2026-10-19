@@ -262,3 +262,21 @@ export const NO_PLANO_PILOTO = { lat: -15.7801, lng: -47.9292 };
 
 /** São Paulo: fora do DF. */
 export const EM_SAO_PAULO = { lat: -23.5505, lng: -46.6333 };
+
+/**
+ * O snapshot de teste com mais postos de losartana: cópias da UBS 05 Taguatinga, cada uma um pouco mais
+ * ao sul, para a lista passar de uma página ("Mostrar mais postos").
+ */
+export function comMaisPostosDeLosartana(extras: number): Snapshot {
+  const base = snapshotTeste.ubs[0]!;
+  const ubs = Array.from({ length: extras }, (_, n) => ({
+    ...base,
+    cnes: String(9_000_000 + n),
+    nome: `UBS EXTRA ${n + 1}`,
+    farmacia: `FARMÁCIA - UBS EXTRA ${n + 1}`,
+    lat: base.lat - 0.01 * (n + 1),
+  }));
+  const primeira = snapshotTeste.ubs.length;
+  const estoque = ubs.map((_, n): Snapshot["estoque"][number] => [primeira + n, 0, 100, 40]);
+  return { ...snapshotTeste, ubs: [...snapshotTeste.ubs, ...ubs], estoque: [...snapshotTeste.estoque, ...estoque] };
+}

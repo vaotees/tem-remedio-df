@@ -142,6 +142,20 @@ Tabela CMED (Anvisa)          ─┘
 - O app **não avisa sozinho** quando um remédio chega (isso é a v1.1): a tela vazia e a Ajuda dizem para abrir a aba e conferir, sem prometer aviso.
 - **Ajuda**: "Como usar" (buscar, escolher a dose, ver os postos, tocar no posto), cartão "Meus remédios" (guardar, ver, tirar; não avisa sozinho; a lista fica só no celular), dados sem internet e "alguns remédios só são entregues em certas UBSs, como os controlados". Nada de telefone, endereço ou regra que não venha de fonte oficial.
 
+### Acabamento (M6)
+Ordem combinada com o usuário (um PR por parte): acessibilidade → APK → busca por voz → testes E2E com Maestro → README com GIF. O usuário testa o APK e a voz num celular Android; o iPhone continua pelo Expo Go.
+
+#### Acessibilidade
+Revisão de VoiceOver/TalkBack, letra grande e alvos de toque. O que mudou:
+- **Ícones escondidos do leitor de tela.** O ícone é uma letra de uma fonte especial: sem esconder, o VoiceOver parava nele e lia um caractere sem sentido (lupa da busca, avisos, linhas de Meus remédios, coração da tela vazia...). Agora todo ícone passa pelo `Icone` (`src/componentes/Icone.tsx`), que sempre esconde; o ESLint barra o import direto do `@expo/vector-icons`.
+- **Letra grande sem texto vazando.** Num texto ao lado de um ícone (linha), o React Native não quebra a linha sozinho: com letra grande, o título do botão ("Guardado em Meus remédios"), o selo do semáforo e a legenda do mapa saíam da tela. Agora encolhem e quebram linha. O ESLint barra `numberOfLines`, `ellipsizeMode`, `adjustsFontSizeToFit` e `allowFontScaling`.
+- **Barra de abas.** O rótulo não tem mais `numberOfLines` (cortava com "…" na letra máxima). Ele cresce com a letra do celular até 1,4× (mais que isso, "Meus remédios" não cabe em 2 linhas), e a barra cresce junto (`alturaBarraAbas`). No iPhone, segurar a aba mostra o rótulo em letra grande, como nas abas do sistema.
+- **Anúncios no iPhone.** O `accessibilityLiveRegion` só existe no Android e na web. No iPhone, `useAnuncio` (`src/util/anuncio.ts`) anuncia, 0,8 s depois que a tela para de mudar: o resultado da busca ("3 remédios encontrados", "Não achei X"), a lista de postos quando aparece ou muda de ordem ("4 postos têm hoje. Do mais perto para o mais longe de você.") e "Nenhum posto tem X hoje".
+- **Foco.** "Mostrar mais postos" leva o leitor de tela ao primeiro posto novo (antes, ele ficava no botão, lá embaixo). "Apagar o que foi escrito" some depois do toque: o foco volta para o campo da busca. O gesto de voltar do VoiceOver (Z com dois dedos) fecha a folha "Como chegar". A ordem de cada tela é a da leitura: Voltar, título, conteúdo.
+- **Telefone dígito por dígito** no botão Ligar e no cartão do telefone ("6 1, 3 5 6 3, 9 1 7 6"), em vez de "três mil quinhentos e sessenta e três". Na tela, o número continua como veio da SES-DF.
+- **Testes**: em 15 estados das telas (busca, Qual destes?, postos na lista, no mapa, na primeira vez, sem permissão e vazia, detalhe, Como chegar, Meus remédios vazia e com remédio, Ajuda, região), nenhum ícone aparece para o leitor e tudo que é tocável tem 56 de altura; mais os anúncios, o foco, o telefone e o gesto de voltar.
+- Já estava certo e foi mantido: rótulo único em cada item da lista (o cartão inteiro é um botão), títulos como cabeçalho, semáforo com ícone + texto, alvos de 56, contraste testado, pinos do mapa com rótulo e "Ver o próximo" para não precisar acertar o pino.
+
 ### Como testar no celular
 - **Expo Go** no celular (de preferência Android), lendo o QR code do `pnpm app`.
 - **Web** para conferência rápida de layout.
@@ -157,7 +171,7 @@ Tabela CMED (Anvisa)          ─┘
 | M3. Fluxo principal (busca → dose → lista → detalhe) | Feito — busca tolerante com marcas, "Qual destes?", postos por distância, detalhe com Como chegar/Ligar/WhatsApp. Busca por voz adiada (precisa de development build) |
 | M4. Mapa e região manual | Feito — Lista \| Mapa com pinos do semáforo e cartão do mais perto (na web, só a lista); Região Administrativa escolhida à mão, salva no aparelho, trocável pela lista e pela Ajuda; pergunta antes do pedido de localização |
 | M5. Meus remédios, tela vazia, Ajuda | Feito — guardar e tirar pela lista de postos (e pela tela vazia), lista no aparelho em JSON; aba com a situação de hoje de cada remédio (quantos postos e o primeiro pela localização ou região, com semáforo e avisos de retirada); "Seus remédios" na busca; Ajuda com "Como usar" e "Meus remédios" |
-| M6. Acabamento (E2E, acessibilidade, APK, busca por voz, README com GIF) | |
+| M6. Acabamento (E2E, acessibilidade, APK, busca por voz, README com GIF) | Em andamento — acessibilidade revisada (ícones escondidos do leitor de tela, letra grande sem texto vazando, abas que crescem com a letra, anúncios no iPhone, foco, telefone dígito por dígito). Faltam APK, busca por voz, Maestro e README com GIF |
 
 ## Riscos
 - O endpoint do Power BI não é API oficial. Mitigação: validação + pedido dos dados em formato aberto por LAI.

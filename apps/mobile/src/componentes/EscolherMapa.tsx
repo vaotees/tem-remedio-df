@@ -33,6 +33,9 @@ export function EscolherMapa({ ubs, aoFechar }: Props) {
         <View
           style={[estilos.folha, { backgroundColor: cores.fundo, paddingBottom: espaco.lg + bottom }]}
           accessibilityViewIsModal
+          // VoiceOver: o gesto de "voltar" (Z com dois dedos) fecha a folha, como o Cancelar.
+          onAccessibilityEscape={aoFechar}
+          testID="folha-como-chegar"
         >
           <Texto variante="subtitulo">Abrir o caminho com qual app?</Texto>
           {apps.map((app) => (

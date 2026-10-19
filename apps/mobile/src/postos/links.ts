@@ -45,6 +45,20 @@ export function linkTelefone(telefone: string): string | null {
   return `tel:+55${digitos}`;
 }
 
+/**
+ * "(61) 3563-9176" → "6 1, 3 5 6 3, 9 1 7 6": o leitor de tela fala o telefone dígito por dígito, como a
+ * gente dita um número, e não "três mil quinhentos e sessenta e três". Número sem separador
+ * ("6134497490") é dividido em DDD, começo e fim.
+ */
+export function telefoneParaLeitor(telefone: string): string {
+  return telefone
+    .replace(/\d{10,11}/g, (n) => `${n.slice(0, 2)} ${n.slice(2, -4)} ${n.slice(-4)}`)
+    .split(/[^A-Za-zÀ-ÿ\d]+/)
+    .filter(Boolean)
+    .map((parte) => (/^\d+$/.test(parte) ? parte.split("").join(" ") : parte.toLocaleLowerCase("pt-BR")))
+    .join(", ");
+}
+
 /** "72155000" → "72155-000". */
 export function formatarCep(cep: string): string {
   return cep.replace(/^(\d{5})(\d{3})$/, "$1-$2");
