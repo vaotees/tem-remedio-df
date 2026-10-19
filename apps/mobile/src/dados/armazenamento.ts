@@ -1,6 +1,6 @@
 import { Directory, File, Paths } from "expo-file-system";
 
-/** Onde o app guarda o último snapshot baixado. No celular: um arquivo na pasta do app. */
+/** Arquivos que ficam só neste aparelho (último snapshot baixado, região escolhida). No celular: na pasta do app. */
 export interface Armazenamento {
   ler(nome: string): Promise<string | null>;
   gravar(nome: string, conteudo: string): Promise<void>;

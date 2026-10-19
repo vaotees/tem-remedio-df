@@ -47,7 +47,7 @@ function Opcoes({ snapshot, codigo, nomeMarca }: { snapshot: Snapshot; codigo: s
       rotulo: rotulos[n]!,
       // "Comprimido 5 mg" repetido (ex.: prednisona comum e para hanseníase): mostra a descrição da SES-DF.
       repetido: rotulos.filter((r) => r === rotulos[n]).length > 1,
-      postos: postosComEstoque(snapshot, i, null).length,
+      postos: postosComEstoque(snapshot, i, { por: "nome" }).length,
     }));
   }, [snapshot, base]);
 

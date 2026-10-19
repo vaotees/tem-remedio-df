@@ -1,5 +1,5 @@
 import { fireEvent, renderRouter, screen, within } from "expo-router/testing-library";
-import { Linking, Share } from "react-native";
+import { AccessibilityInfo, Linking, Share } from "react-native";
 import { queryClient } from "@/dados/consultas";
 import { NO_PLANO_PILOTO, snapshotTeste } from "../fixtures/snapshot-teste";
 
@@ -22,17 +22,53 @@ jest.mock("@/dados/useSnapshot", () => {
   };
 });
 
+// Arquivos do aparelho (região escolhida) em memória.
+const mockArquivos = new Map<string, string>();
+jest.mock("@/dados/armazenamento", () => ({
+  armazenamento: {
+    ler: async (nome: string) => mockArquivos.get(nome) ?? null,
+    gravar: async (nome: string, conteudo: string) => void mockArquivos.set(nome, conteudo),
+  },
+}));
+const regiaoSalva = () => JSON.parse(mockArquivos.get("regiao.json") ?? "null") as unknown;
+
+// O mapa de verdade (com o react-native-maps simulado no jest.setup) ou o substituto da web.
+const mockMapa = { web: false };
+type MockModulo = typeof import("@/componentes/MapaPostos");
+jest.mock("@/componentes/MapaPostos", () => {
+  const nativo = jest.requireActual<MockModulo>("@/componentes/MapaPostos");
+  const web = jest.requireActual<MockModulo>("@/componentes/MapaPostos.web");
+  return {
+    get MAPA_DISPONIVEL() {
+      return mockMapa.web ? web.MAPA_DISPONIVEL : nativo.MAPA_DISPONIVEL;
+    },
+    MapaPostos: (props: Parameters<MockModulo["MapaPostos"]>[0]) =>
+      mockMapa.web ? <web.MapaPostos {...props} /> : <nativo.MapaPostos {...props} />,
+  };
+});
+
 // GPS de mentira: cada teste diz se há permissão, onde a pessoa está e se o GPS responde.
 // Funções comuns (não jest.fn) para o restoreAllMocks não apagar a implementação.
+type Permissao = { granted: boolean; canAskAgain: boolean; status: string };
+const PERMITIDO: Permissao = { granted: true, canAskAgain: true, status: "granted" };
 const mockGps = {
-  permissao: { granted: true, canAskAgain: true, status: "granted" },
+  permissao: PERMITIDO,
+  /** O que a pessoa responde quando o celular pergunta. */
+  resposta: PERMITIDO,
+  /** Quantas vezes o celular mostrou o pedido de permissão. */
+  pedidos: 0,
   posicao: { coords: { latitude: -15.7801, longitude: -47.9292 } },
   desligado: false,
 };
 jest.mock("expo-location", () => ({
   Accuracy: { Balanced: 3 },
+  PermissionStatus: { GRANTED: "granted", UNDETERMINED: "undetermined", DENIED: "denied" },
   getForegroundPermissionsAsync: async () => mockGps.permissao,
-  requestForegroundPermissionsAsync: async () => mockGps.permissao,
+  requestForegroundPermissionsAsync: async () => {
+    mockGps.pedidos += 1;
+    mockGps.permissao = mockGps.resposta;
+    return mockGps.permissao;
+  },
   getLastKnownPositionAsync: async () => (mockGps.desligado ? null : mockGps.posicao),
   getCurrentPositionAsync: async () => {
     if (mockGps.desligado) throw new Error("GPS desligado");
@@ -48,12 +84,17 @@ jest.setTimeout(30_000);
 beforeEach(() => {
   // O Linking do React Native já é um mock único: sem limpar, as chamadas de um teste passam para o outro.
   jest.clearAllMocks();
-  mockGps.permissao = { granted: true, canAskAgain: true, status: "granted" };
+  mockArquivos.clear();
+  mockMapa.web = false;
+  mockGps.permissao = PERMITIDO;
+  mockGps.resposta = PERMITIDO;
+  mockGps.pedidos = 0;
   mockGps.posicao = { coords: { latitude: NO_PLANO_PILOTO.lat, longitude: NO_PLANO_PILOTO.lng } };
   mockGps.desligado = false;
   jest.spyOn(Linking, "openURL").mockResolvedValue(true);
   jest.spyOn(Linking, "openSettings").mockResolvedValue(undefined);
   jest.spyOn(Share, "share").mockResolvedValue({ action: Share.sharedAction });
+  jest.spyOn(AccessibilityInfo, "announceForAccessibility").mockImplementation(() => {});
 });
 
 afterEach(() => {
@@ -157,12 +198,14 @@ describe("lista de postos", () => {
     await renderRouter(APP, { initialUrl: "/postos/8944" });
 
     expect(await screen.findByText("Sem a sua localização")).toBeOnTheScreen();
-    expect(screen.getByText(/por Região Administrativa\. Em breve você vai poder escolher a sua região/)).toBeOnTheScreen();
+    expect(screen.getByText(/por Região Administrativa\. Escolha a sua para ver primeiro os postos perto de você/)).toBeOnTheScreen();
     expect(postosNaTela()).toEqual(["UBS 3 Ceilandia", "UBS 1 Asa Norte", "UBS 01 Samambaia", "UBS 05 Taguatinga"]);
     expect(screen.getByRole("header", { name: "Ceilândia" })).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Escolher minha região" })).toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole("button", { name: "Permitir nos ajustes" }));
     expect(Linking.openSettings).toHaveBeenCalled();
+    expect(mockGps.pedidos).toBe(0);
   });
 
   it("GPS desligado: por região, com botão de tentar de novo", async () => {
@@ -204,6 +247,208 @@ describe("lista de postos", () => {
   it("remédio que saiu da lista", async () => {
     await renderRouter(APP, { initialUrl: "/postos/000000" });
     expect(await screen.findByText("Não achei esse remédio")).toBeOnTheScreen();
+  });
+});
+
+describe("região escolhida", () => {
+  const NUNCA_PERGUNTADO: Permissao = { granted: false, canAskAgain: true, status: "undetermined" };
+
+  it("primeira vez: pergunta antes de pedir a localização ao celular", async () => {
+    mockGps.permissao = NUNCA_PERGUNTADO;
+    await renderRouter(APP, { initialUrl: "/postos/8944" });
+
+    expect(await screen.findByText("Como achar os postos perto de você?")).toBeOnTheScreen();
+    expect(screen.getByText("A localização e a região ficam só neste celular.")).toBeOnTheScreen();
+    expect(screen.queryAllByRole("button", { name: /^UBS / })).toHaveLength(0);
+    expect(mockGps.pedidos).toBe(0);
+
+    await fireEvent.press(screen.getByRole("button", { name: "Usar minha localização" }));
+    expect(await screen.findByText("Do mais perto para o mais longe de você, em linha reta.")).toBeOnTheScreen();
+    expect(mockGps.pedidos).toBe(1);
+    expect(postosNaTela()[0]).toBe("UBS 1 Asa Norte");
+  });
+
+  it("navegador sem localização: não pergunta, oferece a região", async () => {
+    mockGps.permissao = { granted: false, canAskAgain: false, status: "undetermined" };
+    await renderRouter(APP, { initialUrl: "/postos/8944" });
+    expect(await screen.findByText("Sem a sua localização")).toBeOnTheScreen();
+    expect(screen.queryByText("Como achar os postos perto de você?")).toBeNull();
+    expect(screen.getByRole("button", { name: "Escolher minha região" })).toBeOnTheScreen();
+  });
+
+  it("primeira vez: escolhe a região numa lista grande e volta com a região primeiro", async () => {
+    mockGps.permissao = NUNCA_PERGUNTADO;
+    const r = await renderRouter(APP, { initialUrl: "/postos/8944" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Escolher minha região" }));
+
+    expect(r.getPathname()).toBe("/regiao");
+    expect(await screen.findByText("Qual é a sua região?")).toBeOnTheScreen();
+    const regioes = screen.getAllByRole("button").filter((b) => b.props.accessibilityState?.selected !== undefined);
+    expect(regioes).toHaveLength(35);
+    expect(screen.getByRole("button", { name: /^Plano Piloto\. Asa Norte, Asa Sul/ })).toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole("button", { name: "Taguatinga" }));
+    expect(r.getPathname()).toBe("/postos/8944");
+    expect(await screen.findByText("Sua região: Taguatinga")).toBeOnTheScreen();
+    expect(postosNaTela()).toEqual(["UBS 05 Taguatinga", "UBS 3 Ceilandia", "UBS 01 Samambaia", "UBS 1 Asa Norte"]);
+    expect(screen.getByRole("header", { name: "Taguatinga" })).toBeOnTheScreen();
+    expect(screen.getByRole("header", { name: "Outras regiões, da mais perto para a mais longe" })).toBeOnTheScreen();
+    // Sem localização, a distância não aparece (o centro da região não é onde a pessoa está).
+    expect(screen.queryByText(/ km$/)).toBeNull();
+    // Guardada só no aparelho, e o celular nem chegou a pedir a localização.
+    expect(regiaoSalva()).toEqual({ ra: "Taguatinga", usarRegiao: true });
+    expect(mockGps.pedidos).toBe(0);
+  });
+
+  it("região salva: abre já por ela, mesmo com GPS; dá para trocar e para voltar à localização", async () => {
+    mockArquivos.set("regiao.json", JSON.stringify({ ra: "Samambaia", usarRegiao: true }));
+    const r = await renderRouter(APP, { initialUrl: "/postos/8944" });
+
+    expect(await screen.findByText("Sua região: Samambaia")).toBeOnTheScreen();
+    expect(postosNaTela()[0]).toBe("UBS 01 Samambaia");
+
+    await fireEvent.press(screen.getByRole("button", { name: "Trocar minha região" }));
+    expect(r.getPathname()).toBe("/regiao");
+    const atual = await screen.findByRole("button", { name: "Samambaia. Sua região agora" });
+    expect(atual.props.accessibilityState).toEqual({ selected: true });
+    await fireEvent.press(screen.getByRole("button", { name: "Plano Piloto. Asa Norte, Asa Sul, Noroeste, Vila Planalto" }));
+    expect(await screen.findByText("Sua região: Plano Piloto")).toBeOnTheScreen();
+    expect(postosNaTela()[0]).toBe("UBS 1 Asa Norte");
+
+    await fireEvent.press(screen.getByRole("button", { name: "Usar minha localização" }));
+    expect(await screen.findByText("Do mais perto para o mais longe de você, em linha reta.")).toBeOnTheScreen();
+    expect(regiaoSalva()).toEqual({ ra: "Plano Piloto", usarRegiao: false });
+  });
+
+  it("GPS falhou: usa a região guardada", async () => {
+    mockGps.desligado = true;
+    mockArquivos.set("regiao.json", JSON.stringify({ ra: "Taguatinga", usarRegiao: false }));
+    await renderRouter(APP, { initialUrl: "/postos/8944" });
+
+    expect(await screen.findByText("Não consegui achar sua localização")).toBeOnTheScreen();
+    expect(screen.getByText("Sua região: Taguatinga. Primeiro os postos dela, depois os das regiões mais perto.")).toBeOnTheScreen();
+    expect(postosNaTela()[0]).toBe("UBS 05 Taguatinga");
+    expect(screen.getByRole("button", { name: "Trocar minha região" })).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Tentar de novo" })).toBeOnTheScreen();
+  });
+
+  it("região sem posto com o remédio: avisa e mostra os mais perto dela", async () => {
+    mockArquivos.set("regiao.json", JSON.stringify({ ra: "Sol Nascente/Pôr do Sol", usarRegiao: true }));
+    await renderRouter(APP, { initialUrl: "/postos/8944" });
+    expect(
+      await screen.findByText("Nenhum posto da sua região (Sol Nascente/Pôr do Sol) tem hoje. Abaixo, os das regiões mais perto."),
+    ).toBeOnTheScreen();
+    expect(postosNaTela()[0]).toBe("UBS 3 Ceilandia");
+  });
+
+  it("pela aba Ajuda: escolhe a região e volta para a Ajuda", async () => {
+    const r = await renderRouter(APP, { initialUrl: "/ajuda" });
+    expect(await screen.findByText("Postos perto de você")).toBeOnTheScreen();
+    expect(screen.getByText(/Sem ela, você pode escolher a sua região\./)).toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole("button", { name: "Escolher minha região" }));
+    expect(r.getPathname()).toBe("/regiao");
+    await fireEvent.press(await screen.findByRole("button", { name: "Gama" }));
+
+    expect(r.getPathname()).toBe("/ajuda");
+    expect(await screen.findByText("Sua região: Gama.")).toBeOnTheScreen();
+    expect(regiaoSalva()).toEqual({ ra: "Gama", usarRegiao: true });
+
+    await fireEvent.press(screen.getByRole("button", { name: "Usar minha localização" }));
+    expect(await screen.findByText(/Sem ela, primeiro os da sua região \(Gama\)\./)).toBeOnTheScreen();
+    expect(regiaoSalva()).toEqual({ ra: "Gama", usarRegiao: false });
+  });
+});
+
+describe("mapa", () => {
+  const pinos = () => screen.getAllByTestId(/^pino-\d{7}$/);
+
+  it("alterna entre lista e mapa, com os mesmos postos e o cartão do mais perto", async () => {
+    await renderRouter(APP, { initialUrl: "/postos/8944" });
+    const lista = await screen.findByRole("tab", { name: "Lista" });
+    expect(lista.props.accessibilityState).toEqual({ selected: true });
+
+    await fireEvent.press(screen.getByRole("tab", { name: "Mapa" }));
+    expect(screen.getByRole("tab", { name: "Mapa" }).props.accessibilityState).toEqual({ selected: true });
+    expect(screen.getByLabelText("Mapa com 4 postos que têm hoje.")).toBeOnTheScreen();
+    expect(pinos()).toHaveLength(4);
+    expect(screen.queryAllByRole("button", { name: /^UBS / })).toHaveLength(0);
+    // O leitor de tela anuncia quantos postos há no mapa.
+    expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledWith(
+      "Mapa com 4 postos que têm hoje. Embaixo do mapa, o mais perto de você.",
+    );
+
+    // Pino com o ícone do semáforo; o cartão tem cor, ícone e texto.
+    expect(within(screen.getByTestId("pino-0010707")).getByTestId("icone-warning", { includeHiddenElements: true })).toBeTruthy();
+    expect(screen.getByText("O mais perto de você")).toBeOnTheScreen();
+    expect(screen.getByText("UBS 1 Asa Norte")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Estoque: Quase acabando, ligue antes")).toBeOnTheScreen();
+    // Legenda com os quatro níveis que aparecem no mapa.
+    for (const texto of ["Tem bastante", "Tem pouco, ligue antes", "Quase acabando, ligue antes", "Tem"]) {
+      expect(screen.getAllByText(texto).length).toBeGreaterThan(0);
+    }
+
+    await fireEvent.press(screen.getByRole("tab", { name: "Lista" }));
+    expect(postosNaTela()).toEqual(["UBS 1 Asa Norte", "UBS 05 Taguatinga", "UBS 01 Samambaia", "UBS 3 Ceilandia"]);
+  });
+
+  it("tocar no pino mostra o posto; Ver o próximo anda pela lista; Ver posto abre o detalhe", async () => {
+    const r = await renderRouter(APP, { initialUrl: "/postos/8944" });
+    await fireEvent.press(await screen.findByRole("tab", { name: "Mapa" }));
+
+    await fireEvent.press(screen.getByTestId("pino-0010642"));
+    expect(screen.getByText("3º mais perto de você")).toBeOnTheScreen();
+    expect(screen.getByText("UBS 01 Samambaia")).toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole("button", { name: "Ver o próximo mais perto" }));
+    expect(screen.getByText("4º mais perto de você")).toBeOnTheScreen();
+    expect(screen.getByText("UBS 3 Ceilandia")).toBeOnTheScreen();
+    expect(AccessibilityInfo.announceForAccessibility).toHaveBeenLastCalledWith(expect.stringMatching(/^UBS 3 Ceilandia\. Ceilândia/));
+
+    await fireEvent.press(screen.getByRole("button", { name: "Voltar ao primeiro" }));
+    expect(screen.getByText("O mais perto de você")).toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByTestId("pino-0010626"));
+    await fireEvent.press(screen.getByRole("button", { name: "Ver posto" }));
+    expect(r.getPathname()).toBe("/posto/0010626");
+    expect(await screen.findByText("UBS 05 Taguatinga")).toBeOnTheScreen();
+
+    // Voltar volta para o mapa, que continua escolhido.
+    await fireEvent.press(screen.getByRole("button", { name: "Voltar" }));
+    expect(r.getPathname()).toBe("/postos/8944");
+    expect((await screen.findByRole("tab", { name: "Mapa" })).props.accessibilityState).toEqual({ selected: true });
+  });
+
+  it("mesmo filtro de retirada da lista: controlado só nas UBSs que entregam", async () => {
+    await renderRouter(APP, { initialUrl: "/postos/90007" });
+    await fireEvent.press(await screen.findByRole("tab", { name: "Mapa" }));
+    expect(pinos().map((p) => p.props.testID)).toEqual(["pino-0010707", "pino-0010626"]);
+    expect(screen.getByLabelText("Mapa com 2 postos que têm hoje.")).toBeOnTheScreen();
+  });
+
+  it("pela região: o cartão diz a posição na lista", async () => {
+    mockArquivos.set("regiao.json", JSON.stringify({ ra: "Taguatinga", usarRegiao: true }));
+    await renderRouter(APP, { initialUrl: "/postos/8944" });
+    await fireEvent.press(await screen.findByRole("tab", { name: "Mapa" }));
+    expect(screen.getByText("Posto 1 de 4")).toBeOnTheScreen();
+    expect(screen.getByText("UBS 05 Taguatinga")).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Ver o próximo da lista" })).toBeOnTheScreen();
+    expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledWith(
+      "Mapa com 4 postos que têm hoje. Embaixo do mapa, o primeiro da lista.",
+    );
+  });
+
+  it("na web: só a lista, com um aviso discreto, e a navegação continua funcionando", async () => {
+    mockMapa.web = true;
+    const r = await renderRouter(APP, { initialUrl: "/postos/8944" });
+    expect(await screen.findByText("O mapa dos postos aparece no app do celular. Aqui no navegador, só a lista.")).toBeOnTheScreen();
+    expect(screen.queryByRole("tab", { name: "Mapa" })).toBeNull();
+    expect(postosNaTela()).toHaveLength(4);
+
+    await fireEvent.press(screen.getByRole("button", { name: /^UBS 05 Taguatinga/ }));
+    expect(r.getPathname()).toBe("/posto/0010626");
+    await fireEvent.press(await screen.findByRole("button", { name: "Voltar" }));
+    expect(r.getPathname()).toBe("/postos/8944");
   });
 });
 

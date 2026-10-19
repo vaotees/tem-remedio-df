@@ -1,4 +1,5 @@
 import { DOCUMENTOS_UBS, LIMITES_DIAS } from "@tem-remedio/shared";
+import { useRouter } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { Botao } from "@/componentes/Botao";
 import { Cartao } from "@/componentes/Cartao";
@@ -8,6 +9,8 @@ import { SeloEstoque } from "@/componentes/SeloEstoque";
 import { Tela } from "@/componentes/Tela";
 import { Texto } from "@/componentes/Texto";
 import type { Origem } from "@/dados/snapshot";
+import { useLocalizacao } from "@/postos/localizacao";
+import { useRegiaoEscolhida } from "@/postos/regiao-escolhida";
 import { espaco } from "@/tema";
 
 const TEXTO_ORIGEM: Record<Origem, string> = {
@@ -54,6 +57,8 @@ export default function Ajuda() {
         </ComDados>
       </Cartao>
 
+      <PostosPerto />
+
       <Cartao>
         <Texto variante="subtitulo">Como ler o estoque</Texto>
         <Texto secundario>Contamos pelo quanto a própria UBS costuma entregar por mês.</Texto>
@@ -79,6 +84,51 @@ export default function Ajuda() {
         <Texto>Este app não substitui a orientação do seu médico ou farmacêutico.</Texto>
       </Cartao>
     </Tela>
+  );
+}
+
+/** Como o app escolhe os postos "perto": pela localização ou pela região, e o botão para trocar. */
+function PostosPerto() {
+  const router = useRouter();
+  const { ra, usarRegiao, preferirLocalizacao } = useRegiaoEscolhida();
+  const { pedirLocalizacao, procurando } = useLocalizacao({ ativa: false });
+
+  return (
+    <Cartao>
+      <Texto variante="subtitulo">Postos perto de você</Texto>
+      {usarRegiao ? (
+        <>
+          <Texto>Sua região: {ra}.</Texto>
+          <Texto secundario>Os postos dela aparecem primeiro, depois os das regiões mais perto.</Texto>
+        </>
+      ) : (
+        <Texto>
+          Os postos aparecem do mais perto para o mais longe, pela localização do celular.
+          {ra ? ` Sem ela, primeiro os da sua região (${ra}).` : " Sem ela, você pode escolher a sua região."}
+        </Texto>
+      )}
+      <Botao
+        titulo={ra ? "Trocar minha região" : "Escolher minha região"}
+        icone="list"
+        variante="secundario"
+        onPress={() => router.push("/regiao")}
+      />
+      {usarRegiao ? (
+        <Botao
+          titulo="Usar minha localização"
+          icone="navigate"
+          variante="secundario"
+          carregando={procurando}
+          onPress={() => {
+            preferirLocalizacao();
+            pedirLocalizacao();
+          }}
+        />
+      ) : null}
+      <Texto variante="legenda" secundario>
+        A localização e a região ficam só neste celular: não vão para a internet.
+      </Texto>
+    </Cartao>
   );
 }
 

@@ -24,7 +24,25 @@ export interface Cores {
   aberto: CoresSemaforo;
   fechado: CoresSemaforo;
   semaforo: Record<NivelEstoque, CoresSemaforo>;
+  pino: CoresPino;
 }
+
+export interface CoresPino {
+  /** Fundo do pino, pela situação do estoque (sempre com o ícone do semáforo por cima). */
+  miolo: Record<NivelEstoque, string>;
+  icone: string;
+  borda: string;
+}
+
+/**
+ * Pinos do mapa, iguais nos dois temas: no Android o mapa continua claro mesmo no tema escuro.
+ * Miolo escuro, que aparece no mapa claro, e borda branca, que aparece no mapa escuro do iPhone.
+ */
+const pino: CoresPino = {
+  miolo: { alto: "#1B5E20", baixo: "#9A5B00", critico: "#B71C1C", sem_consumo: "#1F4E8C" },
+  icone: "#FFFFFF",
+  borda: "#FFFFFF",
+};
 
 /**
  * Paleta pensada para baixa visão: todo texto passa de 4,5:1 (WCAG AA) e a maioria de 7:1.
@@ -50,6 +68,7 @@ export const coresClaras: Cores = {
     critico: { texto: "#9B1C1C", fundo: "#FDECEC" },
     sem_consumo: { texto: "#1F3A5F", fundo: "#E8EEF6" },
   },
+  pino,
 };
 
 export const coresEscuras: Cores = {
@@ -72,4 +91,5 @@ export const coresEscuras: Cores = {
     critico: { texto: "#F4A6A6", fundo: "#3D1717" },
     sem_consumo: { texto: "#B9D3F0", fundo: "#1C2A3D" },
   },
+  pino,
 };
