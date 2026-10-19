@@ -32,7 +32,7 @@ describe("navegação", () => {
     expect(screen.getByText("Tem bastante")).toBeOnTheScreen();
     expect(screen.getByText(/Dados que vieram com o app/)).toBeOnTheScreen();
 
-    await fireEvent.press(screen.getByText("Meus remédios"));
+    await fireEvent.press(screen.getByRole("button", { name: "Meus remédios" }));
     expect(r.getPathname()).toBe("/meus-remedios");
     expect(await screen.findByText("Guarde os remédios que você usa")).toBeOnTheScreen();
 

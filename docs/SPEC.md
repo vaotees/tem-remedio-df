@@ -36,7 +36,7 @@ Em até 3 toques, a pessoa (idosa, ou o filho/cuidador) descobre **qual posto de
 5. Detalhe do posto.
 6. Meus remédios.
 - Abas fixas: Buscar, Meus remédios, Ajuda. Na primeira vez que a lista de postos abre, antes do pedido do celular: "Como achar os postos perto de você?" com "Usar minha localização" e "Escolher minha região" (M4).
-- Tela vazia: "Nenhum posto perto tem X hoje" + ver mais longe + salvar em Meus remédios.
+- Tela vazia: "Nenhum posto tem X hoje" + "Guardar em Meus remédios" (M5). A lista já mostra todos os postos do DF, então não há "ver mais longe".
 
 ## Regras de negócio
 
@@ -90,7 +90,7 @@ Tabela CMED (Anvisa)          ─┘
 
 ### Stack
 - Monorepo pnpm: `packages/shared` (schemas zod + regras), `pipeline` (coletor), `apps/mobile` (Expo).
-- App: Expo SDK 57 + TypeScript + Expo Router (abas em JS), TanStack Query, expo-file-system, Fuse.js (busca), expo-location, react-native-maps; a seguir expo-sqlite (Meus remédios).
+- App: Expo SDK 57 + TypeScript + Expo Router (abas em JS), TanStack Query, expo-file-system (snapshot, região e Meus remédios em arquivos JSON), Fuse.js (busca), expo-location, react-native-maps.
 - **Por que SDK 57:** o SDK 58 saiu em 15/10/2026, mas o Expo Go para ele ainda não está nas lojas. Quando chegar, o novo Expo Go só abre SDK 58: aí subimos o projeto (`pnpm exec expo install expo@~58.0.0` + `expo install --fix`, Testing Library 14 e Jest 30).
 - Testes: Vitest (coletor e shared); Jest 29 + Testing Library 13 (app); Maestro (E2E, M6).
 
@@ -113,7 +113,7 @@ Tabela CMED (Anvisa)          ─┘
 - Uma forma e dose só: o resultado vai direto para os postos. Mais de uma: "Qual destes?", com quantos postos têm cada uma; doses repetidas mostram a descrição da SES-DF (ex.: prednisona comum × hanseníase).
 - **Liberação prolongada**: buscou por marca de liberação prolongada e o produto do SUS não é → aviso em "Qual destes?" e na lista de postos.
 - **Lista de postos** (`src/postos/`): distância em linha reta pela localização do aparelho (expo-location; a localização não sai do celular). Sem permissão, sem GPS ou fora do DF (posto mais perto a mais de 60 km): pela região escolhida ou, sem ela, por Região Administrativa (ver M4). 10 postos por vez ("Mostrar mais postos"). Cada posto: nome, RA, distância, semáforo e "Aberto agora / Fechado agora, abre …" quando o horário do cadastro dá para interpretar (não conhece feriados). Avisos de retirada conforme `retirada`; controlado mostra só UBSs com `entregaControlados`.
-- Tela vazia: "Nenhum posto tem X hoje" + convite para Meus remédios (salvar é M5).
+- Tela vazia: "Nenhum posto tem X hoje" + guardar em Meus remédios (ver M5).
 - **Detalhe do posto**: estoque do remédio escolhido com "Estoque de hoje às HHhMM, ligue antes de ir", regra de retirada, Como chegar (pergunta qual app usar: Mapas, só no iPhone, Google Maps ou Waze; links https, que abrem no navegador se o app não estiver instalado, porque o Expo Go não deixa consultar os apps instalados), Ligar (`tel:+55…`), Enviar no WhatsApp (abre o WhatsApp direto com a mensagem pronta, `whatsapp://send`; sem WhatsApp, a folha de compartilhar do celular; na web, `wa.me`), endereço, horário, telefone e documentos.
 - **Fachada (Street View) testada e retirada.** Um botão "Ver a fachada" abria o Street View do Google Maps por link, sem chave de API. No iPhone, o Google escolheu o panorama mais próximo da coordenada, que era uma foto enviada por usuário: uma imagem antiga, em preto e branco, do "SAMDU Posto de Taguatinga" (UBS 5 Taguatinga). Para um idoso, isso confunde mais do que ajuda, e o link não deixa escolher só a foto oficial e recente da rua. Caminho para depois, se valer a pena: o coletor consulta a metadata API do Street View (`source=outdoor`; as consultas não são cobradas, mas exigem chave de um projeto do Google Cloud, guardada só no segredo do GitHub Actions) e guarda no snapshot o id do panorama oficial e a data da foto. O app abre esse panorama já virado para o posto e mostra a data ("foto de maio de 2026"), sem chave no celular.
 - **Busca por voz** ficou para depois: precisa de módulo nativo, que não roda no Expo Go (entra com o development build/APK do M6).
@@ -130,6 +130,18 @@ Tabela CMED (Anvisa)          ─┘
 - **Primeira vez**: a lista não pede a localização sozinha. Mostra "Como achar os postos perto de você?" com **Usar minha localização** (aí o celular pergunta) e **Escolher minha região**. Se a pessoa negar, o aviso oferece "Escolher minha região" e "Permitir nos ajustes".
 - A região fica só no aparelho (`regiao.json` com expo-file-system; `localStorage` na web) e pode ser trocada pela tela de postos e pela aba Ajuda ("Postos perto de você").
 
+### Meus remédios, tela vazia e Ajuda (M5)
+- **Guardar**: botão "Guardar em Meus remédios" na lista de postos, logo abaixo do nome do remédio; na tela vazia, dentro do cartão "Nenhum posto tem X hoje", como ação principal. Guardado, o mesmo botão mostra o estado com ícone e texto (coração cheio + "Guardado em Meus remédios", e embaixo "Está na aba Meus remédios. Para tirar, toque no botão de novo.") e tira da lista com outro toque. O leitor de tela anuncia "Guardado em Meus remédios" / "Tirado de Meus remédios".
+- O **detalhe do posto não tem o botão**: a tela é sobre o lugar, e a lista de postos, um "Voltar" atrás, já tem.
+- **Onde fica**: `meus-remedios.json` no aparelho, pelo mesmo `armazenamento` da região (expo-file-system no celular, `localStorage` na web), com schema zod e React Query (`staleTime: Infinity`), em `src/meus-remedios/guardados.ts`. JSON em vez de expo-sqlite: a lista é curta, segue o padrão da região e não traz dependência nativa nova. Guarda o código SES-DF do produto (não muda entre snapshots), o nome e a forma/dose da hora (para mostrar mesmo se o remédio sumir dos dados), a marca que a pessoa buscou (para lembrar o aviso de liberação prolongada) e a data. Arquivo estragado vira lista vazia; um item estragado fica de fora sem levar os outros. Antes de gravar, o app lê o arquivo: nunca grava por cima de uma lista que ainda não leu.
+- **Aba Meus remédios**: os remédios em ordem alfabética. Cada um mostra quantos postos têm hoje e o primeiro pela origem atual ("Mais perto de você", "Na sua região" ou "Mais perto da sua região"), com nome, região, distância (só com GPS) e semáforo (cor + ícone + texto). Usa a mesma lista da tela de postos (`postosComEstoque`): controlado só nas UBSs que entregam controlados, unidade prisional nunca. Avisos de retirada aparecem pelo título ("Retire na UBS do seu bairro", "Só nas UBSs que entregam controlados"…), e a marca de liberação prolongada ganha o lembrete "Glifage XR é de liberação prolongada; este não é. Confirme com seu médico ou farmacêutico." Um toque abre a lista de postos do remédio (com a marca, para o aviso aparecer lá também).
+- **Localização na aba**: segue a regra "Primeira vez" do M4, a aba nunca pede a localização sozinha. Na primeira vez, a mesma pergunta "Como achar os postos perto de você?"; até a resposta, e enquanto o GPS não responde, só a contagem. Sem localização nem região não existe "mais perto": a aba mostra só quantos postos têm e o aviso para escolher a região, sem apresentar um posto qualquer como o melhor. Com origem, uma linha diz de onde conta ("O posto mais perto de você, em linha reta." ou "Pela sua região: X."); trocar a região fica na tela de postos e na Ajuda.
+- **Código que sumiu do snapshot**: o item continua guardado, com "Não aparece nos dados de hoje", "Se ele voltar para a lista da SES-DF, aparece aqui de novo." e o botão "Tirar de Meus remédios". O app não apaga sozinho.
+- **Navegação**: as telas de postos e do posto ficam em `(abas)/(buscar,meus)/` (rotas compartilhadas do Expo Router). Abertas pela aba Meus remédios, ficam nessa aba, e o "Voltar" volta para a lista guardada, não para a busca. Um link frio (`/postos/…`) abre na aba Buscar, a primeira do layout das abas.
+- **Busca** (Telas, item 1): antes de digitar, "Seus remédios" com os 3 primeiros (só a contagem de postos, sem localização) e "Ver os N em Meus remédios" quando há mais.
+- O app **não avisa sozinho** quando um remédio chega (isso é a v1.1): a tela vazia e a Ajuda dizem para abrir a aba e conferir, sem prometer aviso.
+- **Ajuda**: "Como usar" (buscar, escolher a dose, ver os postos, tocar no posto), cartão "Meus remédios" (guardar, ver, tirar; não avisa sozinho; a lista fica só no celular), dados sem internet e "alguns remédios só são entregues em certas UBSs, como os controlados". Nada de telefone, endereço ou regra que não venha de fonte oficial.
+
 ### Como testar no celular
 - **Expo Go** no celular (de preferência Android), lendo o QR code do `pnpm app`.
 - **Web** para conferência rápida de layout.
@@ -144,7 +156,7 @@ Tabela CMED (Anvisa)          ─┘
 | M2. Base do app | Feito — `apps/mobile/`: abas, tema acessível, snapshot embutido + cache + atualização |
 | M3. Fluxo principal (busca → dose → lista → detalhe) | Feito — busca tolerante com marcas, "Qual destes?", postos por distância, detalhe com Como chegar/Ligar/WhatsApp. Busca por voz adiada (precisa de development build) |
 | M4. Mapa e região manual | Feito — Lista \| Mapa com pinos do semáforo e cartão do mais perto (na web, só a lista); Região Administrativa escolhida à mão, salva no aparelho, trocável pela lista e pela Ajuda; pergunta antes do pedido de localização |
-| M5. Meus remédios, tela vazia, Ajuda | |
+| M5. Meus remédios, tela vazia, Ajuda | Feito — guardar e tirar pela lista de postos (e pela tela vazia), lista no aparelho em JSON; aba com a situação de hoje de cada remédio (quantos postos e o primeiro pela localização ou região, com semáforo e avisos de retirada); "Seus remédios" na busca; Ajuda com "Como usar" e "Meus remédios" |
 | M6. Acabamento (E2E, acessibilidade, APK, busca por voz, README com GIF) | |
 
 ## Riscos

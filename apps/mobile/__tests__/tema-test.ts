@@ -41,6 +41,11 @@ describe.each([
     expect(contraste(c.borda, c.fundo)).toBeGreaterThanOrEqual(3);
   });
 
+  it("ícones sobre a superfície dos cartões passam de 3:1 (ex.: aviso em Meus remédios)", () => {
+    expect(contraste(c.aviso.texto, c.superficie)).toBeGreaterThanOrEqual(3);
+    expect(contraste(c.textoSecundario, c.superficie)).toBeGreaterThanOrEqual(3);
+  });
+
   it("pinos do mapa: ícone legível e pino visível no mapa claro e no escuro", () => {
     for (const [nivel, miolo] of Object.entries(c.pino.miolo)) {
       expect({ nivel, icone: contraste(c.pino.icone, miolo) >= 4.5 }).toEqual({ nivel, icone: true });

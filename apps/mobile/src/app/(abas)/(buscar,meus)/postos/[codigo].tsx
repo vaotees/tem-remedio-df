@@ -2,23 +2,26 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import type { Produto, Snapshot } from "@tem-remedio/shared";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Fragment, useMemo, useState } from "react";
-import { ActivityIndicator, Linking, Platform, StyleSheet, View } from "react-native";
+import { Linking, StyleSheet, View } from "react-native";
 import { Alternancia } from "@/componentes/Alternancia";
 import { Aviso } from "@/componentes/Aviso";
 import { AvisoLiberacao } from "@/componentes/AvisoLiberacao";
 import { Botao } from "@/componentes/Botao";
+import { BotaoGuardar } from "@/componentes/BotaoGuardar";
 import { Cartao } from "@/componentes/Cartao";
 import { ComDados } from "@/componentes/ComDados";
 import { FaixaAtualizacao } from "@/componentes/FaixaAtualizacao";
 import { ItemLista } from "@/componentes/ItemLista";
 import { MAPA_DISPONIVEL, MapaPostos } from "@/componentes/MapaPostos";
 import { NaoEncontrado } from "@/componentes/NaoEncontrado";
+import { PerguntarOrigem, ProcurandoLocalizacao, SituacaoOrigem } from "@/componentes/OrigemPostos";
 import { SeloEstoque } from "@/componentes/SeloEstoque";
 import { SeloHorario } from "@/componentes/SeloHorario";
 import { Tela } from "@/componentes/Tela";
 import { Texto } from "@/componentes/Texto";
 import { Voltar } from "@/componentes/Voltar";
 import { acharMarca, indiceProduto, nomeSubstancia, precisaAvisoLiberacao, rotuloProduto } from "@/busca/remedios";
+import type { NovoRemedio } from "@/meus-remedios/guardados";
 import { descreverPosto } from "@/postos/descricao";
 import { useOrigem } from "@/postos/origem";
 import { avisoRetirada, postosComEstoque, type Ordem, type PostoComEstoque } from "@/postos/postos";
@@ -66,6 +69,12 @@ function ListaPostos({ snapshot, codigo, nomeMarca, procurandoNovos }: Props) {
   const nome = nomeSubstancia([produto]);
   const marca = acharMarca(snapshot, nomeMarca);
   const retirada = avisoRetirada(produto);
+  const paraGuardar: NovoRemedio = {
+    codigo: produto.codigo,
+    nome,
+    apresentacao: rotuloProduto(produto),
+    marca: marca?.nome ?? null,
+  };
   const escolherRegiao = () => router.push("/regiao");
   const abrir = (p: PostoComEstoque) =>
     router.push({
@@ -82,6 +91,9 @@ function ListaPostos({ snapshot, codigo, nomeMarca, procurandoNovos }: Props) {
           {produto.liberacaoProlongada ? " · liberação prolongada" : ""}
         </Texto>
       </View>
+
+      {/* Na tela vazia, o botão fica no cartão "Nenhum posto tem", como a ação principal. */}
+      {postos.length > 0 ? <BotaoGuardar remedio={paraGuardar} /> : null}
 
       <FaixaAtualizacao atualizadoEm={snapshot.meta.atualizadoEm} procurandoNovos={procurandoNovos} />
 
@@ -102,12 +114,9 @@ function ListaPostos({ snapshot, codigo, nomeMarca, procurandoNovos }: Props) {
       ) : null}
 
       {postos.length === 0 ? (
-        <Vazio produto={produto} />
+        <Vazio produto={produto} paraGuardar={paraGuardar} />
       ) : origem.carregando ? (
-        <View style={estilos.procurando} accessibilityLiveRegion="polite">
-          <ActivityIndicator size="large" />
-          <Texto secundario>Procurando sua localização para mostrar os postos mais perto…</Texto>
-        </View>
+        <ProcurandoLocalizacao />
       ) : origem.perguntar ? (
         <PerguntarOrigem procurando={origem.procurando} usarLocalizacao={origem.usarLocalizacao} escolherRegiao={escolherRegiao} />
       ) : (
@@ -208,115 +217,11 @@ function SemMapa() {
   );
 }
 
-interface PropsPerguntar {
-  procurando: boolean;
-  usarLocalizacao: () => void;
-  escolherRegiao: () => void;
-}
-
-/** Primeira vez: antes do pedido do celular, explica e deixa escolher a região em vez da localização. */
-function PerguntarOrigem({ procurando, usarLocalizacao, escolherRegiao }: PropsPerguntar) {
-  return (
-    <Cartao>
-      <Texto variante="subtitulo">Como achar os postos perto de você?</Texto>
-      <Texto>O app pode usar a localização do celular, ou você escolhe a sua região.</Texto>
-      <Texto secundario>A localização e a região ficam só neste celular.</Texto>
-      <Botao titulo="Usar minha localização" icone="navigate" carregando={procurando} onPress={usarLocalizacao} />
-      <Botao titulo="Escolher minha região" icone="list" variante="secundario" onPress={escolherRegiao} />
-    </Cartao>
-  );
-}
-
-interface PropsSituacao {
-  origem: ReturnType<typeof useOrigem>;
-  escolherRegiao: () => void;
-}
-
-/** Explica a ordem da lista e oferece a outra forma de achar os postos perto. */
-function SituacaoOrigem({ origem, escolherRegiao }: PropsSituacao) {
-  const { cores } = useTema();
-  const { ordem, localizacao, foraDoDf, ra, usarRegiao, procurando, usarLocalizacao } = origem;
-
-  if (ordem.por === "distancia") {
-    return (
-      <View style={estilos.linha}>
-        <Ionicons name="navigate" size={20} color={cores.textoSecundario} />
-        <Texto secundario style={estilos.flex}>
-          Do mais perto para o mais longe de você, em linha reta.
-        </Texto>
-      </View>
-    );
-  }
-
-  const textoRegiao = ra
-    ? `Sua região: ${ra}. Primeiro os postos dela, depois os das regiões mais perto.`
-    : "Os postos aparecem por Região Administrativa. Escolha a sua para ver primeiro os postos perto de você.";
-  const botaoRegiao = (
-    <Botao
-      titulo={ra ? "Trocar minha região" : "Escolher minha região"}
-      icone="list"
-      variante={ra ? "secundario" : "primario"}
-      onPress={escolherRegiao}
-    />
-  );
-  const botaoLocalizacao = (titulo = "Usar minha localização") => (
-    <Botao titulo={titulo} icone="navigate" variante="secundario" carregando={procurando} onPress={usarLocalizacao} />
-  );
-
-  // A pessoa escolheu a região: não é aviso, é a escolha dela.
-  if (usarRegiao) {
-    return (
-      <Cartao>
-        <View style={estilos.linha}>
-          <Ionicons name="location" size={24} color={cores.primaria} />
-          <Texto variante="destaque" style={estilos.flex}>
-            Sua região: {ra}
-          </Texto>
-        </View>
-        <Texto secundario>Primeiro os postos dela, depois os das regiões mais perto.</Texto>
-        {botaoRegiao}
-        {botaoLocalizacao()}
-      </Cartao>
-    );
-  }
-
-  if (foraDoDf) {
-    return (
-      <Aviso tipo="info" titulo="Você parece estar fora do DF" texto={textoRegiao}>
-        {botaoRegiao}
-      </Aviso>
-    );
-  }
-  if (localizacao?.situacao === "sem_permissao") {
-    const nosAjustes = !localizacao.podePedir && Platform.OS !== "web";
-    return (
-      <Aviso tipo="info" titulo="Sem a sua localização" texto={textoRegiao}>
-        {botaoRegiao}
-        {localizacao.podePedir ? (
-          botaoLocalizacao()
-        ) : nosAjustes ? (
-          <Botao
-            titulo="Permitir nos ajustes"
-            icone="settings-outline"
-            variante="secundario"
-            dica="Abre os ajustes do celular para este app"
-            onPress={() => Linking.openSettings()}
-          />
-        ) : null}
-      </Aviso>
-    );
-  }
-  return (
-    <Aviso tipo="info" titulo="Não consegui achar sua localização" texto={textoRegiao}>
-      {botaoRegiao}
-      {botaoLocalizacao("Tentar de novo")}
-    </Aviso>
-  );
-}
-
-/** Nenhum posto tem hoje. Salvar em Meus remédios (para saber quando chegar) vem no M5. */
-function Vazio({ produto }: { produto: Produto }) {
-  const router = useRouter();
+/**
+ * Nenhum posto tem hoje. A ação principal é guardar em Meus remédios, para conferir depois, com um toque,
+ * se ele chegou. O app não avisa sozinho (aviso no celular fica para a v1.1): o texto não promete isso.
+ */
+function Vazio({ produto, paraGuardar }: { produto: Produto; paraGuardar: NovoRemedio }) {
   const nome = `${nomeSubstancia([produto])} ${rotuloProduto(produto).toLocaleLowerCase("pt-BR")}`;
   return (
     <Cartao>
@@ -324,16 +229,15 @@ function Vazio({ produto }: { produto: Produto }) {
         Nenhum posto tem {nome} hoje
       </Texto>
       <Texto secundario>
-        O estoque muda todo dia. Em breve você vai poder salvar este remédio em Meus remédios e ver logo quando ele
-        chegar.
+        O estoque muda todo dia. Guarde este remédio: depois, é só abrir a aba Meus remédios para ver se ele chegou
+        a algum posto.
       </Texto>
-      <Botao titulo="Ir para Meus remédios" icone="heart-outline" variante="secundario" onPress={() => router.navigate("/meus-remedios")} />
+      <BotaoGuardar remedio={paraGuardar} principal />
     </Cartao>
   );
 }
 
 const estilos = StyleSheet.create({
-  procurando: { alignItems: "center", gap: espaco.md, paddingVertical: espaco.xl },
   lista: { gap: espaco.sm },
   regiao: { marginTop: espaco.sm },
   linha: { flexDirection: "row", alignItems: "center", gap: espaco.sm },
