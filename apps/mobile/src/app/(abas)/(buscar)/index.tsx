@@ -3,6 +3,7 @@ import type { Snapshot } from "@tem-remedio/shared";
 import { useRouter } from "expo-router";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Botao } from "@/componentes/Botao";
 import { Cartao } from "@/componentes/Cartao";
 import { ComDados } from "@/componentes/ComDados";
 import { FaixaAtualizacao } from "@/componentes/FaixaAtualizacao";
@@ -10,7 +11,9 @@ import { ItemLista } from "@/componentes/ItemLista";
 import { Tela } from "@/componentes/Tela";
 import { Texto } from "@/componentes/Texto";
 import { buscar, MINIMO_LETRAS, prepararBusca, type GrupoResultado } from "@/busca/buscar";
-import { capitalizarNome, rotuloProduto } from "@/busca/remedios";
+import { capitalizarNome, nomeSubstancia, rotuloProduto } from "@/busca/remedios";
+import { useMeusRemedios } from "@/meus-remedios/guardados";
+import { situacaoHoje, textoQuantos } from "@/meus-remedios/situacao";
 import { ALVO_MINIMO, espaco, fonte, raio, useTema } from "@/tema";
 
 export default function Buscar() {
@@ -74,13 +77,16 @@ function Resultados({ snapshot, termo }: { snapshot: Snapshot; termo: string }) 
 
   if (termo.trim().length < MINIMO_LETRAS) {
     return (
-      <Cartao>
-        <Texto variante="destaque">Rede pública do DF</Texto>
-        <Texto secundario>
-          {snapshot.ubs.length} farmácias de UBS e {snapshot.produtos.length} remédios da atenção básica.
-        </Texto>
-        <Texto secundario>Escreva o nome do remédio ou o nome que está na caixa.</Texto>
-      </Cartao>
+      <>
+        <SeusRemedios snapshot={snapshot} />
+        <Cartao>
+          <Texto variante="destaque">Rede pública do DF</Texto>
+          <Texto secundario>
+            {snapshot.ubs.length} farmácias de UBS e {snapshot.produtos.length} remédios da atenção básica.
+          </Texto>
+          <Texto secundario>Escreva o nome do remédio ou o nome que está na caixa.</Texto>
+        </Cartao>
+      </>
     );
   }
 
@@ -129,6 +135,52 @@ function Resultados({ snapshot, termo }: { snapshot: Snapshot; termo: string }) 
           </ItemLista>
         );
       })}
+    </View>
+  );
+}
+
+/** Quantos remédios guardados aparecem na busca; o resto, na aba Meus remédios. */
+const GUARDADOS_NA_BUSCA = 3;
+
+/**
+ * Atalho para os remédios guardados, antes de digitar: um toque leva aos postos.
+ * Aqui só a contagem de postos; o mais perto de cada um fica na aba Meus remédios.
+ */
+function SeusRemedios({ snapshot }: { snapshot: Snapshot }) {
+  const router = useRouter();
+  const { remedios } = useMeusRemedios();
+  if (remedios.length === 0) return null;
+
+  return (
+    <View style={estilos.lista}>
+      <Texto variante="subtitulo">Seus remédios</Texto>
+      {remedios.slice(0, GUARDADOS_NA_BUSCA).map((r) => {
+        const hoje = situacaoHoje(snapshot, r.codigo, { por: "nome" });
+        const nome = hoje.tipo === "fora_dos_dados" ? r.nome : nomeSubstancia([hoje.produto]);
+        const apresentacao = hoje.tipo === "fora_dos_dados" ? r.apresentacao : rotuloProduto(hoje.produto);
+        const situacao =
+          hoje.tipo === "fora_dos_dados" ? "Não aparece nos dados de hoje" : textoQuantos(hoje.tipo === "tem" ? hoje.postos : 0);
+        // Fora dos dados: a aba Meus remédios explica e deixa tirar da lista.
+        const abrir = () =>
+          hoje.tipo === "fora_dos_dados"
+            ? router.navigate("/meus-remedios")
+            : router.push({ pathname: "/postos/[codigo]", params: { codigo: r.codigo, marca: r.marca ?? undefined } });
+        return (
+          <ItemLista key={r.codigo} onPress={abrir} rotulo={[nome, apresentacao, situacao].join(". ")} dica="Mostra os postos que têm">
+            <Texto variante="destaque">{nome}</Texto>
+            <Texto secundario>{apresentacao}</Texto>
+            <Texto>{situacao}</Texto>
+          </ItemLista>
+        );
+      })}
+      {remedios.length > GUARDADOS_NA_BUSCA ? (
+        <Botao
+          titulo={`Ver os ${remedios.length} em Meus remédios`}
+          icone="heart-outline"
+          variante="secundario"
+          onPress={() => router.navigate("/meus-remedios")}
+        />
+      ) : null}
     </View>
   );
 }

@@ -1,4 +1,4 @@
-import { fireEvent, renderRouter, screen, within } from "expo-router/testing-library";
+import { fireEvent, renderRouter, screen, waitFor, within } from "expo-router/testing-library";
 import { AccessibilityInfo, Linking, Share } from "react-native";
 import { queryClient } from "@/dados/consultas";
 import { NO_PLANO_PILOTO, snapshotTeste } from "../fixtures/snapshot-teste";
@@ -22,7 +22,7 @@ jest.mock("@/dados/useSnapshot", () => {
   };
 });
 
-// Arquivos do aparelho (região escolhida) em memória.
+// Arquivos do aparelho (região escolhida, Meus remédios) em memória.
 const mockArquivos = new Map<string, string>();
 jest.mock("@/dados/armazenamento", () => ({
   armazenamento: {
@@ -31,6 +31,8 @@ jest.mock("@/dados/armazenamento", () => ({
   },
 }));
 const regiaoSalva = () => JSON.parse(mockArquivos.get("regiao.json") ?? "null") as unknown;
+const meusRemediosSalvos = () =>
+  JSON.parse(mockArquivos.get("meus-remedios.json") ?? "null") as { remedios: { codigo: string }[] } | null;
 
 // O mapa de verdade (com o react-native-maps simulado no jest.setup) ou o substituto da web.
 const mockMapa = { web: false };
@@ -235,13 +237,12 @@ describe("lista de postos", () => {
     expect(Linking.openURL).toHaveBeenCalledWith("https://www.saude.df.gov.br/tabagismo/");
   });
 
-  it("nenhum posto tem: diz isso e convida para Meus remédios", async () => {
-    const r = await renderRouter(APP, { initialUrl: "/postos/MSE24551" });
+  it("nenhum posto tem: diz isso e oferece guardar em Meus remédios", async () => {
+    await renderRouter(APP, { initialUrl: "/postos/MSE24551" });
     expect(await screen.findByText("Nenhum posto tem Oseltamivir (fosfato) cápsula 75 mg hoje")).toBeOnTheScreen();
     expect(screen.getByText("Só em algumas unidades")).toBeOnTheScreen();
-
-    await fireEvent.press(screen.getByRole("button", { name: "Ir para Meus remédios" }));
-    expect(r.getPathname()).toBe("/meus-remedios");
+    // Um botão só, no cartão da tela vazia.
+    expect(await screen.findAllByRole("button", { name: "Guardar em Meus remédios" })).toHaveLength(1);
   });
 
   it("remédio que saiu da lista", async () => {
@@ -540,6 +541,190 @@ describe("detalhe do posto", () => {
     expect(r.getPathname()).toBe("/posto/0010626");
     await fireEvent.press(await screen.findByRole("button", { name: "Voltar" }));
     expect(r.getPathname()).toBe("/postos/8944");
+  });
+});
+
+describe("Meus remédios", () => {
+  const NUNCA_PERGUNTADO: Permissao = { granted: false, canAskAgain: true, status: "undetermined" };
+  const EM = "2026-10-18T12:00:00.000Z";
+  const LOSARTANA = { codigo: "8944", nome: "Losartana potassica", apresentacao: "Comprimido 50 mg", marca: null, guardadoEm: EM };
+  const CLONAZEPAM = { codigo: "90007", nome: "Clonazepam", apresentacao: "Comprimido 2 mg", marca: "RIVOTRIL", guardadoEm: EM };
+  const OSELTAMIVIR = { codigo: "MSE24551", nome: "Oseltamivir (fosfato)", apresentacao: "Cápsula 75 mg", marca: null, guardadoEm: EM };
+  const SUMIU = { codigo: "000000", nome: "Remédio antigo", apresentacao: "Comprimido 10 mg", marca: null, guardadoEm: EM };
+  const guardados = (...remedios: object[]) => mockArquivos.set("meus-remedios.json", JSON.stringify({ remedios }));
+  const abaMeusRemedios = () => screen.getByRole("button", { name: "Meus remédios" });
+
+  it("guarda pela lista de postos e mostra na aba, com o mais perto; Voltar volta para a aba", async () => {
+    const r = await renderRouter(APP, { initialUrl: "/postos/8944?marca=COZAAR" });
+    expect(await screen.findByText("4 postos têm hoje")).toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole("button", { name: "Guardar em Meus remédios" }));
+    expect(await screen.findByRole("button", { name: "Guardado em Meus remédios" })).toBeOnTheScreen();
+    expect(screen.getByText("Está na aba Meus remédios. Para tirar, toque no botão de novo.")).toBeOnTheScreen();
+    expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledWith("Guardado em Meus remédios");
+    // Só no aparelho: o código SES-DF, o nome, a marca buscada e a data.
+    expect(meusRemediosSalvos()).toEqual({
+      remedios: [
+        { codigo: "8944", nome: "Losartana potassica", apresentacao: "Comprimido 50 mg", marca: "COZAAR", guardadoEm: expect.any(String) },
+      ],
+    });
+
+    await fireEvent.press(abaMeusRemedios());
+    expect(r.getPathname()).toBe("/meus-remedios");
+    expect(await screen.findByText("O posto mais perto de você, em linha reta.")).toBeOnTheScreen();
+    const item = screen.getByRole("button", { name: /^Losartana potassica/ });
+    expect(within(item).getByText("Mesma substância de Cozaar")).toBeOnTheScreen();
+    expect(within(item).getByText("Em 4 postos hoje")).toBeOnTheScreen();
+    expect(within(item).getByText("Mais perto de você:")).toBeOnTheScreen();
+    expect(within(item).getByText("UBS 1 Asa Norte")).toBeOnTheScreen();
+    expect(within(item).getByText("Plano Piloto · 4,0 km")).toBeOnTheScreen();
+    // Semáforo com cor, ícone e texto; o leitor de tela lê o item inteiro.
+    expect(within(item).getByLabelText("Estoque: Quase acabando, ligue antes")).toBeOnTheScreen();
+    expect(item.props.accessibilityLabel).toMatch(
+      /^Losartana potassica\. Comprimido 50 mg\. Mesma substância de Cozaar\. Em 4 postos hoje\. Mais perto de você: UBS 1 Asa Norte\. Plano Piloto, a 4,0 km em linha reta\. Estoque: Quase acabando, ligue antes/,
+    );
+
+    // Aberto pela aba Meus remédios, o remédio fica nela: Voltar volta para a lista guardada.
+    await fireEvent.press(item);
+    expect(r.getPathname()).toBe("/postos/8944");
+    expect(await screen.findByRole("button", { name: "Guardado em Meus remédios" })).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Voltar" }));
+    expect(r.getPathname()).toBe("/meus-remedios");
+  });
+
+  it("tela vazia: guarda o remédio que nenhum posto tem, e a aba diz isso", async () => {
+    await renderRouter(APP, { initialUrl: "/postos/MSE24551" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Guardar em Meus remédios" }));
+    expect(await screen.findByRole("button", { name: "Guardado em Meus remédios" })).toBeOnTheScreen();
+
+    await fireEvent.press(abaMeusRemedios());
+    const item = await screen.findByRole("button", { name: /^Oseltamivir \(fosfato\)/ });
+    expect(within(item).getByText("Nenhum posto tem hoje")).toBeOnTheScreen();
+    expect(within(item).getByText("Só em algumas unidades")).toBeOnTheScreen();
+    expect(within(item).queryByText(/Mais perto/)).toBeNull();
+  });
+
+  it("tira da lista pelo mesmo botão", async () => {
+    guardados(LOSARTANA, OSELTAMIVIR);
+    await renderRouter(APP, { initialUrl: "/postos/8944" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Guardado em Meus remédios" }));
+
+    expect(await screen.findByRole("button", { name: "Guardar em Meus remédios" })).toBeOnTheScreen();
+    expect(screen.queryByText(/Para tirar, toque no botão de novo/)).toBeNull();
+    expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledWith("Tirado de Meus remédios");
+    expect(meusRemediosSalvos()?.remedios.map((r) => r.codigo)).toEqual(["MSE24551"]);
+  });
+
+  it("remédio que não aparece nos dados de hoje: avisa, não apaga sozinho, e a pessoa pode tirar", async () => {
+    guardados(LOSARTANA, SUMIU);
+    await renderRouter(APP, { initialUrl: "/meus-remedios" });
+
+    expect(await screen.findByText("Não aparece nos dados de hoje")).toBeOnTheScreen();
+    expect(screen.getByText("Remédio antigo")).toBeOnTheScreen();
+    expect(screen.getByText("Comprimido 10 mg")).toBeOnTheScreen();
+    expect(meusRemediosSalvos()?.remedios).toHaveLength(2);
+
+    await fireEvent.press(screen.getByRole("button", { name: "Tirar de Meus remédios" }));
+    await waitFor(() => expect(screen.queryByText("Remédio antigo")).toBeNull());
+    expect(screen.getByRole("button", { name: /^Losartana potassica/ })).toBeOnTheScreen();
+    expect(meusRemediosSalvos()?.remedios.map((r) => r.codigo)).toEqual(["8944"]);
+  });
+
+  it("primeira vez: não pede a localização sozinha e, até a pessoa escolher, mostra só quantos postos", async () => {
+    mockGps.permissao = NUNCA_PERGUNTADO;
+    guardados(LOSARTANA);
+    await renderRouter(APP, { initialUrl: "/meus-remedios" });
+
+    expect(await screen.findByText("Como achar os postos perto de você?")).toBeOnTheScreen();
+    expect(mockGps.pedidos).toBe(0);
+    const item = screen.getByRole("button", { name: /^Losartana potassica/ });
+    expect(within(item).getByText("Em 4 postos hoje")).toBeOnTheScreen();
+    expect(within(item).queryByText(/Mais perto/)).toBeNull();
+
+    await fireEvent.press(screen.getByRole("button", { name: "Usar minha localização" }));
+    expect(await screen.findByText("Mais perto de você:")).toBeOnTheScreen();
+    expect(mockGps.pedidos).toBe(1);
+  });
+
+  it("sem permissão e sem região: oferece escolher a região, sem posto 'mais perto'", async () => {
+    mockGps.permissao = { granted: false, canAskAgain: false, status: "denied" };
+    guardados(LOSARTANA);
+    await renderRouter(APP, { initialUrl: "/meus-remedios" });
+
+    expect(await screen.findByText("Sem a sua localização")).toBeOnTheScreen();
+    expect(screen.getByText("Escolha a sua região para ver o posto mais perto de cada remédio.")).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Escolher minha região" })).toBeOnTheScreen();
+    expect(screen.queryByText(/Mais perto/)).toBeNull();
+  });
+
+  it("pela região escolhida, em ordem alfabética; controlado só nas UBSs que entregam", async () => {
+    mockArquivos.set("regiao.json", JSON.stringify({ ra: "Samambaia", usarRegiao: true }));
+    guardados(LOSARTANA, CLONAZEPAM);
+    await renderRouter(APP, { initialUrl: "/meus-remedios" });
+
+    expect(await screen.findByText("Pela sua região: Samambaia.")).toBeOnTheScreen();
+    const itens = screen.getAllByRole("button", { name: /^(Losartana|Clonazepam)/ });
+    expect(itens.map((b) => String(b.props.accessibilityLabel).split(".")[0])).toEqual(["Clonazepam", "Losartana potassica"]);
+
+    const [clonazepam, losartana] = itens as [typeof itens[0], typeof itens[0]];
+    expect(within(losartana).getByText("Na sua região:")).toBeOnTheScreen();
+    expect(within(losartana).getByText("UBS 01 Samambaia")).toBeOnTheScreen();
+    // A UBS de Samambaia não entrega controlados: o primeiro é o mais perto da região que entrega.
+    expect(within(clonazepam).getByText("Mesma substância de Rivotril")).toBeOnTheScreen();
+    expect(within(clonazepam).getByText("Em 2 postos hoje")).toBeOnTheScreen();
+    expect(within(clonazepam).getByText("Mais perto da sua região:")).toBeOnTheScreen();
+    expect(within(clonazepam).getByText("UBS 05 Taguatinga")).toBeOnTheScreen();
+    expect(within(clonazepam).getByText("Só nas UBSs que entregam controlados")).toBeOnTheScreen();
+    // Pela região, a distância não aparece (o centro da região não é onde a pessoa está).
+    expect(screen.queryByText(/ km$/)).toBeNull();
+    expect(mockGps.pedidos).toBe(0);
+  });
+
+  it("marca de liberação prolongada: lembra que não é o mesmo remédio, e a tela de postos também avisa", async () => {
+    guardados({ codigo: "90226", nome: "Metformina (cloridrato)", apresentacao: "Comprimido 850 mg", marca: "GLIFAGE XR", guardadoEm: EM });
+    const r = await renderRouter(APP, { initialUrl: "/meus-remedios" });
+
+    const item = await screen.findByRole("button", { name: /^Metformina/ });
+    expect(within(item).getByText("Mesma substância de Glifage XR")).toBeOnTheScreen();
+    expect(within(item).getByText(/^Glifage XR é de liberação prolongada; este não é\. Confirme com seu médico ou farmacêutico\.$/)).toBeOnTheScreen();
+
+    await fireEvent.press(item);
+    expect(r.getPathname()).toBe("/postos/90226");
+    expect(await screen.findByText("Mesma substância, mas não é o mesmo remédio")).toBeOnTheScreen();
+  });
+
+  it("arquivo estragado: lista vazia, com o convite", async () => {
+    mockArquivos.set("meus-remedios.json", "{estragado");
+    const r = await renderRouter(APP, { initialUrl: "/meus-remedios" });
+    expect(await screen.findByText("Guarde os remédios que você usa")).toBeOnTheScreen();
+    expect(screen.getByText("Sua lista fica só neste celular.")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Buscar um remédio" }));
+    expect(r.getPathname()).toBe("/");
+  });
+
+  it("na busca, antes de digitar: Seus remédios, com um toque até os postos", async () => {
+    guardados(LOSARTANA, OSELTAMIVIR, SUMIU, CLONAZEPAM);
+    const r = await renderRouter(APP, { initialUrl: "/" });
+
+    expect(await screen.findByText("Seus remédios")).toBeOnTheScreen();
+    // Os três primeiros em ordem alfabética; o resto na aba.
+    expect(screen.getByRole("button", { name: "Clonazepam. Comprimido 2 mg. Em 2 postos hoje" })).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Oseltamivir (fosfato). Cápsula 75 mg. Nenhum posto tem hoje" })).toBeOnTheScreen();
+    expect(screen.queryByText("Remédio antigo")).toBeNull();
+
+    await fireEvent.press(screen.getByRole("button", { name: "Losartana potassica. Comprimido 50 mg. Em 4 postos hoje" }));
+    expect(r.getPathname()).toBe("/postos/8944");
+    await fireEvent.press(await screen.findByRole("button", { name: "Voltar" }));
+    expect(r.getPathname()).toBe("/");
+
+    await fireEvent.press(await screen.findByRole("button", { name: "Ver os 4 em Meus remédios" }));
+    expect(r.getPathname()).toBe("/meus-remedios");
+
+    // Digitando, a busca toma o lugar.
+    await fireEvent.press(screen.getByRole("button", { name: "Buscar remédio" }));
+    await buscarPor("losartana");
+    expect(await screen.findByText("1 remédio encontrado")).toBeOnTheScreen();
+    expect(screen.queryByText("Seus remédios")).toBeNull();
   });
 });
 
