@@ -19,7 +19,7 @@ export function nivelEstoque(dias: number | null): NivelEstoque {
   return "alto";
 }
 
-/** Texto do semáforo. Nunca prometer "seguro ir": o dado é da madrugada. */
+/** Texto do semáforo. Nunca prometer "seguro ir": o dado pode ter horas. */
 export const TEXTO_NIVEL: Record<NivelEstoque, string> = {
   alto: "Tem bastante",
   baixo: "Tem pouco, ligue antes",
