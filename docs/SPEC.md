@@ -50,7 +50,7 @@ Em até 3 toques, a pessoa (idosa, ou o filho/cuidador) descobre **qual posto de
 | < 7 | Quase acabando, ligue antes |
 | sem consumo registrado | Tem |
 
-Nunca prometer "seguro ir": o dado é da madrugada. Sempre ícone + texto, não só cor.
+Nunca prometer "seguro ir": o dado pode ter horas. Sempre ícone + texto, não só cor.
 
 ### Onde retirar (`packages/shared/src/retirada.ts`)
 Vem do painel oficial "Como garantir seu medicamento", **remédio por remédio**:
@@ -80,7 +80,7 @@ Ressalva: "sem observação" = sem restrição publicada, não uma regra escrita
 
 ```
 Painéis InfoSaúde (Power BI)  ─┐
-API CNES (Ministério da Saúde) ─┼─► coletor (GitHub Actions, 01:00 e 14:00) ─► snapshot.json + meta.json (GitHub Pages) ─► app Expo (cache local, busca offline)
+API CNES (Ministério da Saúde) ─┼─► coletor (GitHub Actions, de hora em hora) ─► snapshot.json + meta.json (GitHub Pages) ─► app Expo (cache local, busca offline)
 Tabela CMED (Anvisa)          ─┘
 ```
 

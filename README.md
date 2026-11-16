@@ -17,7 +17,7 @@ flowchart LR
   E --> F[App Expo<br/>busca offline]
 ```
 
-O coletor roda duas vezes por dia (01:00 e 14:00, horário de Brasília) e gera um arquivo de ~120 KB (gzip) com:
+O coletor confere de hora em hora se a SES-DF atualizou (ela atualiza por volta de 00h15 e 16h15, horário de Brasília) e, quando há dado novo, publica um arquivo de ~120 KB (gzip) com:
 
 - **156 farmácias de UBS** com endereço, coordenadas, telefone, horário e se entregam remédios controlados;
 - **~200 remédios** da atenção básica, com forma, dose e **onde podem ser retirados** (qualquer UBS, UBS de referência, controlado...);

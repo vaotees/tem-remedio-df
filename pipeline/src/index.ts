@@ -36,20 +36,17 @@ async function main() {
   const anterior = await lerPublicado(args.anterior);
   log(anterior ? `Publicado: dados de ${anterior.atualizadoEm}` : "Nenhum snapshot publicado ainda");
 
-  log("Extraindo da SES-DF (estoque, regras de retirada, cadastro das UBSs)...");
-  const [atualizadoEm, estoque, regras, cadastroUbs] = await Promise.all([
-    buscarDataExtracao(),
-    buscarEstoque(),
-    buscarRegras(),
-    buscarCadastroUbs(),
-  ]);
-  log(`Dados de ${atualizadoEm}: ${estoque.length} linhas com estoque, ${regras.length} regras, ${cadastroUbs.length} UBSs no cadastro`);
-
+  // O workflow roda de hora em hora: sem dado novo, para aqui, depois de uma consulta só.
+  const atualizadoEm = await buscarDataExtracao();
   if (anterior && atualizadoEm === anterior.atualizadoEm) {
-    log("A SES-DF ainda não atualizou. Nada a publicar.");
+    log(`A SES-DF ainda não atualizou (dados de ${atualizadoEm}). Nada a publicar.`);
     await saidaGithub("publicar", "false");
     return;
   }
+
+  log(`Extraindo da SES-DF os dados de ${atualizadoEm} (estoque, regras de retirada, cadastro das UBSs)...`);
+  const [estoque, regras, cadastroUbs] = await Promise.all([buscarEstoque(), buscarRegras(), buscarCadastroUbs()]);
+  log(`${estoque.length} linhas com estoque, ${regras.length} regras, ${cadastroUbs.length} UBSs no cadastro`);
 
   log("Buscando endereços e coordenadas no CNES...");
   const cache = await lerCache(args["cache-cnes"]!);
