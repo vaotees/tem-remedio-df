@@ -1,5 +1,6 @@
 import { TEXTO_RETIRADA, type Produto, type Snapshot, type Ubs } from "@tem-remedio/shared";
 import { distanciaKm, type Coordenadas } from "./distancia";
+import { linkOficial } from "./links";
 import { acharRegiao } from "./regioes";
 
 export interface PostoComEstoque {
@@ -66,9 +67,10 @@ export function estaForaDoDf(snapshot: Snapshot, origem: Coordenadas): boolean {
 /**
  * Identifica um posto entre atualizações do snapshot. O CNES não basta:
  * algumas UBSs têm duas farmácias (ex.: UBS 5 Ceilândia).
+ * Unidade prisional não abre, nem por um link direto (`/posto/[cnes]`).
  */
 export function acharUbs(snapshot: Snapshot, cnes: string, farmacia?: string): Ubs | null {
-  const doCnes = snapshot.ubs.filter((u) => u.cnes === cnes);
+  const doCnes = snapshot.ubs.filter((u) => u.cnes === cnes && !ehUnidadePrisional(u));
   return doCnes.find((u) => u.farmacia === farmacia) ?? doCnes[0] ?? null;
 }
 
@@ -92,18 +94,19 @@ export interface AvisoRetirada {
 /** O que a pessoa precisa saber antes de escolher o posto, conforme a regra de retirada do remédio. */
 export function avisoRetirada(produto: Produto): AvisoRetirada | null {
   const texto = TEXTO_RETIRADA[produto.retirada];
+  const link = linkOficial(produto);
   switch (produto.retirada) {
     case "qualquer_ubs":
       return null;
     case "controlado":
-      return { titulo: "Só nas UBSs que entregam controlados", texto, link: produto.linkInfo };
+      return { titulo: "Só nas UBSs que entregam controlados", texto, link };
     case "ubs_referencia":
-      return { titulo: "Retire na UBS do seu bairro", texto, link: produto.linkInfo };
+      return { titulo: "Retire na UBS do seu bairro", texto, link };
     case "unidades_especificas":
-      return { titulo: "Só em algumas unidades", texto, link: produto.linkInfo };
+      return { titulo: "Só em algumas unidades", texto, link };
     case "grupo_acompanhamento":
-      return { titulo: "Só para quem participa do grupo", texto, link: produto.linkInfo };
+      return { titulo: "Só para quem participa do grupo", texto, link };
     case "sem_informacao":
-      return { titulo: "Confirme antes de ir", texto, link: produto.linkInfo };
+      return { titulo: "Confirme antes de ir", texto, link };
   }
 }

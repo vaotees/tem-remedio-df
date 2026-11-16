@@ -1,4 +1,4 @@
-import { snapshotSchema, type Snapshot } from "@tem-remedio/shared";
+import { dataNoFuturo, LIMITES_SNAPSHOT, snapshotSchema, type Snapshot } from "@tem-remedio/shared";
 import { VALIDACAO } from "./config";
 
 /** O que o coletor sabe do último snapshot publicado (vem do meta.json). */
@@ -17,11 +17,20 @@ export interface ResultadoValidacao {
 
 export function validarSnapshot(
   s: Snapshot,
-  anterior: ResumoPublicado | null,
+  publicado: ResumoPublicado | null,
   limites = VALIDACAO,
+  agora: number = Date.now(),
 ): ResultadoValidacao {
   const erros: string[] = [];
   const avisos: string[] = [];
+
+  // Publicado com data no futuro (ano errado na fonte ou Pages adulterado) travaria toda coleta
+  // seguinte em "dados mais antigos". Ignora o publicado: os dados de agora o substituem.
+  let anterior = publicado;
+  if (anterior && dataNoFuturo({ atualizadoEm: anterior.atualizadoEm }, agora)) {
+    avisos.push(`o publicado tem data no futuro (${anterior.atualizadoEm}): ignorado, os dados de agora substituem`);
+    anterior = null;
+  }
 
   const parse = snapshotSchema.safeParse(s);
   if (!parse.success) {
@@ -29,6 +38,12 @@ export function validarSnapshot(
       ...parse.error.issues.slice(0, 10).map((i) => `schema: ${i.path.join(".")}: ${i.message}`),
     );
   }
+
+  if (dataNoFuturo(s.meta, agora)) {
+    erros.push(`data no futuro (${s.meta.atualizadoEm}, gerado em ${s.meta.geradoEm}): erro na fonte?`);
+  }
+  const bytes = Buffer.byteLength(JSON.stringify(s));
+  if (bytes > LIMITES_SNAPSHOT.bytes) erros.push(`${bytes} bytes (máximo ${LIMITES_SNAPSHOT.bytes}): o app não baixaria`);
 
   if (s.ubs.length < limites.minUbs) erros.push(`só ${s.ubs.length} UBSs (mínimo ${limites.minUbs})`);
   if (s.produtos.length < limites.minProdutos) erros.push(`só ${s.produtos.length} produtos (mínimo ${limites.minProdutos})`);

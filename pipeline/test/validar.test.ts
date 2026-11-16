@@ -2,7 +2,7 @@ import { mkdtemp, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { VERSAO_SCHEMA, type Snapshot } from "@tem-remedio/shared";
+import { LIMITES_SNAPSHOT, VERSAO_SCHEMA, type Snapshot } from "@tem-remedio/shared";
 import { escreverSaida, lerPublicado } from "../src/publicar";
 import { validarSnapshot, type ResumoPublicado } from "../src/validar";
 
@@ -79,6 +79,47 @@ describe("validarSnapshot", () => {
     const s = snapshot();
     s.estoque.push([99, 0, 1, null]);
     expect(validarSnapshot(s, null, LIMITES).status).toBe("rejeitar");
+  });
+
+  describe("datas no futuro", () => {
+    const AGORA = Date.parse("2026-10-17T15:00:00Z");
+
+    it("rejeita dados com data no futuro (ano errado na fonte): travariam o app e as próximas coletas", () => {
+      const r = validarSnapshot(snapshot(4, "2062-10-17T00:16:33"), publicado("2026-10-16T00:15:00"), LIMITES, AGORA);
+      expect(r.status).toBe("rejeitar");
+      expect(r.erros.join(" ")).toMatch(/data no futuro \(2062-10-17T00:16:33/);
+    });
+
+    it("publicado com data no futuro é ignorado: os dados de agora o substituem", () => {
+      // Sem isso, toda coleta seria "mais antiga que a publicada" para sempre.
+      const r = validarSnapshot(snapshot(4), publicado("2099-01-01T00:00:00", 4000), LIMITES, AGORA);
+      expect(r.status).toBe("publicar");
+      expect(r.avisos.join(" ")).toMatch(/publicado tem data no futuro \(2099-01-01T00:00:00\)/);
+    });
+
+    it("dados de hoje continuam valendo", () => {
+      expect(validarSnapshot(snapshot(4), publicado("2026-10-16T00:15:00"), LIMITES, AGORA).status).toBe("publicar");
+    });
+  });
+
+  it("rejeita snapshot maior que o app aceita baixar", () => {
+    const s = snapshot();
+    // Textos no limite do schema, em quantidade suficiente para passar do teto de bytes.
+    const enchimento = "A".repeat(LIMITES_SNAPSHOT.texto);
+    const n = Math.ceil(LIMITES_SNAPSHOT.bytes / (LIMITES_SNAPSHOT.texto * 5)) + 1;
+    s.ubs = Array.from({ length: n }, (_, i) => ({
+      ...s.ubs[0]!,
+      cnes: String(1000000 + i),
+      nome: enchimento,
+      farmacia: enchimento,
+      endereco: enchimento,
+      horario: enchimento,
+      regiaoSaude: enchimento,
+    }));
+    s.estoque = s.ubs.map((_, i) => [i, 0, 100, 30]);
+    const r = validarSnapshot(s, null, LIMITES);
+    expect(r.status).toBe("rejeitar");
+    expect(r.erros.join(" ")).toMatch(/bytes \(máximo 5000000\): o app não baixaria/);
   });
 });
 

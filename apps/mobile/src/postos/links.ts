@@ -1,5 +1,13 @@
-import type { Ubs } from "@tem-remedio/shared";
+import { linkOficialPermitido, type Produto, type Ubs } from "@tem-remedio/shared";
 import { capitalizarNome } from "@/busca/remedios";
+
+/**
+ * "Ver a lista oficial": só abre o site da SES-DF. O schema já recusa snapshot com outro endereço;
+ * esta é a segunda trava, logo antes do botão (o texto dele promete o site da Secretaria).
+ */
+export function linkOficial(produto: Produto): string | null {
+  return produto.linkInfo && linkOficialPermitido(produto.linkInfo) ? produto.linkInfo : null;
+}
 
 /** Rota até o posto no Google Maps (abre o app, se instalado, ou o site). */
 export function linkGoogleMaps(ubs: Ubs): string {

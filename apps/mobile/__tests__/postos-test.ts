@@ -6,6 +6,7 @@ import {
   formatarCep,
   linkAppleMaps,
   linkGoogleMaps,
+  linkOficial,
   linkTelefone,
   linkWaze,
   linkWhatsAppApp,
@@ -122,6 +123,23 @@ describe("avisoRetirada", () => {
   });
 });
 
+describe("link da lista oficial", () => {
+  const produto = (i: number) => snapshotTeste.produtos[i]!;
+
+  it("abre só o site da SES-DF", () => {
+    expect(linkOficial(produto(8))).toBe("https://www.saude.df.gov.br/tabagismo/");
+    expect(linkOficial(produto(0))).toBeNull();
+  });
+
+  it("snapshot adulterado (passou do schema de algum jeito): o aviso fica sem botão", () => {
+    for (const linkInfo of ["javascript:alert(document.domain)", "http://www.saude.df.gov.br/tabagismo/", "https://exemplo.com/"]) {
+      const adulterado = { ...produto(8), linkInfo };
+      expect(linkOficial(adulterado)).toBeNull();
+      expect(avisoRetirada(adulterado)).toMatchObject({ titulo: "Só para quem participa do grupo", link: null });
+    }
+  });
+});
+
 describe("acharUbs", () => {
   it("acha pelo CNES e, quando a UBS tem duas farmácias, pela farmácia", () => {
     expect(acharUbs(snapshotTeste, "0010626")?.nome).toBe("UBS 05 TAGUATINGA");
@@ -132,6 +150,15 @@ describe("acharUbs", () => {
     expect(acharUbs(real, "0011010", duas[1]!.farmacia)).toBe(duas[1]);
     expect(temOutraFarmacia(real, duas[0]!)).toBe(true);
     expect(temOutraFarmacia(snapshotTeste, snapshotTeste.ubs[0]!)).toBe(false);
+  });
+
+  it("unidade prisional não abre nem por link direto", () => {
+    expect(acharUbs(snapshotTeste, "0263680")).toBeNull();
+    // O snapshot embutido é de antes de o coletor tirar as prisionais: as 3 continuam lá.
+    for (const cnes of ["0263680", "3027635", "3027651"]) {
+      expect(real.ubs.some((u) => u.cnes === cnes)).toBe(true);
+      expect(acharUbs(real, cnes)).toBeNull();
+    }
   });
 });
 
