@@ -79,7 +79,8 @@ export default function Inicio() {
             ref={campo}
             value={busca}
             onChangeText={setBusca}
-            placeholder="Nome do remédio ou da caixa"
+            // Curto: o exemplo do campo não quebra linha e seria cortado com a letra grande.
+            placeholder="Ex.: losartana"
             placeholderTextColor={cores.textoSecundario}
             accessibilityLabel="Nome do remédio"
             accessibilityHint="Pode ser o nome que está na caixa"
@@ -106,6 +107,9 @@ export default function Inicio() {
             </Pressable>
           ) : null}
         </View>
+        <Texto variante="legenda" cor={cores.textoFaixaSecundario} style={estilos.dicaCaixa}>
+          Vale também o nome que está na caixa, como Glifage.
+        </Texto>
       </View>
 
       <View style={estilos.corpo}>
@@ -417,6 +421,7 @@ const estilos = StyleSheet.create({
     elevation: 4,
   },
   entrada: { flex: 1, paddingVertical: espaco.sm },
+  dicaCaixa: { marginTop: espaco.xs },
   limpar: { minWidth: ALVO_MINIMO, minHeight: ALVO_MINIMO, alignItems: "center", justifyContent: "center" },
   corpo: { padding: espaco.md, gap: espaco.lg },
   lista: { gap: espaco.sm },

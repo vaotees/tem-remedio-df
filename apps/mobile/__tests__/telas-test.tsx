@@ -940,9 +940,9 @@ describe("Perfil", () => {
 
     await fireEvent.changeText(screen.getByLabelText("Seu nome"), "  Lúcia ");
     await fireEvent(screen.getByLabelText("Seu nome"), "blur");
-    await fireEvent.press(screen.getByRole("tab", { name: "Maior" }));
-    await fireEvent.press(screen.getByRole("tab", { name: "Escuro" }));
-    expect(screen.getByRole("tab", { name: "Maior" }).props.accessibilityState).toEqual({ selected: true });
+    await fireEvent.press(screen.getByRole("radio", { name: "Maior" }));
+    await fireEvent.press(screen.getByRole("radio", { name: /^Escuro\./ }));
+    expect(screen.getByRole("radio", { name: "Maior" }).props.accessibilityState).toEqual({ checked: true });
     expect(preferenciasSalvas()).toEqual({ nome: "Lúcia", letra: "maior", tema: "escuro" });
     expect(await screen.findByText("Lúcia")).toBeOnTheScreen();
 
@@ -958,9 +958,9 @@ describe("Perfil", () => {
     mockArquivos.set("preferencias.json", JSON.stringify({ nome: 42, letra: "gigante", tema: "roxo" }));
     await carregarPreferencias();
     await renderRouter(APP, { initialUrl: "/perfil" });
-    expect(await screen.findByRole("tab", { name: "Normal" })).toBeOnTheScreen();
-    expect(screen.getByRole("tab", { name: "Normal" }).props.accessibilityState).toEqual({ selected: true });
-    expect(screen.getByRole("tab", { name: "Do celular" }).props.accessibilityState).toEqual({ selected: true });
+    expect(await screen.findByRole("radio", { name: "Normal" })).toBeOnTheScreen();
+    expect(screen.getByRole("radio", { name: "Normal" }).props.accessibilityState).toEqual({ checked: true });
+    expect(screen.getByRole("radio", { name: /^Do celular\./ }).props.accessibilityState).toEqual({ checked: true });
   });
 
   it("a Ajuda abre pelo ? do Início e o Voltar volta para o Início", async () => {

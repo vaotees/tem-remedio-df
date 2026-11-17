@@ -1,14 +1,22 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
-import { Alternancia } from "@/componentes/Alternancia";
+import { EscolhaUnica } from "@/componentes/EscolhaUnica";
 import { Cartao } from "@/componentes/Cartao";
 import { Icone, type NomeIcone } from "@/componentes/Icone";
 import { Tela } from "@/componentes/Tela";
 import { Texto } from "@/componentes/Texto";
 import { useRegiaoEscolhida } from "@/postos/regiao-escolhida";
-import { mudarPreferencias, usePreferencias, type Letra, type PreferenciaTema } from "@/preferencias/preferencias";
+import {
+  ESCALAS_LETRA,
+  mudarPreferencias,
+  usePreferencias,
+  type Letra,
+  type PreferenciaTema,
+} from "@/preferencias/preferencias";
 import { ALVO_MINIMO, espaco, familia, fonte, RAIO_CAPSULA, raio, useTema } from "@/tema";
+
+const TITULO_LETRA: Record<Letra, string> = { normal: "Normal", grande: "Grande", maior: "Maior" };
 
 /**
  * Perfil sem cadastro: nada de senha nem conta. Nome (só para a saudação), letra, tema e região
@@ -84,15 +92,16 @@ export default function Perfil() {
           <Icone name="text" size={22} color={cores.primaria} />
           <Texto variante="destaque">Tamanho da letra</Texto>
         </View>
-        <Alternancia<Letra>
+        {/* Cada opção já aparece no tamanho dela: a pessoa vê antes de escolher. */}
+        <EscolhaUnica<Letra>
           rotulo="Tamanho da letra"
           valor={preferencias.letra}
           aoMudar={(letra) => void mudarPreferencias({ letra })}
-          opcoes={[
-            { valor: "normal", titulo: "Normal" },
-            { valor: "grande", titulo: "Grande" },
-            { valor: "maior", titulo: "Maior" },
-          ]}
+          opcoes={(["normal", "grande", "maior"] as const).map((letra) => ({
+            valor: letra,
+            titulo: TITULO_LETRA[letra],
+            tamanhoTitulo: Math.round((fonte.destaque * ESCALAS_LETRA[letra]) / escalaLetra),
+          }))}
         />
         <Texto secundario>A letra também cresce com o ajuste de letra do celular.</Texto>
 
@@ -100,14 +109,14 @@ export default function Perfil() {
           <Icone name="contrast" size={22} color={cores.primaria} />
           <Texto variante="destaque">Cores do app</Texto>
         </View>
-        <Alternancia<PreferenciaTema>
+        <EscolhaUnica<PreferenciaTema>
           rotulo="Cores do app"
           valor={preferencias.tema}
           aoMudar={(tema) => void mudarPreferencias({ tema })}
           opcoes={[
-            { valor: "sistema", titulo: "Do celular" },
-            { valor: "claro", titulo: "Claro" },
-            { valor: "escuro", titulo: "Escuro" },
+            { valor: "sistema", titulo: "Do celular", detalhe: "Claro de dia ou escuro, como o celular estiver" },
+            { valor: "claro", titulo: "Claro", detalhe: "Fundo claro e letra escura" },
+            { valor: "escuro", titulo: "Escuro", detalhe: "Fundo escuro e letra clara" },
           ]}
         />
       </Cartao>

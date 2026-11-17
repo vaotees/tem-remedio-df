@@ -19,7 +19,7 @@ interface Props<T extends string> {
 
 /**
  * Seletor em cápsula, como "Lista | Mapa". A escolhida fica em branco, em negrito e com o ícone de
- * marcado: a diferença não depende só da cor. O rótulo quebra linha, nunca corta.
+ * marcado: a diferença não depende só da cor. O rótulo nunca corta nem quebra no meio de uma palavra.
  */
 export function Alternancia<T extends string>({ opcoes, valor, aoMudar, rotulo }: Props<T>) {
   const { cores } = useTema();
@@ -54,9 +54,15 @@ export function Alternancia<T extends string>({ opcoes, valor, aoMudar, rotulo }
 }
 
 const estilos = StyleSheet.create({
-  grupo: { flexDirection: "row", borderRadius: RAIO_CAPSULA, padding: 4, gap: 4 },
+  // Cápsula numa linha; se as opções não couberem (letra grande), a de sobra desce para outra linha.
+  grupo: { flexDirection: "row", flexWrap: "wrap", borderRadius: 30, padding: 4, gap: 4 },
   opcao: {
-    flex: 1,
+    // Cada opção tem pelo menos a largura do próprio rótulo (nunca quebra uma palavra no meio) e cresce
+    // para preencher a linha. Rótulo de várias palavras maior que a tela quebra entre as palavras.
+    flexGrow: 1,
+    flexShrink: 0,
+    flexBasis: "auto",
+    maxWidth: "100%",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
