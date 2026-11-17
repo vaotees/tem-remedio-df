@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
-import { espaco, raio, useTema } from "@/tema";
+import { espaco, RAIO_CARTAO, useTema } from "@/tema";
 import { Icone } from "./Icone";
 import { Texto } from "./Texto";
 
@@ -18,7 +18,7 @@ export function Aviso({ tipo = "aviso", titulo, texto, children }: Props) {
   const { cores } = useTema();
   const par = tipo === "aviso" ? cores.aviso : cores.info;
   return (
-    <View style={[estilos.caixa, { backgroundColor: par.fundo, borderColor: par.texto }]}>
+    <View style={[estilos.caixa, { backgroundColor: par.fundo }]}>
       <View style={estilos.cabecalho}>
         <Icone name={tipo === "aviso" ? "warning" : "information-circle"} size={26} color={par.texto} />
         <Texto variante="destaque" cor={par.texto} style={estilos.titulo} accessibilityRole="header">
@@ -32,7 +32,7 @@ export function Aviso({ tipo = "aviso", titulo, texto, children }: Props) {
 }
 
 const estilos = StyleSheet.create({
-  caixa: { borderRadius: raio, borderWidth: 1, padding: espaco.md, gap: espaco.sm },
+  caixa: { borderRadius: RAIO_CARTAO, padding: espaco.md, gap: espaco.sm },
   cabecalho: { flexDirection: "row", alignItems: "flex-start", gap: espaco.sm },
   titulo: { flex: 1 },
 });

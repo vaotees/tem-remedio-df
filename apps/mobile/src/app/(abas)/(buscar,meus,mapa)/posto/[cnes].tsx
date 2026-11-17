@@ -1,4 +1,4 @@
-import { DOCUMENTOS_UBS, TEXTO_RETIRADA, type Snapshot } from "@tem-remedio/shared";
+import { DOCUMENTOS_UBS, nivelEstoque, TEXTO_RETIRADA, type Snapshot } from "@tem-remedio/shared";
 import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Linking, Platform, Share, StyleSheet, View } from "react-native";
@@ -6,7 +6,11 @@ import { Botao } from "@/componentes/Botao";
 import { Cartao } from "@/componentes/Cartao";
 import { ComDados } from "@/componentes/ComDados";
 import { EscolherMapa } from "@/componentes/EscolherMapa";
+import { MedidorDias } from "@/componentes/Graficos";
+import { Icone } from "@/componentes/Icone";
+import { MapaPosto } from "@/componentes/MapaPosto";
 import { NaoEncontrado } from "@/componentes/NaoEncontrado";
+import { Pictograma } from "@/componentes/Pictograma";
 import { SeloEstoque } from "@/componentes/SeloEstoque";
 import { SeloHorario } from "@/componentes/SeloHorario";
 import { Tela } from "@/componentes/Tela";
@@ -22,8 +26,9 @@ import {
   telefoneParaLeitor,
   textoCompartilhar,
 } from "@/postos/links";
+import { interpretarHorario } from "@/postos/horario";
 import { acharUbs, estoqueNoPosto, temOutraFarmacia } from "@/postos/postos";
-import { espaco } from "@/tema";
+import { espaco, useTema } from "@/tema";
 import { formatarAtualizacao } from "@/util/datas";
 
 /** Detalhe do posto: onde fica, quando abre, como chegar, ligar e mandar para alguém. */
@@ -80,17 +85,28 @@ function Detalhe({ snapshot, cnes, farmacia, codigoProduto }: Props) {
 
   return (
     <>
-      <View>
+      <MapaPosto ubs={ubs} nivel={estoque ? nivelEstoque(estoque.dias) : null} />
+
+      <View style={estilos.cabecalho}>
         <Texto variante="titulo">{nome}</Texto>
         <Texto secundario>{ubs.ra}</Texto>
         {temOutraFarmacia(snapshot, ubs) ? <Texto variante="legenda" secundario>{ubs.farmacia}</Texto> : null}
+        <SeloHorario horario={ubs.horario} />
       </View>
 
       {produto && remedio ? (
         <Cartao>
-          <Texto variante="destaque">{remedio}</Texto>
+          <View style={estilos.linha}>
+            <Pictograma forma={produto.forma} tamanho={40} />
+            <Texto variante="destaque" style={estilos.flex}>
+              {remedio}
+            </Texto>
+          </View>
           {estoque ? (
-            <SeloEstoque dias={estoque.dias} />
+            <>
+              <SeloEstoque dias={estoque.dias} />
+              <MedidorDias dias={estoque.dias} />
+            </>
           ) : (
             <Texto>Este posto não tem este remédio nos dados de hoje.</Texto>
           )}
@@ -115,22 +131,37 @@ function Detalhe({ snapshot, cnes, farmacia, codigoProduto }: Props) {
           dica="Pergunta qual app de mapa você quer usar"
           onPress={() => setEscolhendoMapa(true)}
         />
-        {telefone ? (
+        <View style={estilos.par}>
+          {telefone ? (
+            <Botao
+              titulo="Ligar"
+              icone="call"
+              variante="tonal"
+              detalhe={ubs.telefone ?? undefined}
+              dica={`Liga para ${telefoneFalado}`}
+              onPress={() => Linking.openURL(telefone)}
+            />
+          ) : null}
           <Botao
-            titulo="Ligar"
-            icone="call"
-            dica={`Liga para ${telefoneFalado}`}
-            onPress={() => Linking.openURL(telefone)}
+            titulo="WhatsApp"
+            rotulo="Enviar no WhatsApp"
+            icone="logo-whatsapp"
+            variante="tonal"
+            detalhe="Mandar o endereço"
+            dica="Abre o WhatsApp com o endereço e o horário deste posto"
+            onPress={() => enviar(textoCompartilhar({ ubs, remedio, atualizacao }))}
           />
-        ) : null}
-        <Botao
-          titulo="Enviar no WhatsApp"
-          icone="logo-whatsapp"
-          variante="secundario"
-          dica="Abre o WhatsApp com o endereço e o horário deste posto"
-          onPress={() => enviar(textoCompartilhar({ ubs, remedio, atualizacao }))}
-        />
+        </View>
       </View>
+
+      <Cartao>
+        <Texto variante="subtitulo">Horário</Texto>
+        <Semana horario={ubs.horario} />
+        <Texto>{ubs.horario ? capitalizarPrimeira(ubs.horario) : "Horário não informado."}</Texto>
+        <Texto variante="legenda" secundario>
+          Em feriados o horário pode mudar.
+        </Texto>
+      </Cartao>
 
       <Cartao>
         <Texto variante="subtitulo">Endereço</Texto>
@@ -138,15 +169,6 @@ function Detalhe({ snapshot, cnes, farmacia, codigoProduto }: Props) {
         <Texto secundario>
           {ubs.ra}
           {ubs.cep ? ` · CEP ${formatarCep(ubs.cep)}` : ""}
-        </Texto>
-      </Cartao>
-
-      <Cartao>
-        <Texto variante="subtitulo">Horário</Texto>
-        <SeloHorario horario={ubs.horario} />
-        <Texto>{ubs.horario ? capitalizarPrimeira(ubs.horario) : "Horário não informado."}</Texto>
-        <Texto variante="legenda" secundario>
-          Em feriados o horário pode mudar.
         </Texto>
       </Cartao>
 
@@ -159,16 +181,74 @@ function Detalhe({ snapshot, cnes, farmacia, codigoProduto }: Props) {
 
       <Cartao>
         <Texto variante="subtitulo">O que levar</Texto>
-        {DOCUMENTOS_UBS.map((doc) => (
-          <Texto key={doc}>• {doc}</Texto>
-        ))}
-        {produto?.retirada === "controlado" ? (
-          <Texto>• Receita de controle especial em 2 vias (não aceitam xerox)</Texto>
-        ) : null}
+        {[...DOCUMENTOS_UBS, ...(produto?.retirada === "controlado" ? ["Receita de controle especial em 2 vias (não aceitam xerox)"] : [])].map(
+          (doc) => (
+            <ItemLevar key={doc} texto={doc} />
+          ),
+        )}
       </Cartao>
 
       <EscolherMapa ubs={escolhendoMapa ? ubs : null} aoFechar={() => setEscolhendoMapa(false)} />
     </>
+  );
+}
+
+const LETRA_DIA = ["D", "S", "T", "Q", "Q", "S", "S"];
+const NOME_DIA = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
+
+/**
+ * A semana em sete quadradinhos: os dias em que o posto abre, hoje em azul, os fechados riscados.
+ * Só quando o horário do cadastro dá para entender; o texto completo vem embaixo.
+ */
+function Semana({ horario, agora = new Date() }: { horario: string | null; agora?: Date }) {
+  const { cores } = useTema();
+  const faixas = interpretarHorario(horario);
+  if (!faixas) return null;
+  const abertos = new Set(faixas.flatMap((f) => f.dias));
+  const hoje = agora.getDay();
+  return (
+    <View
+      style={estilos.semana}
+      accessible
+      accessibilityLabel={`Abre ${NOME_DIA.filter((_, d) => abertos.has(d)).join(", ")}. Hoje é ${NOME_DIA[hoje]}.`}
+    >
+      {LETRA_DIA.map((letra, d) => {
+        const aberto = abertos.has(d);
+        const ehHoje = d === hoje;
+        return (
+          <View
+            key={d}
+            style={[
+              estilos.dia,
+              ehHoje
+                ? { backgroundColor: cores.primaria }
+                : aberto
+                  ? { backgroundColor: cores.superficie2, borderColor: cores.divisoria, borderWidth: 1 }
+                  : null,
+            ]}
+          >
+            <Texto
+              variante="legenda"
+              peso="negrito"
+              cor={ehHoje ? cores.textoSobrePrimaria : aberto ? cores.texto : cores.textoSecundario}
+              style={!aberto ? estilos.fechado : null}
+            >
+              {letra}
+            </Texto>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+function ItemLevar({ texto }: { texto: string }) {
+  const { cores } = useTema();
+  return (
+    <View style={estilos.linha}>
+      <Icone name="checkmark-circle-outline" size={22} color={cores.primaria} />
+      <Texto style={estilos.flex}>{texto}</Texto>
+    </View>
   );
 }
 
@@ -177,5 +257,12 @@ function capitalizarPrimeira(texto: string): string {
 }
 
 const estilos = StyleSheet.create({
+  cabecalho: { gap: espaco.xs },
+  linha: { flexDirection: "row", alignItems: "center", gap: espaco.sm },
+  flex: { flex: 1 },
   botoes: { gap: espaco.sm },
+  par: { flexDirection: "row", gap: espaco.sm },
+  semana: { flexDirection: "row", gap: espaco.xs },
+  dia: { flex: 1, minHeight: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  fechado: { textDecorationLine: "line-through" },
 });

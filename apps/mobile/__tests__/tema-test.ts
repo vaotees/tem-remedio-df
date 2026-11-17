@@ -32,10 +32,23 @@ describe.each([
       ["aberto", c.aberto.texto, c.aberto.fundo],
       ["fechado", c.fechado.texto, c.fechado.fundo],
       ...Object.entries(c.semaforo).map(([nivel, s]) => [`semáforo ${nivel}`, s.texto, s.fundo] as [string, string, string]),
+      ["texto/painel do cartão", c.texto, c.superficie2],
+      ["secundário/painel do cartão", c.textoSecundario, c.superficie2],
+      ["botão tonal (Ligar, WhatsApp) e aba escolhida", c.textoTonal, c.primariaTinta],
+      ["faixa do Início", c.textoFaixa, c.faixa],
+      ["saudação na faixa", c.textoFaixaSecundario, c.faixa],
+      ["texto escuro sobre a menta (avatar)", "#0E1B2B", c.marca.menta],
     ];
     for (const [nome, frente, fundo] of pares) {
       expect({ nome, razao: contraste(frente, fundo) >= 4.5 }).toEqual({ nome, razao: true });
     }
+  });
+
+  it("barras, anel e medidor (gráficos) passam de 3:1 sobre o cartão; o anel aparece no trilho", () => {
+    for (const [nivel, cor] of Object.entries(c.barraSemaforo)) {
+      expect({ nivel, visivel: contraste(cor, c.superficie) >= 3 }).toEqual({ nivel, visivel: true });
+    }
+    expect(contraste(c.primaria, c.trilho)).toBeGreaterThanOrEqual(3);
   });
 
   it("bordas de campo passam de 3:1 (componentes de interface)", () => {
@@ -67,7 +80,7 @@ describe("barra de abas", () => {
 
   it("cresce com a letra do celular até o limite do rótulo, e não encolhe com letra menor", () => {
     expect(alturaBarraAbas(1.2, 0)).toBe(102);
-    expect(alturaBarraAbas(ESCALA_MAXIMA_ABAS, 0)).toBe(110);
+    expect(alturaBarraAbas(ESCALA_MAXIMA_ABAS, 0)).toBe(109);
     expect(alturaBarraAbas(3.1, 0)).toBe(alturaBarraAbas(ESCALA_MAXIMA_ABAS, 0));
     expect(alturaBarraAbas(0.8, 0)).toBe(alturaBarraAbas(1, 0));
   });

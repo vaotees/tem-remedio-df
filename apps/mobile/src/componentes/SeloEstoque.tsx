@@ -1,6 +1,6 @@
 import { nivelEstoque, TEXTO_NIVEL, type NivelEstoque } from "@tem-remedio/shared";
 import { StyleSheet, View } from "react-native";
-import { espaco, useTema } from "@/tema";
+import { espaco, RAIO_CAPSULA, useTema } from "@/tema";
 import { Icone, type NomeIcone } from "./Icone";
 import { Texto } from "./Texto";
 
@@ -13,7 +13,7 @@ export const ICONE_NIVEL: Record<NivelEstoque, NomeIcone> = {
 };
 
 /**
- * Semáforo do estoque. A cor nunca vem sozinha: sempre ícone + texto,
+ * Semáforo do estoque, em cápsula. A cor nunca vem sozinha: sempre ícone + texto,
  * e o leitor de tela lê o texto.
  */
 export function SeloEstoque({ dias }: { dias: number | null }) {
@@ -27,24 +27,27 @@ export function SeloEstoque({ dias }: { dias: number | null }) {
       accessibilityLabel={`Estoque: ${TEXTO_NIVEL[nivel]}`}
       testID={`selo-${nivel}`}
     >
-      <Icone name={ICONE_NIVEL[nivel]} size={22} color={texto} />
-      <Texto variante="legenda" cor={texto} style={estilos.texto}>
+      <Icone name={ICONE_NIVEL[nivel]} size={20} color={texto} />
+      <Texto variante="legenda" peso="negrito" cor={texto} style={estilos.texto}>
         {TEXTO_NIVEL[nivel]}
       </Texto>
     </View>
   );
 }
 
-const estilos = StyleSheet.create({
+export const estilosSelo = StyleSheet.create({
   selo: {
     flexDirection: "row",
     alignItems: "center",
     alignSelf: "flex-start",
-    gap: espaco.xs,
-    paddingHorizontal: espaco.sm,
-    paddingVertical: espaco.xs,
-    borderRadius: 8,
+    gap: 6,
+    paddingLeft: espaco.sm,
+    paddingRight: espaco.md - 4,
+    paddingVertical: 5,
+    borderRadius: RAIO_CAPSULA,
     maxWidth: "100%",
   },
-  texto: { fontWeight: "600", flexShrink: 1 },
+  texto: { flexShrink: 1 },
 });
+
+const estilos = estilosSelo;

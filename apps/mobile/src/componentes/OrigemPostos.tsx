@@ -82,18 +82,30 @@ export function SituacaoOrigem({ origem, escolherRegiao, resumida }: PropsSituac
   // A pessoa escolheu a região: não é aviso, é a escolha dela.
   if (usarRegiao) {
     if (resumida) return <Linha icone="location">Pela sua região: {ra}.</Linha>;
+    // Uma linha e dois botões pequenos, lado a lado: a lista de postos começa logo abaixo.
     return (
-      <Cartao>
+      <View style={estilos.compacto}>
         <View style={estilos.linha}>
-          <Icone name="location" size={24} color={cores.primaria} />
-          <Texto variante="destaque" style={estilos.flex}>
-            Sua região: {ra}
-          </Texto>
+          <Icone name="location" size={22} color={cores.primaria} />
+          <View style={estilos.flex}>
+            <Texto variante="destaque">Sua região: {ra}</Texto>
+            <Texto variante="legenda" secundario>
+              Primeiro os postos dela, depois os das regiões mais perto.
+            </Texto>
+          </View>
         </View>
-        <Texto secundario>Primeiro os postos dela, depois os das regiões mais perto.</Texto>
-        {botaoRegiao}
-        {botaoLocalizacao()}
-      </Cartao>
+        <View style={estilos.pilulas}>
+          <Botao titulo="Trocar minha região" icone="swap-horizontal" variante="secundario" compacto onPress={escolherRegiao} />
+          <Botao
+            titulo="Usar minha localização"
+            icone="navigate"
+            variante="secundario"
+            compacto
+            carregando={procurando}
+            onPress={usarLocalizacao}
+          />
+        </View>
+      </View>
     );
   }
 
@@ -147,4 +159,6 @@ const estilos = StyleSheet.create({
   procurando: { alignItems: "center", gap: espaco.md, paddingVertical: espaco.xl },
   linha: { flexDirection: "row", alignItems: "center", gap: espaco.sm },
   flex: { flex: 1 },
+  compacto: { gap: espaco.sm },
+  pilulas: { flexDirection: "row", flexWrap: "wrap", gap: espaco.sm },
 });

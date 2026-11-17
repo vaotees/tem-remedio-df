@@ -1,15 +1,38 @@
 import { Tabs } from "expo-router";
-import { Text, useWindowDimensions } from "react-native";
+import { Text, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icone, type NomeIcone } from "@/componentes/Icone";
-import { alturaBarraAbas, ESCALA_MAXIMA_ABAS, MARGEM_ABAS, ROTULO_ABA, useTema } from "@/tema";
+import {
+  alturaBarraAbas,
+  ESCALA_MAXIMA_ABAS,
+  familia,
+  MARGEM_ABAS,
+  PILULA_ABA,
+  RAIO_CAPSULA,
+  ROTULO_ABA,
+  useTema,
+} from "@/tema";
 
-function IconeAba({ nome, focused }: { nome: NomeIcone; focused: boolean }) {
+function IconeAba({ nome, nomeEscolhida, focused }: { nome: NomeIcone; nomeEscolhida: NomeIcone; focused: boolean }) {
   const { cores } = useTema();
-  return <Icone name={nome} size={28} color={focused ? cores.primaria : cores.textoSecundario} />;
+  // A aba escolhida tem a pílula azul-clara atrás do ícone e o ícone cheio: não depende só da cor.
+  return (
+    <View
+      style={{
+        width: 64,
+        height: PILULA_ABA,
+        borderRadius: RAIO_CAPSULA,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: focused ? cores.primariaTinta : "transparent",
+      }}
+    >
+      <Icone name={focused ? nomeEscolhida : nome} size={26} color={focused ? cores.textoTonal : cores.textoSecundario} />
+    </View>
+  );
 }
 
-/** Três abas fixas, com rótulo sempre visível e grande. Nada escondido em menu. */
+/** Quatro abas fixas, com rótulo sempre visível e grande. Nada escondido em menu. */
 export default function LayoutAbas() {
   const { cores } = useTema();
   const { bottom } = useSafeAreaInsets();
@@ -17,12 +40,14 @@ export default function LayoutAbas() {
 
   return (
     <Tabs
+      // "Voltar" da Ajuda volta para a aba de onde ela foi aberta (Início ou Perfil).
+      backBehavior="history"
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: cores.primaria,
+        tabBarActiveTintColor: cores.textoTonal,
         tabBarInactiveTintColor: cores.textoSecundario,
         tabBarStyle: {
-          backgroundColor: cores.fundo,
+          backgroundColor: cores.superficie,
           borderTopColor: cores.divisoria,
           // Cresce com a letra do celular: o rótulo quebra em 2 linhas e nunca é cortado com "…".
           height: alturaBarraAbas(fontScale, bottom),
@@ -35,9 +60,9 @@ export default function LayoutAbas() {
             style={{
               fontSize: ROTULO_ABA.fonte,
               lineHeight: ROTULO_ABA.linha,
-              fontWeight: "600",
+              fontFamily: focused ? familia.extra : familia.medio,
               textAlign: "center",
-              color: focused ? cores.primaria : cores.textoSecundario,
+              color: focused ? cores.textoTonal : cores.textoSecundario,
             }}
           >
             {children}
@@ -47,16 +72,35 @@ export default function LayoutAbas() {
     >
       <Tabs.Screen
         name="(buscar)"
-        options={{ title: "Buscar", tabBarIcon: ({ focused }) => <IconeAba nome="search" focused={focused} />, tabBarAccessibilityLabel: "Buscar remédio" }}
+        options={{
+          title: "Início",
+          tabBarIcon: ({ focused }) => <IconeAba nome="home-outline" nomeEscolhida="home" focused={focused} />,
+          tabBarAccessibilityLabel: "Início, buscar remédio",
+        }}
+      />
+      <Tabs.Screen
+        name="(mapa)"
+        options={{
+          title: "Mapa",
+          tabBarIcon: ({ focused }) => <IconeAba nome="map-outline" nomeEscolhida="map" focused={focused} />,
+        }}
       />
       <Tabs.Screen
         name="(meus)"
-        options={{ title: "Meus remédios", tabBarIcon: ({ focused }) => <IconeAba nome="heart-outline" focused={focused} /> }}
+        options={{
+          title: "Meus remédios",
+          tabBarIcon: ({ focused }) => <IconeAba nome="heart-outline" nomeEscolhida="heart" focused={focused} />,
+        }}
       />
       <Tabs.Screen
-        name="ajuda"
-        options={{ title: "Ajuda", tabBarIcon: ({ focused }) => <IconeAba nome="help-circle-outline" focused={focused} /> }}
+        name="perfil"
+        options={{
+          title: "Perfil",
+          tabBarIcon: ({ focused }) => <IconeAba nome="person-outline" nomeEscolhida="person" focused={focused} />,
+        }}
       />
+      {/* A Ajuda abre pelo "?" do Início e pelo Perfil; não ocupa uma aba. */}
+      <Tabs.Screen name="ajuda" options={{ title: "Ajuda", tabBarButton: () => null, tabBarItemStyle: { display: "none" } }} />
     </Tabs>
   );
 }

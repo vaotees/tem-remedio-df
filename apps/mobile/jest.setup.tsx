@@ -34,3 +34,14 @@ jest.mock("react-native-maps", () => {
   }
   return { __esModule: true, default: MapView, Marker };
 });
+
+// Fontes: no Jest não há arquivos de fonte para carregar; a abertura do app segue como se já tivessem chegado.
+jest.mock("expo-font", () => ({
+  ...jest.requireActual<object>("expo-font"),
+  useFonts: () => [true, null],
+}));
+jest.mock("expo-splash-screen", () => ({
+  preventAutoHideAsync: () => Promise.resolve(true),
+  hideAsync: () => Promise.resolve(true),
+  setOptions: () => {},
+}));

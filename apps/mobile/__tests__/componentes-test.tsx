@@ -4,7 +4,10 @@ import { Botao } from "@/componentes/Botao";
 import { FaixaAtualizacao } from "@/componentes/FaixaAtualizacao";
 import { Icone } from "@/componentes/Icone";
 import { SeloEstoque } from "@/componentes/SeloEstoque";
+import { contarNiveis, MedidorDias, textoDias } from "@/componentes/Graficos";
+import { tipoForma } from "@/componentes/Pictograma";
 import { ESPERA_ANUNCIO_MS, useAnuncio } from "@/util/anuncio";
+import { saudacao } from "@/util/datas";
 
 /** Num texto dentro de uma linha (ícone + texto), sem encolher ele vaza para fora da tela com letra grande. */
 const quebraLinha = (texto: string) => StyleSheet.flatten(screen.getByText(texto).props.style).flexShrink;
@@ -113,5 +116,51 @@ describe("FaixaAtualizacao", () => {
     await render(<FaixaAtualizacao atualizadoEm="2026-10-13T00:16:33" agora={agora} />);
     expect(screen.getByText("Podem estar desatualizados. Ligue antes de ir.")).toBeOnTheScreen();
     expect(screen.getByLabelText(/ligue para a UBS antes de ir/)).toBeOnTheScreen();
+  });
+});
+
+describe("gráficos", () => {
+  it("dias de estoque em texto: estimativa, sem prometer", () => {
+    expect(textoDias(0)).toBe("Estoque para menos de 1 dia");
+    expect(textoDias(1)).toBe("Estoque para cerca de 1 dia");
+    expect(textoDias(28)).toBe("Estoque para cerca de 28 dias");
+    expect(textoDias(60)).toBe("Estoque para mais de 2 meses");
+    expect(textoDias(430)).toBe("Estoque para mais de 2 meses");
+  });
+
+  it("conta os postos em cada nível do semáforo", () => {
+    expect(contarNiveis([40, 28, 3, null, 90])).toEqual({ alto: 2, baixo: 1, critico: 1, sem_consumo: 1 });
+  });
+
+  it("medidor: lido pelo leitor de tela; sem consumo registrado, não aparece", async () => {
+    await render(<MedidorDias dias={28} detalhe="dado de hoje, 00h16" />);
+    expect(screen.getByLabelText("Estoque para cerca de 28 dias, dado de hoje, 00h16")).toBeOnTheScreen();
+    await render(<MedidorDias dias={null} />);
+    expect(screen.queryByText(/Estoque para/)).toBeNull();
+  });
+});
+
+describe("pictograma da forma", () => {
+  it.each([
+    ["Comprimido", "comprimido"],
+    ["Cápsula", "comprimido"],
+    ["Injetável", "injetavel"],
+    ["Solução oral", "liquido"],
+    ["Suspensão oral", "liquido"],
+    ["Colírio", "liquido"],
+    ["Pomada oftálmica", "pomada"],
+    ["Creme", "pomada"],
+    ["Inalador", "outro"],
+    [null, "outro"],
+  ] as const)("%s → %s", (forma, tipo) => {
+    expect(tipoForma(forma)).toBe(tipo);
+  });
+});
+
+describe("saudação do Início", () => {
+  it("pela hora do dia, com o nome só se a pessoa escreveu", () => {
+    expect(saudacao(new Date(2026, 10, 17, 8, 12), null)).toBe("Bom dia");
+    expect(saudacao(new Date(2026, 10, 17, 14, 0), "Lúcia")).toBe("Boa tarde, Lúcia");
+    expect(saudacao(new Date(2026, 10, 17, 19, 30), "Lúcia")).toBe("Boa noite, Lúcia");
   });
 });

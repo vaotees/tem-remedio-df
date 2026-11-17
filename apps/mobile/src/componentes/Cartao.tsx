@@ -1,16 +1,13 @@
 import type { ReactNode } from "react";
-import { StyleSheet, View } from "react-native";
-import { espaco, raio, useTema } from "@/tema";
+import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import { espaco, RAIO_CARTAO, sombraCartao, useTema } from "@/tema";
 
-export function Cartao({ children }: { children: ReactNode }) {
+/** Cartão branco sobre o fundo azulado, com sombra suave (no tema escuro, borda). */
+export function Cartao({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const { cores } = useTema();
-  return (
-    <View style={[estilos.cartao, { backgroundColor: cores.superficie, borderColor: cores.divisoria }]}>
-      {children}
-    </View>
-  );
+  return <View style={[estilos.cartao, { backgroundColor: cores.superficie }, sombraCartao(cores), style]}>{children}</View>;
 }
 
 const estilos = StyleSheet.create({
-  cartao: { borderRadius: raio, borderWidth: 1, padding: espaco.md, gap: espaco.sm },
+  cartao: { borderRadius: RAIO_CARTAO, padding: espaco.md, gap: espaco.sm },
 });

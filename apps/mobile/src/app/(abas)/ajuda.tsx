@@ -8,6 +8,7 @@ import { FaixaAtualizacao } from "@/componentes/FaixaAtualizacao";
 import { SeloEstoque } from "@/componentes/SeloEstoque";
 import { Tela } from "@/componentes/Tela";
 import { Texto } from "@/componentes/Texto";
+import { Voltar } from "@/componentes/Voltar";
 import type { Origem } from "@/dados/snapshot";
 import { useLocalizacao } from "@/postos/localizacao";
 import { useRegiaoEscolhida } from "@/postos/regiao-escolhida";
@@ -36,6 +37,7 @@ const NIVEIS = [
 export default function Ajuda() {
   return (
     <Tela>
+      <Voltar />
       <Texto variante="titulo">Ajuda</Texto>
 
       <Cartao>

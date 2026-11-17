@@ -23,3 +23,10 @@ export function diasDesde(atualizadoEm: string, agora: Date = new Date()): numbe
   const hoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate());
   return Math.round((hoje.getTime() - inicio.getTime()) / 86_400_000);
 }
+
+/** "Bom dia, Lúcia": o nome só aparece se a pessoa escreveu no Perfil. */
+export function saudacao(agora: Date, nome: string | null): string {
+  const hora = agora.getHours();
+  const parte = hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";
+  return nome ? `${parte}, ${nome}` : parte;
+}

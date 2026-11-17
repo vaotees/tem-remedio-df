@@ -10,10 +10,12 @@ import { BotaoGuardar } from "@/componentes/BotaoGuardar";
 import { Cartao } from "@/componentes/Cartao";
 import { ComDados } from "@/componentes/ComDados";
 import { FaixaAtualizacao } from "@/componentes/FaixaAtualizacao";
+import { BarraRede, contarNiveis, MedidorDias } from "@/componentes/Graficos";
 import { Icone } from "@/componentes/Icone";
 import { ItemLista } from "@/componentes/ItemLista";
 import { MAPA_DISPONIVEL, MapaPostos } from "@/componentes/MapaPostos";
 import { NaoEncontrado } from "@/componentes/NaoEncontrado";
+import { Pictograma } from "@/componentes/Pictograma";
 import { PerguntarOrigem, ProcurandoLocalizacao, SituacaoOrigem } from "@/componentes/OrigemPostos";
 import { SeloEstoque } from "@/componentes/SeloEstoque";
 import { SeloHorario } from "@/componentes/SeloHorario";
@@ -23,6 +25,7 @@ import { Voltar } from "@/componentes/Voltar";
 import { acharMarca, indiceProduto, nomeSubstancia, precisaAvisoLiberacao, rotuloProduto } from "@/busca/remedios";
 import type { NovoRemedio } from "@/meus-remedios/guardados";
 import { descreverPosto } from "@/postos/descricao";
+import { formatarDistancia } from "@/postos/distancia";
 import { useOrigem } from "@/postos/origem";
 import { avisoRetirada, postosComEstoque, type Ordem, type PostoComEstoque } from "@/postos/postos";
 import { espaco, useTema } from "@/tema";
@@ -102,18 +105,34 @@ function ListaPostos({ snapshot, codigo, nomeMarca, procurandoNovos }: Props) {
 
   return (
     <>
-      <View>
-        <Texto variante="titulo">{nome}</Texto>
-        <Texto variante="destaque" secundario>
-          {rotuloProduto(produto)}
-          {produto.liberacaoProlongada ? " · liberação prolongada" : ""}
-        </Texto>
+      <View style={estilos.titulo}>
+        <Pictograma forma={produto.forma} tamanho={56} />
+        <View style={estilos.flex}>
+          <Texto variante="titulo">{nome}</Texto>
+          <Texto variante="destaque" peso="medio" secundario>
+            {rotuloProduto(produto)}
+            {produto.liberacaoProlongada ? " · liberação prolongada" : ""}
+          </Texto>
+        </View>
       </View>
+
+      {postos.length > 0 ? (
+        <Cartao>
+          <Texto variante="subtitulo" accessibilityLiveRegion="polite">
+            {contagem}
+          </Texto>
+          <Texto variante="legenda" secundario>
+            De {snapshot.ubs.length} farmácias de UBS do DF. Como está o estoque nelas:
+          </Texto>
+          <BarraRede contagem={contarNiveis(postos.map((p) => p.dias))} />
+          <FaixaAtualizacao atualizadoEm={snapshot.meta.atualizadoEm} procurandoNovos={procurandoNovos} />
+        </Cartao>
+      ) : (
+        <FaixaAtualizacao atualizadoEm={snapshot.meta.atualizadoEm} procurandoNovos={procurandoNovos} />
+      )}
 
       {/* Na tela vazia, o botão fica no cartão "Nenhum posto tem", como a ação principal. */}
       {postos.length > 0 ? <BotaoGuardar remedio={paraGuardar} /> : null}
-
-      <FaixaAtualizacao atualizadoEm={snapshot.meta.atualizadoEm} procurandoNovos={procurandoNovos} />
 
       {precisaAvisoLiberacao(marca, produto) && marca ? <AvisoLiberacao marca={marca} quais="um" /> : null}
 
@@ -143,10 +162,6 @@ function ListaPostos({ snapshot, codigo, nomeMarca, procurandoNovos }: Props) {
           {ordem.por === "regiao" && !postos.some((p) => p.ubs.ra === ordem.ra) ? (
             <Texto>Nenhum posto da sua região ({ordem.ra}) tem hoje. Abaixo, os das regiões mais perto.</Texto>
           ) : null}
-          <Texto variante="subtitulo" accessibilityLiveRegion="polite">
-            {contagem}
-          </Texto>
-
           {MAPA_DISPONIVEL ? (
             <Alternancia
               valor={modo}
@@ -225,13 +240,28 @@ function textoVazio(produto: Produto): string {
 }
 
 function ItemPosto({ posto, onPress, ref }: { posto: PostoComEstoque; onPress: () => void; ref?: Ref<HostInstance> }) {
-  const { nome, onde, rotulo } = descreverPosto(posto);
+  const { cores } = useTema();
+  const { nome, rotulo } = descreverPosto(posto);
   return (
     <ItemLista onPress={onPress} rotulo={rotulo} dica="Mostra endereço, telefone e como chegar" ref={ref}>
-      <Texto variante="destaque">{nome}</Texto>
-      <Texto secundario>{onde}</Texto>
-      <SeloEstoque dias={posto.dias} />
-      <SeloHorario horario={posto.ubs.horario} />
+      <View style={estilos.topoPosto}>
+        <Texto variante="destaque" style={estilos.flex}>
+          {nome}
+        </Texto>
+        {posto.distanciaKm !== null ? (
+          <View style={[estilos.distancia, { backgroundColor: cores.superficie2 }]}>
+            <Texto variante="legenda" peso="numero">
+              {formatarDistancia(posto.distanciaKm)}
+            </Texto>
+          </View>
+        ) : null}
+      </View>
+      <Texto secundario>{posto.ubs.ra}</Texto>
+      <View style={estilos.selos}>
+        <SeloEstoque dias={posto.dias} />
+        <SeloHorario horario={posto.ubs.horario} />
+      </View>
+      <MedidorDias dias={posto.dias} />
     </ItemLista>
   );
 }
@@ -269,7 +299,11 @@ function Vazio({ produto, paraGuardar }: { produto: Produto; paraGuardar: NovoRe
 }
 
 const estilos = StyleSheet.create({
-  lista: { gap: espaco.sm },
+  titulo: { flexDirection: "row", alignItems: "center", gap: espaco.md },
+  topoPosto: { flexDirection: "row", alignItems: "flex-start", gap: espaco.sm },
+  distancia: { borderRadius: 10, paddingHorizontal: espaco.sm, paddingVertical: 2 },
+  selos: { flexDirection: "row", flexWrap: "wrap", gap: espaco.xs },
+  lista: { gap: espaco.sm + 4 },
   regiao: { marginTop: espaco.sm },
   linha: { flexDirection: "row", alignItems: "center", gap: espaco.sm },
   flex: { flex: 1 },

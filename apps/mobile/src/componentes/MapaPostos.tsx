@@ -5,7 +5,7 @@ import MapView, { Marker } from "react-native-maps";
 import { descreverPosto } from "@/postos/descricao";
 import { enquadrar, resumoDoMapa, type PropsMapaPostos } from "@/postos/mapa";
 import type { PostoComEstoque } from "@/postos/postos";
-import { ALVO_MINIMO, espaco, raio, useTema } from "@/tema";
+import { ALVO_MINIMO, espaco, RAIO_CARTAO, sombraCartao, useTema } from "@/tema";
 import { Botao } from "./Botao";
 import { Icone } from "./Icone";
 import { ICONE_NIVEL, SeloEstoque } from "./SeloEstoque";
@@ -202,7 +202,7 @@ function CartaoDoPosto({ posto, posicao, total, pertoDeVoce, aoAbrir, aoVerProxi
     posicao + 1 >= total ? "Voltar ao primeiro" : pertoDeVoce ? "Ver o próximo mais perto" : "Ver o próximo da lista";
 
   return (
-    <View style={[estilos.cartao, { backgroundColor: cores.superficie, borderColor: cores.borda }]}>
+    <View style={[estilos.cartao, { backgroundColor: cores.superficie }, sombraCartao(cores)]}>
       <Texto variante="legenda" secundario>
         {titulo}
       </Texto>
@@ -218,11 +218,11 @@ function CartaoDoPosto({ posto, posicao, total, pertoDeVoce, aoAbrir, aoVerProxi
 
 const estilos = StyleSheet.create({
   conteudo: { gap: espaco.sm },
-  moldura: { borderRadius: raio, borderWidth: 1, overflow: "hidden" },
+  moldura: { borderRadius: RAIO_CARTAO, borderWidth: 1, overflow: "hidden" },
   alvo: { width: ALVO_MINIMO, height: ALVO_MINIMO, alignItems: "center", justifyContent: "center" },
   pino: { alignItems: "center", justifyContent: "center" },
   legenda: { flexDirection: "row", flexWrap: "wrap", columnGap: espaco.md, rowGap: espaco.xs },
   itemLegenda: { flexDirection: "row", alignItems: "center", gap: espaco.xs, maxWidth: "100%" },
   textoLegenda: { flexShrink: 1 },
-  cartao: { borderRadius: raio, borderWidth: 1, padding: espaco.md, gap: espaco.sm },
+  cartao: { borderRadius: RAIO_CARTAO, padding: espaco.md, gap: espaco.sm },
 });
