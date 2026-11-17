@@ -5,7 +5,7 @@ App React Native (Expo) que mostra o estoque de remédios das UBSs do Distrito F
 ## Estrutura
 - `packages/shared` — formato do snapshot (schemas zod), semáforo, regras de retirada, `normalizar()`. Usado pelo coletor e pelo app.
 - `pipeline` — coletor diário: extrai (Power BI da SES-DF, CNES, CMED) → limpa → valida → publica `snapshot.json` + `meta.json`.
-- `apps/mobile` — app Expo SDK 57 (Expo Router, rotas em `src/app/`). Fica no 57 até o Expo Go do SDK 58 chegar às lojas (ver `docs/SPEC.md`). Leia `apps/mobile/AGENTS.md`: o Expo muda a cada SDK, consulte a documentação da versão instalada antes de usar uma API.
+- `apps/mobile` — app Expo SDK 58 (React Native 0.88, Expo Router, rotas em `src/app/`). Leia `apps/mobile/AGENTS.md`: o Expo muda a cada SDK, consulte a documentação da versão instalada antes de usar uma API.
 - `spike/` — teste de extração (M0) em Python; só referência, não é código de produção.
 
 ## Comandos
@@ -18,12 +18,14 @@ App React Native (Expo) que mostra o estoque de remédios das UBSs do Distrito F
 
 ## App (apps/mobile)
 - Instalar pacote: `pnpm exec expo install <pacote>` **dentro de `apps/mobile`**. Não use `npx expo`: há um `expo-cli` global antigo (2021) nesta máquina que entra no lugar quando o `expo` local não é achado e instala versões erradas com npm.
-- Testing Library 13 (o Expo Router 57 exige). Os testes já usam `await render(...)`/`await fireEvent...`, que também serve para a 14 (assíncrona) quando subirmos para o SDK 58. Ícones são simulados em `jest.setup.tsx`.
-- Depois de trocar versão do Expo, rode `npx expo-doctor@latest` em `apps/mobile` (pega dependências duplicadas de outro SDK).
-- Cores só de `src/tema/cores.ts`; o teste de contraste (`__tests__/tema-test.ts`) tem que continuar passando.
-- Texto nunca é cortado com "…" (rótulos quebram linha); alvo de toque mínimo `ALVO_MINIMO` (56).
+- Jest 30 + Testing Library 14 (assíncrona: sempre `await render(...)`, `await renderRouter(...)`, `await fireEvent...`), com `test-renderer` no lugar do `react-test-renderer`. Ícones são simulados em `jest.setup.tsx`.
+- Depois de trocar versão do Expo, rode `npx expo-doctor@latest` em `apps/mobile` (pega dependências duplicadas de outro SDK). Se sobrar pacote de outro SDK resolvido como peer no `pnpm-lock.yaml`, apague só as entradas dele no lockfile e rode `pnpm install`; `pnpm update --depth Infinity` sobe muita coisa que não tem nada a ver.
+- Cores só de `src/tema/cores.ts`; o teste de contraste (`__tests__/tema-test.ts`) tem que continuar passando. Fonte da marca (Atkinson Hyperlegible Next) pelo `Texto` (`peso`, nunca `fontWeight`); cartões com `Cartao`/`sombraCartao`; gráficos (anel, barra da rede, medidor de dias) em `src/componentes/Graficos.tsx`.
+- Preferências do Perfil (nome, letra, cores) em `src/preferencias/preferencias.ts`, só no aparelho (`preferencias.json`); `useTema` já aplica a letra e as cores.
+- Texto nunca é cortado com "…" (rótulos quebram linha; texto ao lado de ícone leva `flexShrink: 1`); alvo de toque mínimo `ALVO_MINIMO` (56). O ESLint barra `numberOfLines` e companhia.
+- Ícones só pelo `Icone` (`src/componentes/Icone.tsx`), que os esconde do leitor de tela. Texto que muda sem toque (resultado, contagem) leva `accessibilityLiveRegion` (Android/web) e `useAnuncio` (iPhone).
 - Telas usam `Tela` e `ComDados`; dados vêm de `useSnapshot()`, nunca direto da rede.
-- Lógica sem tela em `src/busca` (busca, agrupamento por substância), `src/postos` (distância, horário, regras de retirada, links, regiões, ordem dos postos, mapa) e `src/meus-remedios` (lista guardada no aparelho, situação de hoje). Rotas: `src/app/(abas)/(buscar)/` (busca, "Qual destes?"), `(abas)/(meus)/` (Meus remédios) e `(abas)/(buscar,meus)/` (postos e detalhe, compartilhados pelas duas abas: abertos por uma, ficam nela); a escolha da região em `src/app/regiao.tsx`.
+- Lógica sem tela em `src/busca` (busca, agrupamento por substância), `src/postos` (distância, horário, regras de retirada, links, regiões, ordem dos postos, mapa) e `src/meus-remedios` (lista guardada no aparelho, situação de hoje). Rotas: quatro abas (Início, Mapa, Meus remédios, Perfil). `src/app/(abas)/(buscar)/` (Início com a busca, "Qual destes?"), `(abas)/(mapa)/` (mapa da rede), `(abas)/(meus)/` (Meus remédios), `(abas)/perfil.tsx` e `(abas)/(buscar,meus,mapa)/` (postos e detalhe, compartilhados pelas três abas: abertos por uma, ficam nela). A Ajuda (`(abas)/ajuda.tsx`) não aparece na barra: abre pelo "?" do Início e pelo Perfil. A escolha da região em `src/app/regiao.tsx`.
 - Mapa só no celular: `react-native-maps` é importado apenas em `src/componentes/MapaPostos.tsx`; na web vale `MapaPostos.web.tsx` (sem mapa). No Jest ele é simulado em `jest.setup.tsx`.
 - Testes de tela usam o snapshot pequeno `fixtures/snapshot-teste.ts` (registros reais) e simulam o `expo-location` e os arquivos do aparelho (`@/dados/armazenamento`).
 

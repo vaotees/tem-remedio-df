@@ -1,7 +1,7 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
-import type { ReactNode } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
-import { ALVO_MINIMO, espaco, raio, useTema } from "@/tema";
+import type { ReactNode, Ref } from "react";
+import { Pressable, StyleSheet, View, type HostInstance } from "react-native";
+import { ALVO_MINIMO, espaco, RAIO_CARTAO, sombraCartao, useTema } from "@/tema";
+import { Icone } from "./Icone";
 
 interface Props {
   onPress: () => void;
@@ -9,25 +9,31 @@ interface Props {
   rotulo: string;
   dica?: string;
   children: ReactNode;
+  /** Para levar o foco do leitor de tela até o item (ex.: o primeiro posto novo em "Mostrar mais postos"). */
+  ref?: Ref<HostInstance>;
+  /** Sem a seta à direita, quando o cartão já tem um "Ver ..." escrito embaixo. */
+  semSeta?: boolean;
 }
 
-/** Cartão tocável inteiro (não só o título), com borda visível e seta indicando que abre outra tela. */
-export function ItemLista({ onPress, rotulo, dica, children }: Props) {
+/** Cartão tocável inteiro (não só o título), branco e com sombra, e seta indicando que abre outra tela. */
+export function ItemLista({ onPress, rotulo, dica, children, ref, semSeta }: Props) {
   const { cores } = useTema();
   return (
     <Pressable
+      ref={ref}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={rotulo}
       accessibilityHint={dica}
       style={({ pressed }) => [
         estilos.item,
-        { backgroundColor: cores.superficie, borderColor: cores.borda },
+        { backgroundColor: cores.superficie },
+        sombraCartao(cores),
         pressed && { opacity: 0.75 },
       ]}
     >
       <View style={estilos.conteudo}>{children}</View>
-      <Ionicons name="chevron-forward" size={28} color={cores.primaria} />
+      {semSeta ? null : <Icone name="chevron-forward" size={26} color={cores.primaria} />}
     </Pressable>
   );
 }
@@ -38,9 +44,8 @@ const estilos = StyleSheet.create({
     alignItems: "center",
     gap: espaco.sm,
     minHeight: ALVO_MINIMO,
-    borderWidth: 1,
-    borderRadius: raio,
+    borderRadius: RAIO_CARTAO,
     padding: espaco.md,
   },
-  conteudo: { flex: 1, gap: espaco.xs },
+  conteudo: { flex: 1, gap: espaco.sm },
 });

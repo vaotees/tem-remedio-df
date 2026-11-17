@@ -41,7 +41,8 @@
             "backgroundColor": "#0F1115"
           }
         }
-      ]
+      ],
+      "expo-font"
     ],
     "scheme": "temremedio",
     "experiments": {

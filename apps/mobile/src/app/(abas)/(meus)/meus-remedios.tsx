@@ -1,12 +1,13 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
 import type { Snapshot } from "@tem-remedio/shared";
 import { useRouter } from "expo-router";
-import { useMemo, type ComponentProps, type ReactNode } from "react";
-import { StyleSheet, View } from "react-native";
+import { useMemo, type ReactNode } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
 import { Botao } from "@/componentes/Botao";
 import { Cartao } from "@/componentes/Cartao";
 import { ComDados } from "@/componentes/ComDados";
 import { FaixaAtualizacao } from "@/componentes/FaixaAtualizacao";
+import { Anel } from "@/componentes/Graficos";
+import { Icone, type NomeIcone } from "@/componentes/Icone";
 import { ItemLista } from "@/componentes/ItemLista";
 import { PerguntarOrigem, ProcurandoLocalizacao, SituacaoOrigem } from "@/componentes/OrigemPostos";
 import { SeloEstoque } from "@/componentes/SeloEstoque";
@@ -18,7 +19,7 @@ import { situacaoHoje, textoQuantos, tituloPrimeiro, type SituacaoHoje } from "@
 import { descreverPosto } from "@/postos/descricao";
 import { useOrigem } from "@/postos/origem";
 import { avisoRetirada, type Ordem } from "@/postos/postos";
-import { espaco, useTema } from "@/tema";
+import { ALVO_MINIMO, espaco, RAIO_CAPSULA, useTema } from "@/tema";
 
 /** Os remédios que a pessoa guardou, com a situação de hoje de cada um. A lista fica só no aparelho. */
 export default function MeusRemedios() {
@@ -26,7 +27,12 @@ export default function MeusRemedios() {
 
   return (
     <Tela>
-      <Texto variante="titulo">Meus remédios</Texto>
+      <View style={estilos.cabecalho}>
+        <Texto variante="titulo" style={estilos.flex}>
+          Meus remédios
+        </Texto>
+        {remedios.length > 0 ? <Adicionar /> : null}
+      </View>
       {carregando ? null : remedios.length === 0 ? (
         <Convite />
       ) : (
@@ -46,7 +52,9 @@ function Convite() {
   const router = useRouter();
   return (
     <View style={estilos.vazio}>
-      <Ionicons name="heart-outline" size={56} color={cores.primaria} />
+      <View style={[estilos.circulo, { backgroundColor: cores.primariaTinta }]}>
+        <Icone name="heart" size={48} color={cores.textoTonal} />
+      </View>
       <Texto variante="subtitulo" style={estilos.centro}>
         Guarde os remédios que você usa
       </Texto>
@@ -88,6 +96,7 @@ function Lista({ snapshot, remedios, procurandoNovos }: PropsLista) {
 
   return (
     <>
+      <Resumo tem={situacoes.filter((x) => x.hoje.tipo === "tem").length} total={situacoes.length} />
       <FaixaAtualizacao atualizadoEm={snapshot.meta.atualizadoEm} procurandoNovos={procurandoNovos} />
 
       {origem.carregando ? (
@@ -98,7 +107,7 @@ function Lista({ snapshot, remedios, procurandoNovos }: PropsLista) {
         <SituacaoOrigem origem={origem} escolherRegiao={escolherRegiao} resumida />
       )}
 
-      <View style={estilos.lista}>
+      <View style={estilos.listaRemedios}>
         {situacoes.map(({ remedio, hoje }) =>
           hoje.tipo === "fora_dos_dados" ? (
             <ForaDosDados key={remedio.codigo} remedio={remedio} />
@@ -167,9 +176,14 @@ function ItemRemedio({ snapshot, remedio, hoje, ordem, onPress }: PropsItem) {
     .join(". ");
 
   return (
-    <ItemLista onPress={onPress} rotulo={rotulo} dica="Mostra os postos que têm hoje">
-      <Texto variante="destaque">{nome}</Texto>
-      <Texto secundario>{apresentacao}</Texto>
+    <ItemLista onPress={onPress} rotulo={rotulo} dica="Mostra os postos que têm hoje" semSeta>
+      <View style={estilos.topoRemedio}>
+        <Anel valor={hoje.tipo === "tem" ? hoje.postos : 0} total={snapshot.ubs.length} tamanho={68} />
+        <View style={estilos.flex}>
+          <Texto variante="destaque">{nome}</Texto>
+          <Texto secundario>{apresentacao}</Texto>
+        </View>
+      </View>
       {mesmaSubstancia ? <Texto>{mesmaSubstancia}</Texto> : null}
       {liberacao ? (
         <Linha icone="warning" cor={cores.aviso.texto}>
@@ -178,7 +192,7 @@ function ItemRemedio({ snapshot, remedio, hoje, ordem, onPress }: PropsItem) {
       ) : null}
       <Linha icone={primeiro ? "medkit-outline" : "close-circle-outline"}>{quantos}</Linha>
       {primeiro && posto ? (
-        <View style={[estilos.primeiro, { borderColor: cores.divisoria }]}>
+        <View style={[estilos.primeiro, { backgroundColor: cores.superficie2 }]}>
           <Texto variante="legenda" secundario>
             {titulo}:
           </Texto>
@@ -188,7 +202,60 @@ function ItemRemedio({ snapshot, remedio, hoje, ordem, onPress }: PropsItem) {
         </View>
       ) : null}
       {retirada ? <Linha icone="information-circle-outline">{retirada.titulo}</Linha> : null}
+      {hoje.tipo === "tem" ? (
+        <View style={estilos.ver}>
+          <Texto variante="destaque" cor={cores.primaria} style={estilos.flex}>
+            {hoje.postos === 1 ? "Ver o posto" : `Ver os ${hoje.postos} postos`}
+          </Texto>
+          <Icone name="chevron-forward" size={24} color={cores.primaria} />
+        </View>
+      ) : null}
     </ItemLista>
+  );
+}
+
+/** A pergunta de toda manhã, respondida no alto: os meus remédios têm hoje? */
+function Resumo({ tem, total }: { tem: number; total: number }) {
+  const { cores } = useTema();
+  const todos = tem === total;
+  const par = todos ? cores.semaforo.alto : cores.aviso;
+  const texto = todos
+    ? total === 1
+      ? "Seu remédio tem em algum posto hoje"
+      : `Os ${total} remédios têm em algum posto hoje`
+    : tem === 0
+      ? total === 1
+        ? "Seu remédio não tem em nenhum posto hoje"
+        : "Nenhum dos seus remédios tem hoje"
+      : `${tem} de ${total} remédios têm em algum posto hoje`;
+  return (
+    <View style={[estilos.resumo, { backgroundColor: par.fundo }]} accessible accessibilityLabel={texto}>
+      <View style={[estilos.bola, { backgroundColor: todos ? cores.barraSemaforo.alto : cores.barraSemaforo.baixo }]}>
+        <Icone name={todos ? "checkmark" : "alert"} size={26} color={cores.superficie} />
+      </View>
+      <Texto variante="destaque" cor={par.texto} style={estilos.flex}>
+        {texto}
+      </Texto>
+    </View>
+  );
+}
+
+function Adicionar() {
+  const router = useRouter();
+  const { cores } = useTema();
+  return (
+    <Pressable
+      onPress={() => router.navigate("/")}
+      accessibilityRole="button"
+      accessibilityLabel="Adicionar remédio"
+      accessibilityHint="Vai para a busca"
+      style={({ pressed }) => [estilos.adicionar, { backgroundColor: cores.primaria }, pressed && { opacity: 0.75 }]}
+    >
+      <Icone name="add" size={24} color={cores.textoSobrePrimaria} />
+      <Texto variante="legenda" peso="negrito" cor={cores.textoSobrePrimaria}>
+        Adicionar
+      </Texto>
+    </Pressable>
   );
 }
 
@@ -211,21 +278,29 @@ function ForaDosDados({ remedio }: { remedio: RemedioGuardado }) {
   );
 }
 
-function Linha({ icone, cor, children }: { icone: ComponentProps<typeof Ionicons>["name"]; cor?: string; children: ReactNode }) {
+function Linha({ icone, cor, children }: { icone: NomeIcone; cor?: string; children: ReactNode }) {
   const { cores } = useTema();
   return (
     <View style={estilos.linha}>
-      <Ionicons name={icone} size={22} color={cor ?? cores.textoSecundario} />
+      <Icone name={icone} size={22} color={cor ?? cores.textoSecundario} />
       <Texto style={estilos.flex}>{children}</Texto>
     </View>
   );
 }
 
 const estilos = StyleSheet.create({
+  cabecalho: { flexDirection: "row", alignItems: "center", gap: espaco.sm },
+  adicionar: { flexDirection: "row", alignItems: "center", gap: 4, minHeight: ALVO_MINIMO, paddingHorizontal: espaco.md, borderRadius: RAIO_CAPSULA },
+  circulo: { width: 96, height: 96, borderRadius: 48, alignItems: "center", justifyContent: "center" },
+  resumo: { flexDirection: "row", alignItems: "center", gap: espaco.md, padding: espaco.md, borderRadius: 18 },
+  bola: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
+  listaRemedios: { gap: espaco.md },
+  topoRemedio: { flexDirection: "row", alignItems: "center", gap: espaco.md },
+  ver: { flexDirection: "row", alignItems: "center", gap: espaco.xs },
   vazio: { flex: 1, alignItems: "center", justifyContent: "center", gap: espaco.md, paddingVertical: espaco.xl },
   centro: { textAlign: "center" },
   lista: { gap: espaco.sm },
   linha: { flexDirection: "row", alignItems: "flex-start", gap: espaco.sm },
   flex: { flex: 1 },
-  primeiro: { gap: espaco.xs, borderTopWidth: 1, paddingTop: espaco.sm, marginTop: espaco.xs },
+  primeiro: { gap: espaco.xs, borderRadius: 14, padding: espaco.sm + 4 },
 });

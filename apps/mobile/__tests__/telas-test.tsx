@@ -1,16 +1,20 @@
 import { fireEvent, renderRouter, screen, waitFor, within } from "expo-router/testing-library";
-import { AccessibilityInfo, Linking, Share } from "react-native";
+import type { Snapshot } from "@tem-remedio/shared";
+import { AccessibilityInfo, Linking, Share, StyleSheet, TextInput } from "react-native";
 import { queryClient } from "@/dados/consultas";
-import { NO_PLANO_PILOTO, snapshotTeste } from "../fixtures/snapshot-teste";
+import { carregarPreferencias, reiniciarPreferencias } from "@/preferencias/preferencias";
+import { ALVO_MINIMO } from "@/tema";
+import { comMaisPostosDeLosartana, NO_PLANO_PILOTO, snapshotTeste } from "../fixtures/snapshot-teste";
 
-// As telas leem o snapshot pequeno de teste.
+// As telas leem o snapshot pequeno de teste (ou outro, quando o teste troca).
+const mockDados: { snapshot: Snapshot | null } = { snapshot: null };
 jest.mock("@/dados/useSnapshot", () => {
-  const { snapshotTeste: snapshot } = jest.requireActual<typeof import("../fixtures/snapshot-teste")>(
+  const { snapshotTeste: padrao } = jest.requireActual<typeof import("../fixtures/snapshot-teste")>(
     "../fixtures/snapshot-teste",
   );
   return {
     useSnapshot: () => ({
-      snapshot,
+      snapshot: mockDados.snapshot ?? padrao,
       origem: "embutido",
       carregando: false,
       erro: null,
@@ -87,15 +91,18 @@ beforeEach(() => {
   // O Linking do React Native já é um mock único: sem limpar, as chamadas de um teste passam para o outro.
   jest.clearAllMocks();
   mockArquivos.clear();
+  // Letra, cores e nome do Perfil ficam na memória do módulo: cada teste começa do padrão.
+  reiniciarPreferencias();
+  mockDados.snapshot = null;
   mockMapa.web = false;
   mockGps.permissao = PERMITIDO;
   mockGps.resposta = PERMITIDO;
   mockGps.pedidos = 0;
   mockGps.posicao = { coords: { latitude: NO_PLANO_PILOTO.lat, longitude: NO_PLANO_PILOTO.lng } };
   mockGps.desligado = false;
-  jest.spyOn(Linking, "openURL").mockResolvedValue(true);
+  jest.spyOn(Linking, "openURL").mockResolvedValue(undefined);
   jest.spyOn(Linking, "openSettings").mockResolvedValue(undefined);
-  jest.spyOn(Share, "share").mockResolvedValue({ action: Share.sharedAction });
+  jest.spyOn(Share, "share").mockResolvedValue({ action: Share.sharedAction, activityType: undefined });
   jest.spyOn(AccessibilityInfo, "announceForAccessibility").mockImplementation(() => {});
 });
 
@@ -108,6 +115,9 @@ afterEach(() => {
 async function buscarPor(termo: string) {
   await fireEvent.changeText(screen.getByLabelText("Nome do remédio"), termo);
 }
+
+/** O resumo ("4 postos têm hoje") aparece antes da lista, que espera a localização ou a região. */
+const esperarPostos = () => screen.findAllByRole("button", { name: /^UBS / });
 
 /** Nomes dos postos na ordem da lista (o item inteiro é um botão com o nome primeiro). */
 function postosNaTela(): string[] {
@@ -188,7 +198,9 @@ describe("lista de postos", () => {
     expect(postosNaTela()).toEqual(["UBS 1 Asa Norte", "UBS 05 Taguatinga", "UBS 01 Samambaia", "UBS 3 Ceilandia"]);
 
     const asaNorte = screen.getByRole("button", { name: /^UBS 1 Asa Norte/ });
-    expect(within(asaNorte).getByText("Plano Piloto · 4,0 km")).toBeOnTheScreen();
+    // A distância vem num selo ao lado do nome; embaixo, a região e o medidor dos dias de estoque.
+    expect(within(asaNorte).getByText("4,0 km")).toBeOnTheScreen();
+    expect(within(asaNorte).getByText("Plano Piloto")).toBeOnTheScreen();
     expect(within(asaNorte).getByText("Quase acabando, ligue antes")).toBeOnTheScreen();
     expect(asaNorte.props.accessibilityLabel).toMatch(/a 4,0 km em linha reta\. Estoque: Quase acabando, ligue antes\. (Aberto|Fechado) agora/);
     // UBS sem horário no cadastro: sem "Aberto agora".
@@ -221,6 +233,7 @@ describe("lista de postos", () => {
     await renderRouter(APP, { initialUrl: "/postos/90007" });
     expect(await screen.findByText("2 postos têm hoje")).toBeOnTheScreen();
     expect(screen.getByText("Só nas UBSs que entregam controlados")).toBeOnTheScreen();
+    await esperarPostos();
     expect(postosNaTela()).toEqual(["UBS 1 Asa Norte", "UBS 05 Taguatinga"]);
   });
 
@@ -371,7 +384,13 @@ describe("mapa", () => {
 
     await fireEvent.press(screen.getByRole("tab", { name: "Mapa" }));
     expect(screen.getByRole("tab", { name: "Mapa" }).props.accessibilityState).toEqual({ selected: true });
-    expect(screen.getByLabelText("Mapa com 4 postos que têm hoje.")).toBeOnTheScreen();
+    const mapa = screen.getByLabelText("Mapa com 4 postos que têm hoje.");
+    expect(mapa).toBeOnTheScreen();
+    // Arrastar com um dedo desce a tela, não o mapa: quem rola não fica preso nele.
+    expect(mapa.props.scrollEnabled).toBe(false);
+    // A legenda vem antes do mapa, para quem desce a tela.
+    const naOrdemDaTela = screen.getAllByLabelText(/^(Cores dos pinos: |Mapa com 4 postos)/);
+    expect(naOrdemDaTela.map((e) => String(e.props.accessibilityLabel).slice(0, 15))).toEqual(["Cores dos pinos", "Mapa com 4 post"]);
     expect(pinos()).toHaveLength(4);
     expect(screen.queryAllByRole("button", { name: /^UBS / })).toHaveLength(0);
     // O leitor de tela anuncia quantos postos há no mapa.
@@ -467,7 +486,7 @@ describe("detalhe do posto", () => {
     expect(screen.getByText("SGAN, ASA NORTE")).toBeOnTheScreen();
     expect(screen.getByText("Plano Piloto · CEP 70790-054")).toBeOnTheScreen();
     expect(screen.getByText("Das 07h às 18h de segunda a sexta, e sábado das 07h às 12h")).toBeOnTheScreen();
-    expect(screen.getByText("• Documento oficial com foto")).toBeOnTheScreen();
+    expect(screen.getByText("Documento oficial com foto")).toBeOnTheScreen();
   });
 
   it("Como chegar pergunta qual app de mapa usar", async () => {
@@ -525,7 +544,7 @@ describe("detalhe do posto", () => {
 
   it("controlado: lembra a receita especial; sem telefone, não mostra Ligar", async () => {
     await renderRouter(APP, { initialUrl: "/posto/0010634?produto=8829" });
-    expect(await screen.findByText("• Receita de controle especial em 2 vias (não aceitam xerox)")).toBeOnTheScreen();
+    expect(await screen.findByText("Receita de controle especial em 2 vias (não aceitam xerox)")).toBeOnTheScreen();
     expect(screen.getByText("A SES-DF não informou o telefone deste posto.")).toBeOnTheScreen();
     expect(screen.queryByRole("button", { name: "Ligar" })).toBeNull();
   });
@@ -571,7 +590,7 @@ describe("Meus remédios", () => {
     const r = await renderRouter(APP, { initialUrl: "/postos/8944?marca=COZAAR" });
     expect(await screen.findByText("4 postos têm hoje")).toBeOnTheScreen();
 
-    await fireEvent.press(screen.getByRole("button", { name: "Guardar em Meus remédios" }));
+    await fireEvent.press(await screen.findByRole("button", { name: "Guardar em Meus remédios" }));
     expect(await screen.findByRole("button", { name: "Guardado em Meus remédios" })).toBeOnTheScreen();
     expect(screen.getByText("Está na aba Meus remédios. Para tirar, toque no botão de novo.")).toBeOnTheScreen();
     expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledWith("Guardado em Meus remédios");
@@ -721,11 +740,12 @@ describe("Meus remédios", () => {
 
     expect(await screen.findByText("Seus remédios")).toBeOnTheScreen();
     // Os três primeiros em ordem alfabética; o resto na aba.
-    expect(screen.getByRole("button", { name: "Clonazepam. Comprimido 2 mg. Em 2 postos hoje" })).toBeOnTheScreen();
+    // Cada um com o anel e, quando o app sabe de onde contar, o posto mais perto.
+    expect(await screen.findByRole("button", { name: /^Clonazepam\. Comprimido 2 mg\. Em 2 postos hoje\. Mais perto: / })).toBeOnTheScreen();
     expect(screen.getByRole("button", { name: "Oseltamivir (fosfato). Cápsula 75 mg. Nenhum posto tem hoje" })).toBeOnTheScreen();
     expect(screen.queryByText("Remédio antigo")).toBeNull();
 
-    await fireEvent.press(screen.getByRole("button", { name: "Losartana potassica. Comprimido 50 mg. Em 4 postos hoje" }));
+    await fireEvent.press(screen.getByRole("button", { name: /^Losartana potassica\. Comprimido 50 mg\. Em 4 postos hoje/ }));
     expect(r.getPathname()).toBe("/postos/8944");
     await fireEvent.press(await screen.findByRole("button", { name: "Voltar" }));
     expect(r.getPathname()).toBe("/");
@@ -734,7 +754,7 @@ describe("Meus remédios", () => {
     expect(r.getPathname()).toBe("/meus-remedios");
 
     // Digitando, a busca toma o lugar.
-    await fireEvent.press(screen.getByRole("button", { name: "Buscar remédio" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Início, buscar remédio" }));
     await buscarPor("losartana");
     expect(await screen.findByText("1 remédio encontrado")).toBeOnTheScreen();
     expect(screen.queryByText("Seus remédios")).toBeNull();
@@ -744,4 +764,233 @@ describe("Meus remédios", () => {
 // O snapshot de teste não muda sem querer.
 it("fixture tem 6 postos e 10 produtos", () => {
   expect([snapshotTeste.ubs.length, snapshotTeste.produtos.length]).toEqual([6, 10]);
+});
+
+describe("acessibilidade", () => {
+  const NUNCA_PERGUNTADO: Permissao = { granted: false, canAskAgain: true, status: "undetermined" };
+  const NEGADO: Permissao = { granted: false, canAskAgain: false, status: "denied" };
+  const LOSARTANA = {
+    codigo: "8944",
+    nome: "Losartana potassica",
+    apresentacao: "Comprimido 50 mg",
+    marca: null,
+    guardadoEm: "2026-10-18T12:00:00.000Z",
+  };
+  const guardarLosartana = () => mockArquivos.set("meus-remedios.json", JSON.stringify({ remedios: [LOSARTANA] }));
+  /** Espera o VoiceOver anunciar (o anúncio sai depois que a tela para de mudar). */
+  const anunciou = (texto: string) =>
+    waitFor(() => expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledWith(texto), { timeout: 3000 });
+
+  /**
+   * Na tela de agora: nenhum ícone aparece para o leitor de tela (ele pararia num caractere sem sentido)
+   * e tudo que é tocável tem pelo menos 56 de altura. As abas da barra de baixo ficam de fora (são as que
+   * mostram o rótulo grande ao segurar): a altura delas é a da barra (`alturaBarraAbas`, no teste do tema).
+   */
+  function conferirTela() {
+    expect(screen.queryAllByTestId(/^icone-/).map((i) => i.props.testID)).toEqual([]);
+    const pequenos = [...screen.queryAllByRole("button"), ...screen.queryAllByRole("tab")]
+      .filter((alvo) => !alvo.props.accessibilityShowsLargeContentViewer)
+      .map((alvo) => {
+        const estilo = StyleSheet.flatten(alvo.props.style) ?? {};
+        const altura = Math.max(Number(estilo.minHeight ?? 0), Number(estilo.height ?? 0));
+        return { rotulo: String(alvo.props.accessibilityLabel), altura };
+      })
+      .filter(({ altura }) => altura < ALVO_MINIMO);
+    expect(pequenos).toEqual([]);
+  }
+
+  interface Caso {
+    tela: string;
+    url: string;
+    /** Espera a tela ficar pronta (e faz o que for preciso nela). */
+    esperar: () => Promise<unknown>;
+    /** Antes de abrir: permissão de localização, remédios guardados... */
+    preparar?: () => void;
+  }
+  it.each<Caso>([
+    { tela: "busca, antes de digitar", url: "/", esperar: () => screen.findByText("Rede pública do DF") },
+    { tela: "busca, com Seus remédios", url: "/", esperar: () => screen.findByText("Seus remédios"), preparar: guardarLosartana },
+    {
+      tela: "busca, com resultados",
+      url: "/",
+      esperar: async () => {
+        await buscarPor("losartana");
+        return screen.findByText("1 remédio encontrado");
+      },
+    },
+    { tela: "Qual destes?", url: "/remedio/90648", esperar: () => screen.findByText("Qual destes?") },
+    {
+      tela: "postos, primeira vez",
+      url: "/postos/8944",
+      esperar: () => screen.findByText("Como achar os postos perto de você?"),
+      preparar: () => (mockGps.permissao = NUNCA_PERGUNTADO),
+    },
+    {
+      tela: "postos, sem permissão",
+      url: "/postos/8944",
+      esperar: () => screen.findByText("Sem a sua localização"),
+      preparar: () => (mockGps.permissao = NEGADO),
+    },
+    { tela: "postos, lista", url: "/postos/8944", esperar: () => screen.findByText("4 postos têm hoje") },
+    {
+      tela: "postos, mapa",
+      url: "/postos/8944",
+      esperar: async () => {
+        await fireEvent.press(await screen.findByRole("tab", { name: "Mapa" }));
+        return screen.findByText("O mais perto de você");
+      },
+    },
+    { tela: "postos, nenhum tem", url: "/postos/MSE24551", esperar: () => screen.findByText(/^Nenhum posto tem Oseltamivir/) },
+    {
+      tela: "detalhe do posto",
+      url: "/posto/0010626?produto=8944",
+      esperar: () => screen.findByRole("button", { name: "Como chegar" }),
+    },
+    {
+      tela: "Como chegar",
+      url: "/posto/0010626?produto=8944",
+      esperar: async () => {
+        await fireEvent.press(await screen.findByRole("button", { name: "Como chegar" }));
+        return screen.findByText("Abrir o caminho com qual app?");
+      },
+    },
+    { tela: "Meus remédios, vazio", url: "/meus-remedios", esperar: () => screen.findByText("Guarde os remédios que você usa") },
+    {
+      tela: "Meus remédios, com remédio",
+      url: "/meus-remedios",
+      esperar: () => screen.findByText("Mais perto de você:"),
+      preparar: guardarLosartana,
+    },
+    { tela: "Ajuda", url: "/ajuda", esperar: () => screen.findByText("Como usar") },
+    { tela: "região", url: "/regiao", esperar: () => screen.findByText("Qual é a sua região?") },
+  ])("$tela: ícones escondidos do leitor de tela e tudo que é tocável com 56 de altura", async ({ url, esperar, preparar }) => {
+    preparar?.();
+    await renderRouter(APP, { initialUrl: url });
+    await esperar();
+    conferirTela();
+  });
+
+  it("busca: o VoiceOver anuncia o que achou, sem a pessoa sair do campo", async () => {
+    await renderRouter(APP, { initialUrl: "/" });
+    await buscarPor("losartana");
+    await anunciou("1 remédio encontrado");
+    await buscarPor("xyzwq");
+    await anunciou("Não achei “xyzwq”");
+  });
+
+  it("busca: depois de apagar, o foco volta para o campo", async () => {
+    await renderRouter(APP, { initialUrl: "/" });
+    await buscarPor("losartana");
+    await fireEvent.press(await screen.findByRole("button", { name: "Apagar o que foi escrito" }));
+    expect(screen.getByLabelText("Nome do remédio").props.value).toBe("");
+    expect(TextInput.prototype.focus).toHaveBeenCalled();
+  });
+
+  it("postos: anuncia a contagem e a ordem quando a lista aparece depois da pergunta", async () => {
+    mockGps.permissao = NUNCA_PERGUNTADO;
+    await renderRouter(APP, { initialUrl: "/postos/8944" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Usar minha localização" }));
+    await anunciou("4 postos têm hoje. Do mais perto para o mais longe de você.");
+  });
+
+  it("postos: anuncia quando nenhum posto tem", async () => {
+    await renderRouter(APP, { initialUrl: "/postos/MSE24551" });
+    await anunciou("Nenhum posto tem Oseltamivir (fosfato) cápsula 75 mg hoje");
+  });
+
+  it("Mostrar mais postos: o leitor de tela vai para o primeiro posto novo", async () => {
+    mockDados.snapshot = comMaisPostosDeLosartana(8);
+    const focar = jest.spyOn(AccessibilityInfo, "sendAccessibilityEvent").mockImplementation(() => {});
+    /** Rótulos dos elementos que receberam o foco do leitor de tela (a navegação também move o foco). */
+    const focados = () =>
+      focar.mock.calls
+        .filter(([, tipo]) => tipo === "focus")
+        .map(([alvo]) => (alvo as { props?: { accessibilityLabel?: string } } | null)?.props?.accessibilityLabel);
+    await renderRouter(APP, { initialUrl: "/postos/8944" });
+    expect(await screen.findByText("12 postos têm hoje")).toBeOnTheScreen();
+    await esperarPostos();
+    expect(postosNaTela()).toHaveLength(10);
+    const antes = focados().length;
+
+    await fireEvent.press(screen.getByRole("button", { name: "Mostrar mais postos" }));
+    const nomes = postosNaTela();
+    expect(nomes).toHaveLength(12);
+    expect(focados().slice(antes)).toEqual([expect.stringMatching(new RegExp(`^${nomes[10]}\\. `))]);
+  });
+
+  it("detalhe: o telefone é lido dígito por dígito", async () => {
+    await renderRouter(APP, { initialUrl: "/posto/0010626?produto=8944" });
+    const ligar = await screen.findByRole("button", { name: "Ligar" });
+    expect(ligar.props.accessibilityHint).toBe("Liga para 6 1, 3 5 6 3, 9 1 7 6");
+    expect(screen.getByLabelText("6 1, 3 5 6 3, 9 1 7 6")).toBeOnTheScreen();
+    // Na tela, o número continua como veio da SES-DF (embaixo do Ligar e no cartão do telefone).
+    expect(screen.getAllByText("(61) 3563-9176")).toHaveLength(2);
+  });
+
+  it("Como chegar: o gesto de voltar do VoiceOver fecha a folha", async () => {
+    await renderRouter(APP, { initialUrl: "/posto/0010626?produto=8944" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Como chegar" }));
+    expect(screen.getByText("Abrir o caminho com qual app?")).toBeOnTheScreen();
+    await fireEvent(screen.getByTestId("folha-como-chegar"), "accessibilityEscape");
+    expect(screen.queryByText("Abrir o caminho com qual app?")).toBeNull();
+    expect(Linking.openURL).not.toHaveBeenCalled();
+  });
+});
+
+describe("Perfil", () => {
+  const preferenciasSalvas = () => JSON.parse(mockArquivos.get("preferencias.json") ?? "null") as unknown;
+
+  it("sem cadastro: nome, letra e cores ficam só no celular; o Início diz bom dia com o nome", async () => {
+    const r = await renderRouter(APP, { initialUrl: "/perfil" });
+    expect(await screen.findByText("Sem senha e sem cadastro.")).toBeOnTheScreen();
+
+    await fireEvent.changeText(screen.getByLabelText("Seu nome"), "  Lúcia ");
+    await fireEvent(screen.getByLabelText("Seu nome"), "blur");
+    await fireEvent.press(screen.getByRole("radio", { name: "Maior" }));
+    await fireEvent.press(screen.getByRole("radio", { name: /^Escuro\./ }));
+    expect(screen.getByRole("radio", { name: "Maior" }).props.accessibilityState).toEqual({ checked: true });
+    expect(preferenciasSalvas()).toEqual({ nome: "Lúcia", letra: "maior", tema: "escuro" });
+    expect(await screen.findByText("Lúcia")).toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole("button", { name: "Início, buscar remédio" }));
+    expect(r.getPathname()).toBe("/");
+    expect(await screen.findByText(/^(Bom dia|Boa tarde|Boa noite), Lúcia$/)).toBeOnTheScreen();
+    // Letra maior: o título cresce 30%.
+    const titulo = StyleSheet.flatten(screen.getByText("Qual remédio você procura?").props.style);
+    expect(titulo.fontSize).toBe(36);
+  });
+
+  it("arquivo estragado: volta ao padrão sem quebrar", async () => {
+    mockArquivos.set("preferencias.json", JSON.stringify({ nome: 42, letra: "gigante", tema: "roxo" }));
+    await carregarPreferencias();
+    await renderRouter(APP, { initialUrl: "/perfil" });
+    expect(await screen.findByRole("radio", { name: "Normal" })).toBeOnTheScreen();
+    expect(screen.getByRole("radio", { name: "Normal" }).props.accessibilityState).toEqual({ checked: true });
+    expect(screen.getByRole("radio", { name: /^Do celular\./ }).props.accessibilityState).toEqual({ checked: true });
+  });
+
+  it("a Ajuda abre pelo ? do Início e o Voltar volta para o Início", async () => {
+    const r = await renderRouter(APP, { initialUrl: "/" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Ajuda" }));
+    expect(r.getPathname()).toBe("/ajuda");
+    expect(await screen.findByText("Como usar")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Voltar" }));
+    expect(r.getPathname()).toBe("/");
+  });
+});
+
+describe("Mapa", () => {
+  it("mostra as farmácias de UBS e abre o detalhe pelo pino, na mesma aba", async () => {
+    const r = await renderRouter(APP, { initialUrl: "/mapa" });
+    expect(await screen.findByText(/^As 5 farmácias de UBS do DF/)).toBeOnTheScreen();
+    // Com a localização: o cartão começa no posto mais perto.
+    expect(await screen.findByText("O mais perto de você")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByTestId("pino-rede-0010626"));
+    expect(screen.getByText("Posto escolhido")).toBeOnTheScreen();
+    expect(screen.getByText("UBS 05 Taguatinga")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Ver posto" }));
+    expect(r.getPathname()).toBe("/posto/0010626");
+    await fireEvent.press(await screen.findByRole("button", { name: "Voltar" }));
+    expect(r.getPathname()).toBe("/mapa");
+  });
 });

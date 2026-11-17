@@ -17,15 +17,24 @@ describe("navegação", () => {
     expect(r.getPathname()).toBe("/");
     expect(await screen.findByText("Qual remédio você procura?")).toBeOnTheScreen();
     expect(screen.getByLabelText("Nome do remédio")).toBeOnTheScreen();
-    expect(await screen.findByText(/farmácias de UBS e \d+ remédios/)).toBeOnTheScreen();
+    expect(await screen.findByLabelText(/farmácias de UBS e \d+ remédios/)).toBeOnTheScreen();
     expect(screen.getByText(/· SES-DF/)).toBeOnTheScreen();
   });
 
-  it("as três abas têm rótulo visível e levam às telas", async () => {
+  it("as quatro abas têm rótulo visível e levam às telas; a Ajuda abre pelo Perfil e pelo Início", async () => {
     const r = await renderRouter(APP, { initialUrl: "/" });
     await screen.findByText("Qual remédio você procura?");
+    for (const aba of ["Início", "Mapa", "Meus remédios", "Perfil"]) expect(screen.getByText(aba)).toBeOnTheScreen();
+    expect(screen.queryByText("Ajuda")).toBeNull();
 
-    await fireEvent.press(screen.getByText("Ajuda"));
+    await fireEvent.press(screen.getByRole("button", { name: "Mapa dos postos" }));
+    expect(r.getPathname()).toBe("/mapa");
+    expect(await screen.findByText(/As \d+ farmácias de UBS do DF/)).toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByText("Perfil"));
+    expect(r.getPathname()).toBe("/perfil");
+    expect(await screen.findByText("Sem senha e sem cadastro.")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Ajuda e como usar" }));
     expect(r.getPathname()).toBe("/ajuda");
     expect(await screen.findByText("De onde vêm os dados")).toBeOnTheScreen();
     expect(screen.getByText("O que levar na UBS")).toBeOnTheScreen();

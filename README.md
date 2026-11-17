@@ -4,7 +4,7 @@
 
 App para idosos (e seus cuidadores) descobrirem **qual posto de saúde do DF tem o remédio hoje**, antes de sair de casa. Usa só dados públicos e oficiais da Secretaria de Saúde do DF.
 
-Projeto de portfólio em React Native (Expo) + TypeScript. Status: **coletor de dados (M1), base do app (M2), fluxo principal (M3: busca → dose → postos mais perto → detalhe), mapa com escolha da região (M4) e Meus remédios (M5: lista guardada só no celular, com a situação de hoje de cada remédio) prontos**; acabamento (M6) em construção.
+Projeto de portfólio em React Native (Expo) + TypeScript. Status: **coletor de dados (M1), base do app (M2), fluxo principal (M3: busca → dose → postos mais perto → detalhe), mapa com escolha da região (M4) e Meus remédios (M5: lista guardada só no celular, com a situação de hoje de cada remédio) prontos**; acabamento (M6) em construção, com a acessibilidade já revisada (leitor de tela, letra grande do celular, alvos de toque de 56).
 
 ## Como funciona
 
@@ -28,7 +28,7 @@ O app só lê esse arquivo: não há servidor nem login, e nenhum dado de saúde
 
 ## Rodando
 
-Requer Node 22+ e pnpm.
+Requer Node 22.13+ ou 24.3+ (o `.nvmrc` usa o 24) e pnpm.
 
 ```bash
 pnpm install

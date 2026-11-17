@@ -90,9 +90,9 @@ Tabela CMED (Anvisa)          ─┘
 
 ### Stack
 - Monorepo pnpm: `packages/shared` (schemas zod + regras), `pipeline` (coletor), `apps/mobile` (Expo).
-- App: Expo SDK 57 + TypeScript + Expo Router (abas em JS), TanStack Query, expo-file-system (snapshot, região e Meus remédios em arquivos JSON), Fuse.js (busca), expo-location, react-native-maps.
-- **Por que SDK 57:** o SDK 58 saiu em 15/10/2026, mas o Expo Go para ele ainda não está nas lojas. Quando chegar, o novo Expo Go só abre SDK 58: aí subimos o projeto (`pnpm exec expo install expo@~58.0.0` + `expo install --fix`, Testing Library 14 e Jest 30).
-- Testes: Vitest (coletor e shared); Jest 29 + Testing Library 13 (app); Maestro (E2E, M6).
+- App: Expo SDK 58 (React Native 0.88, React 19.3) + TypeScript + Expo Router (abas em JS), TanStack Query, expo-file-system (snapshot, região e Meus remédios em arquivos JSON), Fuse.js (busca), expo-location, react-native-maps.
+- **SDK 58:** o projeto começou no SDK 57 porque o SDK 58 saiu em 15/10/2026 sem o Expo Go dele nas lojas. O Expo Go 58.0.5 chegou à App Store em 22/10/2026 e só abre projetos do SDK 58; o app subiu para o 58 em 04/11/2026 (`pnpm exec expo install expo@~58.0.0` + `expo install --fix`, Jest 30 e Testing Library 14). O código do app não mudou: só os mocks de teste, para os tipos do React Native 0.88.
+- Testes: Vitest (coletor e shared); Jest 30 + Testing Library 14 (app); Maestro (E2E, M6).
 
 ### Dados no app (M2)
 - O app **abre com o snapshot embutido** (`apps/mobile/assets/dados/snapshot-inicial.json`): funciona na primeira abertura, sem internet.
@@ -123,7 +123,7 @@ Tabela CMED (Anvisa)          ─┘
 
 ### Mapa e região (M4)
 - Rota nova: `/regiao` ("Qual é a sua região?"), fora das abas, aberta pela lista de postos e pela aba Ajuda; ao escolher, volta para onde estava.
-- **Lista | Mapa** na tela de postos (abas lado a lado; a escolhida fica preenchida e com ícone de marcado). O mapa (react-native-maps 1.27.2, a versão do SDK 57, que já vem no Expo Go: Mapas da Apple no iPhone, Google Maps no Android, sem chave) mostra os mesmos postos, na mesma ordem e com o mesmo filtro de retirada da lista. Abre enquadrando a pessoa (ou o centro da região escolhida) e os 5 primeiros postos.
+- **Lista | Mapa** na tela de postos (abas lado a lado; a escolhida fica preenchida e com ícone de marcado). O mapa (react-native-maps 1.29.11, a versão do SDK 58, que já vem no Expo Go: Mapas da Apple no iPhone, Google Maps no Android, sem chave) mostra os mesmos postos, na mesma ordem e com o mesmo filtro de retirada da lista. Abre enquadrando a pessoa (ou o centro da região escolhida) e os 5 primeiros postos.
 - **Pinos**: bolinha com a cor e o ícone do semáforo, borda branca e área de toque de 56; o escolhido fica maior. Cores próprias (`cores.pino`), iguais nos dois temas porque o mapa do Android continua claro no tema escuro. O teste de contraste confere o ícone sobre o pino (4,5:1) e o pino sobre o chão do mapa claro e do escuro (3:1). Legenda com os níveis que aparecem no mapa.
 - **Cartão embaixo do mapa**: começa no mais perto (ou no primeiro da lista, sem localização), com nome, região, distância, semáforo (cor + ícone + texto), horário, **Ver posto** e **Ver o próximo mais perto**, que anda pela lista sem precisar acertar o pino (mais fácil para quem treme a mão e para quem usa leitor de tela). O leitor de tela anuncia "Mapa com N postos que têm hoje" quando o mapa aparece, e o posto novo a cada "Ver o próximo".
 - **Web**: o react-native-maps não funciona no navegador. `MapaPostos.web.tsx` faz o Metro nunca carregá-lo; a tela mostra só a lista, com um aviso discreto ("O mapa dos postos aparece no app do celular").
@@ -140,7 +140,7 @@ Tabela CMED (Anvisa)          ─┘
 - **Aba Meus remédios**: os remédios em ordem alfabética. Cada um mostra quantos postos têm hoje e o primeiro pela origem atual ("Mais perto de você", "Na sua região" ou "Mais perto da sua região"), com nome, região, distância (só com GPS) e semáforo (cor + ícone + texto). Usa a mesma lista da tela de postos (`postosComEstoque`): controlado só nas UBSs que entregam controlados, unidade prisional nunca. Avisos de retirada aparecem pelo título ("Retire na UBS do seu bairro", "Só nas UBSs que entregam controlados"…), e a marca de liberação prolongada ganha o lembrete "Glifage XR é de liberação prolongada; este não é. Confirme com seu médico ou farmacêutico." Um toque abre a lista de postos do remédio (com a marca, para o aviso aparecer lá também).
 - **Localização na aba**: segue a regra "Primeira vez" do M4, a aba nunca pede a localização sozinha. Na primeira vez, a mesma pergunta "Como achar os postos perto de você?"; até a resposta, e enquanto o GPS não responde, só a contagem. Sem localização nem região não existe "mais perto": a aba mostra só quantos postos têm e o aviso para escolher a região, sem apresentar um posto qualquer como o melhor. Com origem, uma linha diz de onde conta ("O posto mais perto de você, em linha reta." ou "Pela sua região: X."); trocar a região fica na tela de postos e na Ajuda.
 - **Código que sumiu do snapshot**: o item continua guardado, com "Não aparece nos dados de hoje", "Se ele voltar para a lista da SES-DF, aparece aqui de novo." e o botão "Tirar de Meus remédios". O app não apaga sozinho.
-- **Navegação**: as telas de postos e do posto ficam em `(abas)/(buscar,meus)/` (rotas compartilhadas do Expo Router). Abertas pela aba Meus remédios, ficam nessa aba, e o "Voltar" volta para a lista guardada, não para a busca. Um link frio (`/postos/…`) abre na aba Buscar, a primeira do layout das abas.
+- **Navegação**: quatro abas fixas com rótulo (Início, Mapa, Meus remédios, Perfil); a Ajuda abre pelo "?" do Início e pelo Perfil. As telas de postos e do posto ficam em `(abas)/(buscar,meus,mapa)/` (rotas compartilhadas do Expo Router). Abertas pela aba Meus remédios ou Mapa, ficam nessa aba, e o "Voltar" volta para ela. Um link frio (`/postos/…`) abre na aba Início, a primeira do layout das abas.
 - **Busca** (Telas, item 1): antes de digitar, "Seus remédios" com os 3 primeiros (só a contagem de postos, sem localização) e "Ver os N em Meus remédios" quando há mais.
 - O app **não avisa sozinho** quando um remédio chega (isso é a v1.1): a tela vazia e a Ajuda dizem para abrir a aba e conferir, sem prometer aviso.
 - **Ajuda**: "Como usar" (buscar, escolher a dose, ver os postos, tocar no posto), cartão "Meus remédios" (guardar, ver, tirar; não avisa sozinho; a lista fica só no celular), dados sem internet e "alguns remédios só são entregues em certas UBSs, como os controlados". Nada de telefone, endereço ou regra que não venha de fonte oficial.
@@ -151,6 +151,20 @@ Tabela CMED (Anvisa)          ─┘
 - **Ícone**: fundo azul; Android com ícone adaptável (cor de fundo + frente na área segura de 66 dp) e versão de uma cor para o ícone temático do Android 13+.
 - **Tela de abertura**: pelo plugin `expo-splash-screen` (o SDK 57 não tem mais a chave `splash`), símbolo com 160 dp sobre o fundo do app em cada tema (`#FFFFFF` / `#0F1115`). O Expo Go mostra o próprio ícone; o do app só aparece num build.
 - Desenho, arquivos e regras de uso em `apps/mobile/assets/marca/README.md`; os SVGs e PNGs saem de `apps/mobile/scripts/gerar-marca.mjs`.
+
+### Acabamento (M6)
+Ordem combinada com o usuário (um PR por parte): acessibilidade → APK → busca por voz → testes E2E com Maestro → README com GIF. O usuário testa o APK e a voz num celular Android; o iPhone continua pelo Expo Go.
+
+#### Acessibilidade
+Revisão de VoiceOver/TalkBack, letra grande e alvos de toque. O que mudou:
+- **Ícones escondidos do leitor de tela.** O ícone é uma letra de uma fonte especial: sem esconder, o VoiceOver parava nele e lia um caractere sem sentido (lupa da busca, avisos, linhas de Meus remédios, coração da tela vazia...). Agora todo ícone passa pelo `Icone` (`src/componentes/Icone.tsx`), que sempre esconde; o ESLint barra o import direto do `@expo/vector-icons`.
+- **Letra grande sem texto vazando.** Num texto ao lado de um ícone (linha), o React Native não quebra a linha sozinho: com letra grande, o título do botão ("Guardado em Meus remédios"), o selo do semáforo e a legenda do mapa saíam da tela. Agora encolhem e quebram linha. O ESLint barra `numberOfLines`, `ellipsizeMode`, `adjustsFontSizeToFit` e `allowFontScaling`.
+- **Barra de abas.** O rótulo não tem mais `numberOfLines` (cortava com "…" na letra máxima). Ele cresce com a letra do celular até 1,4× (mais que isso, "Meus remédios" não cabe em 2 linhas), e a barra cresce junto (`alturaBarraAbas`). No iPhone, segurar a aba mostra o rótulo em letra grande, como nas abas do sistema.
+- **Anúncios no iPhone.** O `accessibilityLiveRegion` só existe no Android e na web. No iPhone, `useAnuncio` (`src/util/anuncio.ts`) anuncia, 0,8 s depois que a tela para de mudar: o resultado da busca ("3 remédios encontrados", "Não achei X"), a lista de postos quando aparece ou muda de ordem ("4 postos têm hoje. Do mais perto para o mais longe de você.") e "Nenhum posto tem X hoje".
+- **Foco.** "Mostrar mais postos" leva o leitor de tela ao primeiro posto novo (antes, ele ficava no botão, lá embaixo). "Apagar o que foi escrito" some depois do toque: o foco volta para o campo da busca. O gesto de voltar do VoiceOver (Z com dois dedos) fecha a folha "Como chegar". A ordem de cada tela é a da leitura: Voltar, título, conteúdo.
+- **Telefone dígito por dígito** no botão Ligar e no cartão do telefone ("6 1, 3 5 6 3, 9 1 7 6"), em vez de "três mil quinhentos e sessenta e três". Na tela, o número continua como veio da SES-DF.
+- **Testes**: em 15 estados das telas (busca, Qual destes?, postos na lista, no mapa, na primeira vez, sem permissão e vazia, detalhe, Como chegar, Meus remédios vazia e com remédio, Ajuda, região), nenhum ícone aparece para o leitor e tudo que é tocável tem 56 de altura; mais os anúncios, o foco, o telefone e o gesto de voltar.
+- Já estava certo e foi mantido: rótulo único em cada item da lista (o cartão inteiro é um botão), títulos como cabeçalho, semáforo com ícone + texto, alvos de 56, contraste testado, pinos do mapa com rótulo e "Ver o próximo" para não precisar acertar o pino.
 
 ### Como testar no celular
 - **Expo Go** no celular (de preferência Android), lendo o QR code do `pnpm app`.
@@ -167,9 +181,20 @@ Tabela CMED (Anvisa)          ─┘
 | M3. Fluxo principal (busca → dose → lista → detalhe) | Feito — busca tolerante com marcas, "Qual destes?", postos por distância, detalhe com Como chegar/Ligar/WhatsApp. Busca por voz adiada (precisa de development build) |
 | M4. Mapa e região manual | Feito — Lista \| Mapa com pinos do semáforo e cartão do mais perto (na web, só a lista); Região Administrativa escolhida à mão, salva no aparelho, trocável pela lista e pela Ajuda; pergunta antes do pedido de localização |
 | M5. Meus remédios, tela vazia, Ajuda | Feito — guardar e tirar pela lista de postos (e pela tela vazia), lista no aparelho em JSON; aba com a situação de hoje de cada remédio (quantos postos e o primeiro pela localização ou região, com semáforo e avisos de retirada); "Seus remédios" na busca; Ajuda com "Como usar" e "Meus remédios" |
-| M6. Acabamento (E2E, acessibilidade, APK, busca por voz, README com GIF) | |
+| M6. Acabamento (E2E, acessibilidade, APK, busca por voz, README com GIF) | Em andamento — acessibilidade revisada (ícones escondidos do leitor de tela, letra grande sem texto vazando, abas que crescem com a letra, anúncios no iPhone, foco, telefone dígito por dígito). Faltam APK, busca por voz, Maestro e README com GIF |
 
 ## Riscos
 - O endpoint do Power BI não é API oficial. Mitigação: validação + pedido dos dados em formato aberto por LAI.
 - Farmácias zeradas podem ser dispensação suspensa → mostrar "sem informação de estoque", não "não tem".
 - Telefone falta em ~20% das UBSs (CNES + cadastro SES-DF).
+
+### Redesenho visual (17/11/2026)
+Pedido do usuário depois de ver o app no iPhone: o visual estava básico demais. Proposta aprovada na página privada https://claude.ai/artifact/HaW9K9Cn7VgrCvCcsBMUxn.
+- **Marca no app**: faixa azul no Início com o símbolo e "Tem Remédio DF"; fonte Atkinson Hyperlegible Next (Braille Institute, feita para baixa visão) em todo o app; botões, selos e seletor em forma de cápsula, como o símbolo.
+- **Cores**: fundo cinza-azulado (`#F2F5F9`) e cartões brancos com sombra suave; no escuro, cartões com borda. O semáforo continua separado da marca.
+- **Gráficos**: anel (em quantos dos postos do DF tem hoje, no azul do app, não no verde do estoque), barra da rede (quantos postos têm bastante, pouco, quase nada) e medidor dos dias de estoque em cada posto ("cerca de 28 dias", "mais de 2 meses"; é estimativa: quantidade ÷ consumo médio do posto; sem consumo registrado, não aparece).
+- **Início como painel**: saudação, busca, Seus remédios com anel e posto mais perto, atalhos (Mapa, Minha região, Como usar) e a rede em números.
+- **Aba Mapa**: as farmácias de UBS (sem as prisionais) num mapa; o cartão mostra o posto, o horário e "Ver posto". Na web, lista.
+- **Perfil sem cadastro**: nome opcional (só para a saudação), tamanho da letra (normal, grande, maior, por cima do ajuste do celular) e cores (do celular, claro, escuro). Fica só no aparelho. **Sem login**: a lista de remédios é dado de saúde (LGPD art. 11) e senha é barreira e porta de golpe para o público idoso.
+- **Detalhe do posto**: mapa pequeno no alto (só no celular), horário com os dias da semana, uma ação principal (Como chegar) e Ligar/WhatsApp lado a lado com o número à vista.
+- Ainda não: "Pessoas que eu cuido" (listas separadas por pessoa, muda o formato de `meus-remedios.json`), histórico de 30 dias ("costuma ter neste posto"), ilustrações e animações.

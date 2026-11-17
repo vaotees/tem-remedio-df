@@ -1,4 +1,3 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { nivelEstoque, TEXTO_NIVEL, type NivelEstoque } from "@tem-remedio/shared";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AccessibilityInfo, StyleSheet, useWindowDimensions, View } from "react-native";
@@ -6,8 +5,9 @@ import MapView, { Marker } from "react-native-maps";
 import { descreverPosto } from "@/postos/descricao";
 import { enquadrar, resumoDoMapa, type PropsMapaPostos } from "@/postos/mapa";
 import type { PostoComEstoque } from "@/postos/postos";
-import { ALVO_MINIMO, espaco, raio, useTema } from "@/tema";
+import { ALVO_MINIMO, espaco, RAIO_CARTAO, sombraCartao, useTema } from "@/tema";
 import { Botao } from "./Botao";
+import { Icone } from "./Icone";
 import { ICONE_NIVEL, SeloEstoque } from "./SeloEstoque";
 import { SeloHorario } from "./SeloHorario";
 import { Texto } from "./Texto";
@@ -59,10 +59,28 @@ export function MapaPostos({ postos, ordem, aoAbrir }: PropsMapaPostos) {
 
   return (
     <View style={estilos.conteudo}>
+      {/* A legenda vem antes do mapa: quem desce a tela lê o que cada cor quer dizer antes de chegar nele. */}
+      <View
+        style={[estilos.caixaLegenda, { backgroundColor: cores.superficie }, sombraCartao(cores)]}
+        accessible
+        accessibilityLabel={`Cores dos pinos: ${niveis.map((n) => TEXTO_NIVEL[n]).join(", ")}`}
+      >
+        <Texto variante="destaque">O que cada cor quer dizer</Texto>
+        <View style={estilos.legenda}>
+          {niveis.map((nivel) => (
+            <View key={nivel} style={estilos.itemLegenda}>
+              <Pino nivel={nivel} tamanho={34} />
+              <Texto peso="negrito" style={estilos.textoLegenda}>
+                {TEXTO_NIVEL[nivel]}
+              </Texto>
+            </View>
+          ))}
+        </View>
+      </View>
       <Texto secundario>
         {postos.length === 1
           ? "Toque no pino para ver o posto."
-          : "Toque num pino para ver o posto. Para ver mais postos, afaste o mapa com dois dedos."}
+          : "Toque num pino para ver o posto. Com dois dedos, aproxime ou afaste o mapa. Com um dedo, a tela desce normalmente."}
       </Texto>
       <View
         style={[
@@ -79,6 +97,9 @@ export function MapaPostos({ postos, ordem, aoAbrir }: PropsMapaPostos) {
           showsUserLocation={pertoDeVoce}
           showsPointsOfInterests={false}
           showsCompass={false}
+          // O mapa fica no meio de uma tela que rola: arrastar com um dedo desce a tela, não o mapa (senão a
+          // pessoa fica "presa" nele). Dois dedos aproximam e afastam; "Ver o próximo" leva o mapa até o posto.
+          scrollEnabled={false}
           rotateEnabled={false}
           pitchEnabled={false}
           // Android: sem a barrinha que abre o Google Maps (o "Como chegar" do posto já pergunta o app).
@@ -96,15 +117,6 @@ export function MapaPostos({ postos, ordem, aoAbrir }: PropsMapaPostos) {
             />
           ))}
         </MapView>
-      </View>
-
-      <View style={estilos.legenda}>
-        {niveis.map((nivel) => (
-          <View key={nivel} style={estilos.itemLegenda}>
-            <Pino nivel={nivel} tamanho={28} />
-            <Texto variante="legenda">{TEXTO_NIVEL[nivel]}</Texto>
-          </View>
-        ))}
       </View>
 
       <CartaoDoPosto
@@ -174,7 +186,7 @@ function Pino({ nivel, tamanho }: { nivel: NivelEstoque; tamanho: number }) {
         },
       ]}
     >
-      <Ionicons name={ICONE_NIVEL[nivel]} size={Math.round(tamanho * 0.55)} color={cores.pino.icone} />
+      <Icone name={ICONE_NIVEL[nivel]} size={Math.round(tamanho * 0.55)} color={cores.pino.icone} />
     </View>
   );
 }
@@ -200,7 +212,7 @@ function CartaoDoPosto({ posto, posicao, total, pertoDeVoce, aoAbrir, aoVerProxi
     posicao + 1 >= total ? "Voltar ao primeiro" : pertoDeVoce ? "Ver o próximo mais perto" : "Ver o próximo da lista";
 
   return (
-    <View style={[estilos.cartao, { backgroundColor: cores.superficie, borderColor: cores.borda }]}>
+    <View style={[estilos.cartao, { backgroundColor: cores.superficie }, sombraCartao(cores)]}>
       <Texto variante="legenda" secundario>
         {titulo}
       </Texto>
@@ -216,10 +228,12 @@ function CartaoDoPosto({ posto, posicao, total, pertoDeVoce, aoAbrir, aoVerProxi
 
 const estilos = StyleSheet.create({
   conteudo: { gap: espaco.sm },
-  moldura: { borderRadius: raio, borderWidth: 1, overflow: "hidden" },
+  moldura: { borderRadius: RAIO_CARTAO, borderWidth: 1, overflow: "hidden" },
   alvo: { width: ALVO_MINIMO, height: ALVO_MINIMO, alignItems: "center", justifyContent: "center" },
   pino: { alignItems: "center", justifyContent: "center" },
-  legenda: { flexDirection: "row", flexWrap: "wrap", columnGap: espaco.md, rowGap: espaco.xs },
-  itemLegenda: { flexDirection: "row", alignItems: "center", gap: espaco.xs },
-  cartao: { borderRadius: raio, borderWidth: 1, padding: espaco.md, gap: espaco.sm },
+  caixaLegenda: { borderRadius: RAIO_CARTAO, padding: espaco.md, gap: espaco.sm },
+  legenda: { flexDirection: "row", flexWrap: "wrap", columnGap: espaco.md, rowGap: espaco.sm },
+  itemLegenda: { flexDirection: "row", alignItems: "center", gap: espaco.xs, maxWidth: "100%" },
+  textoLegenda: { flexShrink: 1 },
+  cartao: { borderRadius: RAIO_CARTAO, padding: espaco.md, gap: espaco.sm },
 });
