@@ -1,12 +1,12 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
 import type { Snapshot } from "@tem-remedio/shared";
 import { useRouter } from "expo-router";
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import { Botao } from "@/componentes/Botao";
 import { Cartao } from "@/componentes/Cartao";
 import { ComDados } from "@/componentes/ComDados";
 import { FaixaAtualizacao } from "@/componentes/FaixaAtualizacao";
+import { Icone } from "@/componentes/Icone";
 import { ItemLista } from "@/componentes/ItemLista";
 import { Tela } from "@/componentes/Tela";
 import { Texto } from "@/componentes/Texto";
@@ -15,10 +15,12 @@ import { capitalizarNome, nomeSubstancia, rotuloProduto } from "@/busca/remedios
 import { useMeusRemedios } from "@/meus-remedios/guardados";
 import { situacaoHoje, textoQuantos } from "@/meus-remedios/situacao";
 import { ALVO_MINIMO, espaco, fonte, raio, useTema } from "@/tema";
+import { useAnuncio } from "@/util/anuncio";
 
 export default function Buscar() {
   const { cores } = useTema();
   const [busca, setBusca] = useState("");
+  const campo = useRef<TextInput>(null);
   // A lista acompanha a digitação sem travar o teclado.
   const termo = useDeferredValue(busca);
 
@@ -27,8 +29,9 @@ export default function Buscar() {
       <Texto variante="titulo">Qual remédio você procura?</Texto>
 
       <View style={[estilos.campo, { borderColor: cores.borda, backgroundColor: cores.fundo }]}>
-        <Ionicons name="search" size={26} color={cores.textoSecundario} />
+        <Icone name="search" size={26} color={cores.textoSecundario} />
         <TextInput
+          ref={campo}
           value={busca}
           onChangeText={setBusca}
           placeholder="Ex.: losartana ou Glifage"
@@ -42,12 +45,16 @@ export default function Buscar() {
         />
         {busca ? (
           <Pressable
-            onPress={() => setBusca("")}
+            onPress={() => {
+              setBusca("");
+              // O botão some depois de apagar: o foco (e o teclado) volta para o campo, onde se escreve de novo.
+              campo.current?.focus();
+            }}
             accessibilityRole="button"
             accessibilityLabel="Apagar o que foi escrito"
             style={estilos.limpar}
           >
-            <Ionicons name="close-circle" size={28} color={cores.textoSecundario} />
+            <Icone name="close-circle" size={28} color={cores.textoSecundario} />
           </Pressable>
         ) : null}
       </View>
@@ -74,8 +81,13 @@ function Resultados({ snapshot, termo }: { snapshot: Snapshot; termo: string }) 
     const t = setTimeout(() => prepararBusca(snapshot), 0);
     return () => clearTimeout(t);
   }, [snapshot]);
+  const curto = termo.trim().length < MINIMO_LETRAS;
+  const quantos = grupos.length === 1 ? "1 remédio encontrado" : `${grupos.length} remédios encontrados`;
+  const naoAchei = `Não achei “${termo.trim()}”`;
+  // Quem usa leitor de tela fica sabendo do resultado sem sair do campo.
+  useAnuncio(curto ? null : grupos.length === 0 ? naoAchei : quantos);
 
-  if (termo.trim().length < MINIMO_LETRAS) {
+  if (curto) {
     return (
       <>
         <SeusRemedios snapshot={snapshot} />
@@ -94,7 +106,7 @@ function Resultados({ snapshot, termo }: { snapshot: Snapshot; termo: string }) 
     return (
       <Cartao>
         <Texto variante="destaque" accessibilityLiveRegion="polite">
-          Não achei “{termo.trim()}”
+          {naoAchei}
         </Texto>
         <Texto secundario>
           Confira se está escrito certo ou tente o nome que vem na caixa. Aqui aparecem só os remédios entregues nas
@@ -115,7 +127,7 @@ function Resultados({ snapshot, termo }: { snapshot: Snapshot; termo: string }) 
   return (
     <View style={estilos.lista}>
       <Texto secundario accessibilityLiveRegion="polite">
-        {grupos.length === 1 ? "1 remédio encontrado" : `${grupos.length} remédios encontrados`}
+        {quantos}
       </Texto>
       {grupos.map((g) => {
         const rotulos = g.produtos.map((i) => rotuloProduto(snapshot.produtos[i]!));

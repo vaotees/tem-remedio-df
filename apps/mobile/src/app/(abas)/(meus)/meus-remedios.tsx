@@ -1,12 +1,12 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
 import type { Snapshot } from "@tem-remedio/shared";
 import { useRouter } from "expo-router";
-import { useMemo, type ComponentProps, type ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import { Botao } from "@/componentes/Botao";
 import { Cartao } from "@/componentes/Cartao";
 import { ComDados } from "@/componentes/ComDados";
 import { FaixaAtualizacao } from "@/componentes/FaixaAtualizacao";
+import { Icone, type NomeIcone } from "@/componentes/Icone";
 import { ItemLista } from "@/componentes/ItemLista";
 import { PerguntarOrigem, ProcurandoLocalizacao, SituacaoOrigem } from "@/componentes/OrigemPostos";
 import { SeloEstoque } from "@/componentes/SeloEstoque";
@@ -46,7 +46,7 @@ function Convite() {
   const router = useRouter();
   return (
     <View style={estilos.vazio}>
-      <Ionicons name="heart-outline" size={56} color={cores.primaria} />
+      <Icone name="heart-outline" size={56} color={cores.primaria} />
       <Texto variante="subtitulo" style={estilos.centro}>
         Guarde os remédios que você usa
       </Texto>
@@ -211,11 +211,11 @@ function ForaDosDados({ remedio }: { remedio: RemedioGuardado }) {
   );
 }
 
-function Linha({ icone, cor, children }: { icone: ComponentProps<typeof Ionicons>["name"]; cor?: string; children: ReactNode }) {
+function Linha({ icone, cor, children }: { icone: NomeIcone; cor?: string; children: ReactNode }) {
   const { cores } = useTema();
   return (
     <View style={estilos.linha}>
-      <Ionicons name={icone} size={22} color={cor ?? cores.textoSecundario} />
+      <Icone name={icone} size={22} color={cor ?? cores.textoSecundario} />
       <Texto style={estilos.flex}>{children}</Texto>
     </View>
   );

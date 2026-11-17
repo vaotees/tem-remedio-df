@@ -1,6 +1,6 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, View } from "react-native";
+import { Icone } from "@/componentes/Icone";
 import { Tela } from "@/componentes/Tela";
 import { Texto } from "@/componentes/Texto";
 import { Voltar } from "@/componentes/Voltar";
@@ -64,7 +64,7 @@ function ItemRegiao({ regiao, escolhida, onPress }: { regiao: Regiao; escolhida:
           </Texto>
         ) : null}
       </View>
-      {escolhida ? <Ionicons name="checkmark-circle" size={28} color={cores.primaria} /> : null}
+      {escolhida ? <Icone name="checkmark-circle" size={28} color={cores.primaria} /> : null}
     </Pressable>
   );
 }

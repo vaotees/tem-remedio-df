@@ -1,7 +1,13 @@
-import { render, screen, userEvent } from "@testing-library/react-native";
+import { render, renderHook, screen, userEvent } from "@testing-library/react-native";
+import { AccessibilityInfo, Platform, StyleSheet } from "react-native";
 import { Botao } from "@/componentes/Botao";
 import { FaixaAtualizacao } from "@/componentes/FaixaAtualizacao";
+import { Icone } from "@/componentes/Icone";
 import { SeloEstoque } from "@/componentes/SeloEstoque";
+import { ESPERA_ANUNCIO_MS, useAnuncio } from "@/util/anuncio";
+
+/** Num texto dentro de uma linha (ícone + texto), sem encolher ele vaza para fora da tela com letra grande. */
+const quebraLinha = (texto: string) => StyleSheet.flatten(screen.getByText(texto).props.style).flexShrink;
 
 describe("SeloEstoque", () => {
   it.each([
@@ -13,6 +19,66 @@ describe("SeloEstoque", () => {
     await render(<SeloEstoque dias={dias} />);
     expect(screen.getByText(texto)).toBeOnTheScreen();
     expect(screen.getByLabelText(`Estoque: ${texto}`)).toBeOnTheScreen();
+  });
+});
+
+describe("Icone", () => {
+  it("fica escondido do leitor de tela (é enfeite: o texto ao lado diz o que é)", async () => {
+    await render(<Icone name="heart" size={24} color="#000" />);
+    expect(screen.queryByTestId("icone-heart")).toBeNull();
+    expect(screen.getByTestId("icone-heart", { includeHiddenElements: true })).toBeTruthy();
+  });
+});
+
+describe("letra grande", () => {
+  it("o título do botão quebra linha dentro do botão", async () => {
+    await render(<Botao titulo="Guardado em Meus remédios" icone="heart" onPress={() => {}} />);
+    expect(quebraLinha("Guardado em Meus remédios")).toBe(1);
+  });
+
+  it("o texto do semáforo quebra linha dentro do selo", async () => {
+    await render(<SeloEstoque dias={2} />);
+    expect(quebraLinha("Quase acabando, ligue antes")).toBe(1);
+    expect(StyleSheet.flatten(screen.getByTestId("selo-critico").props.style).maxWidth).toBe("100%");
+  });
+});
+
+describe("useAnuncio", () => {
+  beforeEach(() => {
+    // O AccessibilityInfo do React Native já é um mock único: sem limpar, as chamadas de um teste passam para o outro.
+    jest.clearAllMocks();
+    jest.useFakeTimers();
+    jest.spyOn(AccessibilityInfo, "announceForAccessibility").mockImplementation(() => {});
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  it("no iPhone, anuncia só depois que o texto para de mudar", () => {
+    const { rerender } = renderHook(({ m }: { m: string | null }) => useAnuncio(m), { initialProps: { m: "2 remédios encontrados" } });
+    rerender({ m: "1 remédio encontrado" });
+    jest.advanceTimersByTime(ESPERA_ANUNCIO_MS - 1);
+    expect(AccessibilityInfo.announceForAccessibility).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(1);
+    expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledTimes(1);
+    expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledWith("1 remédio encontrado");
+    // Uma vez só: nada fica agendado depois do anúncio.
+    jest.advanceTimersByTime(ESPERA_ANUNCIO_MS * 3);
+    expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledTimes(1);
+  });
+
+  it("sem mensagem, não anuncia", () => {
+    renderHook(() => useAnuncio(null));
+    jest.advanceTimersByTime(ESPERA_ANUNCIO_MS * 2);
+    expect(AccessibilityInfo.announceForAccessibility).not.toHaveBeenCalled();
+  });
+
+  it.each(["android", "web"] as const)("no %s, não anuncia: o accessibilityLiveRegion do texto já faz isso", (os) => {
+    jest.replaceProperty(Platform, "OS", os);
+    renderHook(() => useAnuncio("1 remédio encontrado"));
+    jest.advanceTimersByTime(ESPERA_ANUNCIO_MS * 2);
+    expect(AccessibilityInfo.announceForAccessibility).not.toHaveBeenCalled();
   });
 });
 

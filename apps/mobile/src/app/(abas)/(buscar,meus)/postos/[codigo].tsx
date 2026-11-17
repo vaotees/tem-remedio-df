@@ -1,8 +1,7 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
 import type { Produto, Snapshot } from "@tem-remedio/shared";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Fragment, useMemo, useState } from "react";
-import { Linking, StyleSheet, View } from "react-native";
+import { Fragment, useEffect, useMemo, useRef, useState, type Ref } from "react";
+import { AccessibilityInfo, Linking, StyleSheet, View } from "react-native";
 import { Alternancia } from "@/componentes/Alternancia";
 import { Aviso } from "@/componentes/Aviso";
 import { AvisoLiberacao } from "@/componentes/AvisoLiberacao";
@@ -11,6 +10,7 @@ import { BotaoGuardar } from "@/componentes/BotaoGuardar";
 import { Cartao } from "@/componentes/Cartao";
 import { ComDados } from "@/componentes/ComDados";
 import { FaixaAtualizacao } from "@/componentes/FaixaAtualizacao";
+import { Icone } from "@/componentes/Icone";
 import { ItemLista } from "@/componentes/ItemLista";
 import { MAPA_DISPONIVEL, MapaPostos } from "@/componentes/MapaPostos";
 import { NaoEncontrado } from "@/componentes/NaoEncontrado";
@@ -26,6 +26,7 @@ import { descreverPosto } from "@/postos/descricao";
 import { useOrigem } from "@/postos/origem";
 import { avisoRetirada, postosComEstoque, type Ordem, type PostoComEstoque } from "@/postos/postos";
 import { espaco, useTema } from "@/tema";
+import { useAnuncio } from "@/util/anuncio";
 
 /** Quantos postos aparecem de cada vez: lista curta é mais fácil de ler. */
 const POR_PAGINA = 10;
@@ -59,10 +60,27 @@ function ListaPostos({ snapshot, codigo, nomeMarca, procurandoNovos }: Props) {
   const { ordem } = origem;
   const [quantos, setQuantos] = useState(POR_PAGINA);
   const [modo, setModo] = useState<Modo>("lista");
+  // "Mostrar mais postos": o leitor de tela vai para o primeiro posto novo, não fica no botão lá embaixo.
+  const [primeiroNovo, setPrimeiroNovo] = useState<number | null>(null);
+  const itemNovo = useRef<View>(null);
+  useEffect(() => {
+    if (primeiroNovo !== null && itemNovo.current) AccessibilityInfo.sendAccessibilityEvent(itemNovo.current, "focus");
+  }, [primeiroNovo]);
 
   const iProduto = indiceProduto(snapshot, codigo);
   const produto = snapshot.produtos[iProduto];
   const postos = useMemo(() => postosComEstoque(snapshot, iProduto, ordem), [snapshot, iProduto, ordem]);
+  const contagem = postos.length === 1 ? "1 posto tem hoje" : `${postos.length} postos têm hoje`;
+  // A lista aparece (ou muda de ordem) depois da pergunta ou do GPS, sem a pessoa tocar nela.
+  useAnuncio(
+    !produto
+      ? null
+      : postos.length === 0
+        ? textoVazio(produto)
+        : origem.carregando || origem.perguntar
+          ? null
+          : `${contagem}. ${textoOrdem(ordem)}`,
+  );
 
   if (!produto) return <NaoEncontrado oQue="remédio" />;
 
@@ -126,7 +144,7 @@ function ListaPostos({ snapshot, codigo, nomeMarca, procurandoNovos }: Props) {
             <Texto>Nenhum posto da sua região ({ordem.ra}) tem hoje. Abaixo, os das regiões mais perto.</Texto>
           ) : null}
           <Texto variante="subtitulo" accessibilityLiveRegion="polite">
-            {postos.length === 1 ? "1 posto tem hoje" : `${postos.length} postos têm hoje`}
+            {contagem}
           </Texto>
 
           {MAPA_DISPONIVEL ? (
@@ -156,7 +174,7 @@ function ListaPostos({ snapshot, codigo, nomeMarca, procurandoNovos }: Props) {
                           {cabecalho}
                         </Texto>
                       ) : null}
-                      <ItemPosto posto={p} onPress={() => abrir(p)} />
+                      <ItemPosto posto={p} onPress={() => abrir(p)} ref={n === primeiroNovo ? itemNovo : undefined} />
                     </Fragment>
                   );
                 })}
@@ -167,7 +185,10 @@ function ListaPostos({ snapshot, codigo, nomeMarca, procurandoNovos }: Props) {
                   icone="chevron-down"
                   variante="secundario"
                   dica={`Faltam ${postos.length - quantos}`}
-                  onPress={() => setQuantos((q) => q + POR_PAGINA)}
+                  onPress={() => {
+                    setPrimeiroNovo(quantos);
+                    setQuantos(quantos + POR_PAGINA);
+                  }}
                 />
               ) : null}
             </>
@@ -192,10 +213,21 @@ function cabecalhoAntes(ordem: Ordem, posto: PostoComEstoque, anterior: PostoCom
   return null;
 }
 
-function ItemPosto({ posto, onPress }: { posto: PostoComEstoque; onPress: () => void }) {
+/** O que o leitor de tela diz da ordem da lista, junto com a contagem. */
+function textoOrdem(ordem: Ordem): string {
+  if (ordem.por === "distancia") return "Do mais perto para o mais longe de você.";
+  if (ordem.por === "regiao") return `Primeiro os da sua região, ${ordem.ra}.`;
+  return "Por Região Administrativa.";
+}
+
+function textoVazio(produto: Produto): string {
+  return `Nenhum posto tem ${nomeSubstancia([produto])} ${rotuloProduto(produto).toLocaleLowerCase("pt-BR")} hoje`;
+}
+
+function ItemPosto({ posto, onPress, ref }: { posto: PostoComEstoque; onPress: () => void; ref?: Ref<View> }) {
   const { nome, onde, rotulo } = descreverPosto(posto);
   return (
-    <ItemLista onPress={onPress} rotulo={rotulo} dica="Mostra endereço, telefone e como chegar">
+    <ItemLista onPress={onPress} rotulo={rotulo} dica="Mostra endereço, telefone e como chegar" ref={ref}>
       <Texto variante="destaque">{nome}</Texto>
       <Texto secundario>{onde}</Texto>
       <SeloEstoque dias={posto.dias} />
@@ -209,7 +241,7 @@ function SemMapa() {
   const { cores } = useTema();
   return (
     <View style={estilos.linha}>
-      <Ionicons name="map-outline" size={20} color={cores.textoSecundario} />
+      <Icone name="map-outline" size={20} color={cores.textoSecundario} />
       <Texto variante="legenda" secundario style={estilos.flex}>
         O mapa dos postos aparece no app do celular. Aqui no navegador, só a lista.
       </Texto>
@@ -222,11 +254,10 @@ function SemMapa() {
  * se ele chegou. O app não avisa sozinho (aviso no celular fica para a v1.1): o texto não promete isso.
  */
 function Vazio({ produto, paraGuardar }: { produto: Produto; paraGuardar: NovoRemedio }) {
-  const nome = `${nomeSubstancia([produto])} ${rotuloProduto(produto).toLocaleLowerCase("pt-BR")}`;
   return (
     <Cartao>
       <Texto variante="subtitulo" accessibilityLiveRegion="polite">
-        Nenhum posto tem {nome} hoje
+        {textoVazio(produto)}
       </Texto>
       <Texto secundario>
         O estoque muda todo dia. Guarde este remédio: depois, é só abrir a aba Meus remédios para ver se ele chegou

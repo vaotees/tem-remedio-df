@@ -1,21 +1,19 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
-import type { ComponentProps } from "react";
-import { Text } from "react-native";
+import { Text, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { fonte, useTema } from "@/tema";
-
-type NomeIcone = ComponentProps<typeof Ionicons>["name"];
+import { Icone, type NomeIcone } from "@/componentes/Icone";
+import { alturaBarraAbas, ESCALA_MAXIMA_ABAS, MARGEM_ABAS, ROTULO_ABA, useTema } from "@/tema";
 
 function IconeAba({ nome, focused }: { nome: NomeIcone; focused: boolean }) {
   const { cores } = useTema();
-  return <Ionicons name={nome} size={28} color={focused ? cores.primaria : cores.textoSecundario} />;
+  return <Icone name={nome} size={28} color={focused ? cores.primaria : cores.textoSecundario} />;
 }
 
 /** Três abas fixas, com rótulo sempre visível e grande. Nada escondido em menu. */
 export default function LayoutAbas() {
   const { cores } = useTema();
   const { bottom } = useSafeAreaInsets();
+  const { fontScale } = useWindowDimensions();
 
   return (
     <Tabs
@@ -26,17 +24,17 @@ export default function LayoutAbas() {
         tabBarStyle: {
           backgroundColor: cores.fundo,
           borderTopColor: cores.divisoria,
-          height: 88 + bottom,
-          paddingTop: 8,
-          paddingBottom: 8 + bottom,
+          // Cresce com a letra do celular: o rótulo quebra em 2 linhas e nunca é cortado com "…".
+          height: alturaBarraAbas(fontScale, bottom),
+          paddingTop: MARGEM_ABAS,
+          paddingBottom: MARGEM_ABAS + bottom,
         },
-        // Rótulo pode quebrar em 2 linhas: nunca cortar com "…" (inclusive com letra grande no celular).
         tabBarLabel: ({ focused, children }) => (
           <Text
-            numberOfLines={2}
+            maxFontSizeMultiplier={ESCALA_MAXIMA_ABAS}
             style={{
-              fontSize: fonte.legenda,
-              lineHeight: 20,
+              fontSize: ROTULO_ABA.fonte,
+              lineHeight: ROTULO_ABA.linha,
               fontWeight: "600",
               textAlign: "center",
               color: focused ? cores.primaria : cores.textoSecundario,

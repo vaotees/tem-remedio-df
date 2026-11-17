@@ -1,16 +1,19 @@
 import { fireEvent, renderRouter, screen, waitFor, within } from "expo-router/testing-library";
-import { AccessibilityInfo, Linking, Share } from "react-native";
+import type { Snapshot } from "@tem-remedio/shared";
+import { AccessibilityInfo, Linking, Share, StyleSheet, TextInput } from "react-native";
 import { queryClient } from "@/dados/consultas";
-import { NO_PLANO_PILOTO, snapshotTeste } from "../fixtures/snapshot-teste";
+import { ALVO_MINIMO } from "@/tema";
+import { comMaisPostosDeLosartana, NO_PLANO_PILOTO, snapshotTeste } from "../fixtures/snapshot-teste";
 
-// As telas leem o snapshot pequeno de teste.
+// As telas leem o snapshot pequeno de teste (ou outro, quando o teste troca).
+const mockDados: { snapshot: Snapshot | null } = { snapshot: null };
 jest.mock("@/dados/useSnapshot", () => {
-  const { snapshotTeste: snapshot } = jest.requireActual<typeof import("../fixtures/snapshot-teste")>(
+  const { snapshotTeste: padrao } = jest.requireActual<typeof import("../fixtures/snapshot-teste")>(
     "../fixtures/snapshot-teste",
   );
   return {
     useSnapshot: () => ({
-      snapshot,
+      snapshot: mockDados.snapshot ?? padrao,
       origem: "embutido",
       carregando: false,
       erro: null,
@@ -87,6 +90,7 @@ beforeEach(() => {
   // O Linking do React Native já é um mock único: sem limpar, as chamadas de um teste passam para o outro.
   jest.clearAllMocks();
   mockArquivos.clear();
+  mockDados.snapshot = null;
   mockMapa.web = false;
   mockGps.permissao = PERMITIDO;
   mockGps.resposta = PERMITIDO;
@@ -744,4 +748,174 @@ describe("Meus remédios", () => {
 // O snapshot de teste não muda sem querer.
 it("fixture tem 6 postos e 10 produtos", () => {
   expect([snapshotTeste.ubs.length, snapshotTeste.produtos.length]).toEqual([6, 10]);
+});
+
+describe("acessibilidade", () => {
+  const NUNCA_PERGUNTADO: Permissao = { granted: false, canAskAgain: true, status: "undetermined" };
+  const NEGADO: Permissao = { granted: false, canAskAgain: false, status: "denied" };
+  const LOSARTANA = {
+    codigo: "8944",
+    nome: "Losartana potassica",
+    apresentacao: "Comprimido 50 mg",
+    marca: null,
+    guardadoEm: "2026-10-18T12:00:00.000Z",
+  };
+  const guardarLosartana = () => mockArquivos.set("meus-remedios.json", JSON.stringify({ remedios: [LOSARTANA] }));
+  /** Espera o VoiceOver anunciar (o anúncio sai depois que a tela para de mudar). */
+  const anunciou = (texto: string) =>
+    waitFor(() => expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledWith(texto), { timeout: 3000 });
+
+  /**
+   * Na tela de agora: nenhum ícone aparece para o leitor de tela (ele pararia num caractere sem sentido)
+   * e tudo que é tocável tem pelo menos 56 de altura. As abas da barra de baixo ficam de fora (são as que
+   * mostram o rótulo grande ao segurar): a altura delas é a da barra (`alturaBarraAbas`, no teste do tema).
+   */
+  function conferirTela() {
+    expect(screen.queryAllByTestId(/^icone-/).map((i) => i.props.testID)).toEqual([]);
+    const pequenos = [...screen.queryAllByRole("button"), ...screen.queryAllByRole("tab")]
+      .filter((alvo) => !alvo.props.accessibilityShowsLargeContentViewer)
+      .map((alvo) => {
+        const estilo = StyleSheet.flatten(alvo.props.style) ?? {};
+        const altura = Math.max(Number(estilo.minHeight ?? 0), Number(estilo.height ?? 0));
+        return { rotulo: String(alvo.props.accessibilityLabel), altura };
+      })
+      .filter(({ altura }) => altura < ALVO_MINIMO);
+    expect(pequenos).toEqual([]);
+  }
+
+  interface Caso {
+    tela: string;
+    url: string;
+    /** Espera a tela ficar pronta (e faz o que for preciso nela). */
+    esperar: () => Promise<unknown>;
+    /** Antes de abrir: permissão de localização, remédios guardados... */
+    preparar?: () => void;
+  }
+  it.each<Caso>([
+    { tela: "busca, antes de digitar", url: "/", esperar: () => screen.findByText("Rede pública do DF") },
+    { tela: "busca, com Seus remédios", url: "/", esperar: () => screen.findByText("Seus remédios"), preparar: guardarLosartana },
+    {
+      tela: "busca, com resultados",
+      url: "/",
+      esperar: async () => {
+        await buscarPor("losartana");
+        return screen.findByText("1 remédio encontrado");
+      },
+    },
+    { tela: "Qual destes?", url: "/remedio/90648", esperar: () => screen.findByText("Qual destes?") },
+    {
+      tela: "postos, primeira vez",
+      url: "/postos/8944",
+      esperar: () => screen.findByText("Como achar os postos perto de você?"),
+      preparar: () => (mockGps.permissao = NUNCA_PERGUNTADO),
+    },
+    {
+      tela: "postos, sem permissão",
+      url: "/postos/8944",
+      esperar: () => screen.findByText("Sem a sua localização"),
+      preparar: () => (mockGps.permissao = NEGADO),
+    },
+    { tela: "postos, lista", url: "/postos/8944", esperar: () => screen.findByText("4 postos têm hoje") },
+    {
+      tela: "postos, mapa",
+      url: "/postos/8944",
+      esperar: async () => {
+        await fireEvent.press(await screen.findByRole("tab", { name: "Mapa" }));
+        return screen.findByText("O mais perto de você");
+      },
+    },
+    { tela: "postos, nenhum tem", url: "/postos/MSE24551", esperar: () => screen.findByText(/^Nenhum posto tem Oseltamivir/) },
+    {
+      tela: "detalhe do posto",
+      url: "/posto/0010626?produto=8944",
+      esperar: () => screen.findByRole("button", { name: "Como chegar" }),
+    },
+    {
+      tela: "Como chegar",
+      url: "/posto/0010626?produto=8944",
+      esperar: async () => {
+        await fireEvent.press(await screen.findByRole("button", { name: "Como chegar" }));
+        return screen.findByText("Abrir o caminho com qual app?");
+      },
+    },
+    { tela: "Meus remédios, vazio", url: "/meus-remedios", esperar: () => screen.findByText("Guarde os remédios que você usa") },
+    {
+      tela: "Meus remédios, com remédio",
+      url: "/meus-remedios",
+      esperar: () => screen.findByText("Mais perto de você:"),
+      preparar: guardarLosartana,
+    },
+    { tela: "Ajuda", url: "/ajuda", esperar: () => screen.findByText("Como usar") },
+    { tela: "região", url: "/regiao", esperar: () => screen.findByText("Qual é a sua região?") },
+  ])("$tela: ícones escondidos do leitor de tela e tudo que é tocável com 56 de altura", async ({ url, esperar, preparar }) => {
+    preparar?.();
+    await renderRouter(APP, { initialUrl: url });
+    await esperar();
+    conferirTela();
+  });
+
+  it("busca: o VoiceOver anuncia o que achou, sem a pessoa sair do campo", async () => {
+    await renderRouter(APP, { initialUrl: "/" });
+    await buscarPor("losartana");
+    await anunciou("1 remédio encontrado");
+    await buscarPor("xyzwq");
+    await anunciou("Não achei “xyzwq”");
+  });
+
+  it("busca: depois de apagar, o foco volta para o campo", async () => {
+    await renderRouter(APP, { initialUrl: "/" });
+    await buscarPor("losartana");
+    await fireEvent.press(await screen.findByRole("button", { name: "Apagar o que foi escrito" }));
+    expect(screen.getByLabelText("Nome do remédio").props.value).toBe("");
+    expect(TextInput.prototype.focus).toHaveBeenCalled();
+  });
+
+  it("postos: anuncia a contagem e a ordem quando a lista aparece depois da pergunta", async () => {
+    mockGps.permissao = NUNCA_PERGUNTADO;
+    await renderRouter(APP, { initialUrl: "/postos/8944" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Usar minha localização" }));
+    await anunciou("4 postos têm hoje. Do mais perto para o mais longe de você.");
+  });
+
+  it("postos: anuncia quando nenhum posto tem", async () => {
+    await renderRouter(APP, { initialUrl: "/postos/MSE24551" });
+    await anunciou("Nenhum posto tem Oseltamivir (fosfato) cápsula 75 mg hoje");
+  });
+
+  it("Mostrar mais postos: o leitor de tela vai para o primeiro posto novo", async () => {
+    mockDados.snapshot = comMaisPostosDeLosartana(8);
+    const focar = jest.spyOn(AccessibilityInfo, "sendAccessibilityEvent").mockImplementation(() => {});
+    /** Rótulos dos elementos que receberam o foco do leitor de tela (a navegação também move o foco). */
+    const focados = () =>
+      focar.mock.calls
+        .filter(([, tipo]) => tipo === "focus")
+        .map(([alvo]) => (alvo as { props?: { accessibilityLabel?: string } } | null)?.props?.accessibilityLabel);
+    await renderRouter(APP, { initialUrl: "/postos/8944" });
+    expect(await screen.findByText("12 postos têm hoje")).toBeOnTheScreen();
+    expect(postosNaTela()).toHaveLength(10);
+    const antes = focados().length;
+
+    await fireEvent.press(screen.getByRole("button", { name: "Mostrar mais postos" }));
+    const nomes = postosNaTela();
+    expect(nomes).toHaveLength(12);
+    expect(focados().slice(antes)).toEqual([expect.stringMatching(new RegExp(`^${nomes[10]}\\. `))]);
+  });
+
+  it("detalhe: o telefone é lido dígito por dígito", async () => {
+    await renderRouter(APP, { initialUrl: "/posto/0010626?produto=8944" });
+    const ligar = await screen.findByRole("button", { name: "Ligar" });
+    expect(ligar.props.accessibilityHint).toBe("Liga para 6 1, 3 5 6 3, 9 1 7 6");
+    expect(screen.getByLabelText("6 1, 3 5 6 3, 9 1 7 6")).toBeOnTheScreen();
+    // Na tela, o número continua como veio da SES-DF.
+    expect(screen.getByText("(61) 3563-9176")).toBeOnTheScreen();
+  });
+
+  it("Como chegar: o gesto de voltar do VoiceOver fecha a folha", async () => {
+    await renderRouter(APP, { initialUrl: "/posto/0010626?produto=8944" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Como chegar" }));
+    expect(screen.getByText("Abrir o caminho com qual app?")).toBeOnTheScreen();
+    await fireEvent(screen.getByTestId("folha-como-chegar"), "accessibilityEscape");
+    expect(screen.queryByText("Abrir o caminho com qual app?")).toBeNull();
+    expect(Linking.openURL).not.toHaveBeenCalled();
+  });
 });

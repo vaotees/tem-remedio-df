@@ -1,4 +1,3 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { nivelEstoque, TEXTO_NIVEL, type NivelEstoque } from "@tem-remedio/shared";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AccessibilityInfo, StyleSheet, useWindowDimensions, View } from "react-native";
@@ -8,6 +7,7 @@ import { enquadrar, resumoDoMapa, type PropsMapaPostos } from "@/postos/mapa";
 import type { PostoComEstoque } from "@/postos/postos";
 import { ALVO_MINIMO, espaco, raio, useTema } from "@/tema";
 import { Botao } from "./Botao";
+import { Icone } from "./Icone";
 import { ICONE_NIVEL, SeloEstoque } from "./SeloEstoque";
 import { SeloHorario } from "./SeloHorario";
 import { Texto } from "./Texto";
@@ -102,7 +102,9 @@ export function MapaPostos({ postos, ordem, aoAbrir }: PropsMapaPostos) {
         {niveis.map((nivel) => (
           <View key={nivel} style={estilos.itemLegenda}>
             <Pino nivel={nivel} tamanho={28} />
-            <Texto variante="legenda">{TEXTO_NIVEL[nivel]}</Texto>
+            <Texto variante="legenda" style={estilos.textoLegenda}>
+              {TEXTO_NIVEL[nivel]}
+            </Texto>
           </View>
         ))}
       </View>
@@ -174,7 +176,7 @@ function Pino({ nivel, tamanho }: { nivel: NivelEstoque; tamanho: number }) {
         },
       ]}
     >
-      <Ionicons name={ICONE_NIVEL[nivel]} size={Math.round(tamanho * 0.55)} color={cores.pino.icone} />
+      <Icone name={ICONE_NIVEL[nivel]} size={Math.round(tamanho * 0.55)} color={cores.pino.icone} />
     </View>
   );
 }
@@ -220,6 +222,7 @@ const estilos = StyleSheet.create({
   alvo: { width: ALVO_MINIMO, height: ALVO_MINIMO, alignItems: "center", justifyContent: "center" },
   pino: { alignItems: "center", justifyContent: "center" },
   legenda: { flexDirection: "row", flexWrap: "wrap", columnGap: espaco.md, rowGap: espaco.xs },
-  itemLegenda: { flexDirection: "row", alignItems: "center", gap: espaco.xs },
+  itemLegenda: { flexDirection: "row", alignItems: "center", gap: espaco.xs, maxWidth: "100%" },
+  textoLegenda: { flexShrink: 1 },
   cartao: { borderRadius: raio, borderWidth: 1, padding: espaco.md, gap: espaco.sm },
 });

@@ -1,7 +1,7 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { StyleSheet, View } from "react-native";
 import { espaco, raio, useTema } from "@/tema";
 import { diasDesde, formatarAtualizacao } from "@/util/datas";
+import { Icone } from "./Icone";
 import { Texto } from "./Texto";
 
 interface Props {
@@ -23,7 +23,7 @@ export function FaixaAtualizacao({ atualizadoEm, procurandoNovos, agora = new Da
       accessible
       accessibilityLabel={antigo ? `${texto}. Os dados podem estar desatualizados, ligue para a UBS antes de ir.` : texto}
     >
-      <Ionicons name={antigo ? "warning" : "time-outline"} size={20} color={cor} />
+      <Icone name={antigo ? "warning" : "time-outline"} size={20} color={cor} />
       <View style={estilos.textos}>
         <Texto variante="legenda" cor={cor}>
           {texto}

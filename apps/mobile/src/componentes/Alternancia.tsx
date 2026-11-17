@@ -1,13 +1,12 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
-import type { ComponentProps } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { ALVO_MINIMO, espaco, raio, useTema } from "@/tema";
+import { Icone, type NomeIcone } from "./Icone";
 import { Texto } from "./Texto";
 
 interface Opcao<T extends string> {
   valor: T;
   titulo: string;
-  icone: ComponentProps<typeof Ionicons>["name"];
+  icone: NomeIcone;
 }
 
 interface Props<T extends string> {
@@ -40,7 +39,7 @@ export function Alternancia<T extends string>({ opcoes, valor, aoMudar }: Props<
               pressed && { opacity: 0.75 },
             ]}
           >
-            <Ionicons name={escolhida ? "checkmark-circle" : o.icone} size={24} color={cor} />
+            <Icone name={escolhida ? "checkmark-circle" : o.icone} size={24} color={cor} />
             <Texto variante="destaque" cor={cor} style={estilos.titulo}>
               {o.titulo}
             </Texto>

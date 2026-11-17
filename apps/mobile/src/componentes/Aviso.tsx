@@ -1,7 +1,7 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
 import type { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import { espaco, raio, useTema } from "@/tema";
+import { Icone } from "./Icone";
 import { Texto } from "./Texto";
 
 interface Props {
@@ -20,7 +20,7 @@ export function Aviso({ tipo = "aviso", titulo, texto, children }: Props) {
   return (
     <View style={[estilos.caixa, { backgroundColor: par.fundo, borderColor: par.texto }]}>
       <View style={estilos.cabecalho}>
-        <Ionicons name={tipo === "aviso" ? "warning" : "information-circle"} size={26} color={par.texto} />
+        <Icone name={tipo === "aviso" ? "warning" : "information-circle"} size={26} color={par.texto} />
         <Texto variante="destaque" cor={par.texto} style={estilos.titulo} accessibilityRole="header">
           {titulo}
         </Texto>

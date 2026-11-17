@@ -1,3 +1,4 @@
+import { ALVO_MINIMO, alturaBarraAbas, ESCALA_MAXIMA_ABAS } from "@/tema";
 import { coresClaras, coresEscuras, type Cores } from "@/tema/cores";
 import { contraste } from "@/tema/contraste";
 
@@ -54,5 +55,20 @@ describe.each([
       }
     }
     expect(contraste(c.pino.borda, CHAO_DO_MAPA_ESCURO)).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe("barra de abas", () => {
+  it("cabe o ícone e 2 linhas de rótulo, mais a área do gesto de início", () => {
+    expect(alturaBarraAbas(1, 0)).toBe(94);
+    expect(alturaBarraAbas(1, 34)).toBe(128);
+    expect(alturaBarraAbas(1, 0)).toBeGreaterThanOrEqual(ALVO_MINIMO);
+  });
+
+  it("cresce com a letra do celular até o limite do rótulo, e não encolhe com letra menor", () => {
+    expect(alturaBarraAbas(1.2, 0)).toBe(102);
+    expect(alturaBarraAbas(ESCALA_MAXIMA_ABAS, 0)).toBe(110);
+    expect(alturaBarraAbas(3.1, 0)).toBe(alturaBarraAbas(ESCALA_MAXIMA_ABAS, 0));
+    expect(alturaBarraAbas(0.8, 0)).toBe(alturaBarraAbas(1, 0));
   });
 });

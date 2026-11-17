@@ -1,7 +1,7 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { StyleSheet, View } from "react-native";
 import { interpretarHorario, situacaoHorario } from "@/postos/horario";
 import { espaco, useTema } from "@/tema";
+import { Icone } from "./Icone";
 import { Texto } from "./Texto";
 
 /**
@@ -17,7 +17,7 @@ export function SeloHorario({ horario, agora = new Date() }: { horario: string |
   const par = aberto ? cores.aberto : cores.fechado;
   return (
     <View style={[estilos.selo, { backgroundColor: par.fundo }]} accessible accessibilityLabel={texto}>
-      <Ionicons name={aberto ? "time" : "moon-outline"} size={22} color={par.texto} />
+      <Icone name={aberto ? "time" : "moon-outline"} size={22} color={par.texto} />
       <Texto variante="legenda" cor={par.texto} style={estilos.texto}>
         {texto}
       </Texto>
