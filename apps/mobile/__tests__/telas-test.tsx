@@ -384,7 +384,13 @@ describe("mapa", () => {
 
     await fireEvent.press(screen.getByRole("tab", { name: "Mapa" }));
     expect(screen.getByRole("tab", { name: "Mapa" }).props.accessibilityState).toEqual({ selected: true });
-    expect(screen.getByLabelText("Mapa com 4 postos que têm hoje.")).toBeOnTheScreen();
+    const mapa = screen.getByLabelText("Mapa com 4 postos que têm hoje.");
+    expect(mapa).toBeOnTheScreen();
+    // Arrastar com um dedo desce a tela, não o mapa: quem rola não fica preso nele.
+    expect(mapa.props.scrollEnabled).toBe(false);
+    // A legenda vem antes do mapa, para quem desce a tela.
+    const naOrdemDaTela = screen.getAllByLabelText(/^(Cores dos pinos: |Mapa com 4 postos)/);
+    expect(naOrdemDaTela.map((e) => String(e.props.accessibilityLabel).slice(0, 15))).toEqual(["Cores dos pinos", "Mapa com 4 post"]);
     expect(pinos()).toHaveLength(4);
     expect(screen.queryAllByRole("button", { name: /^UBS / })).toHaveLength(0);
     // O leitor de tela anuncia quantos postos há no mapa.

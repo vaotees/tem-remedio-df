@@ -1,6 +1,6 @@
 import type { Ubs } from "@tem-remedio/shared";
 import { useMemo, useRef, useState } from "react";
-import { StyleSheet, useWindowDimensions, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { capitalizarNome } from "@/busca/remedios";
 import { distanciaKm, formatarDistancia, type Coordenadas } from "@/postos/distancia";
@@ -34,7 +34,6 @@ const chave = (u: Ubs) => `${u.cnes}-${u.farmacia}`;
  */
 export function MapaRede({ postos, origem, aoAbrir }: PropsMapaRede) {
   const { cores, escuro } = useTema();
-  const { height } = useWindowDimensions();
   const mapa = useRef<MapView>(null);
   const ordenados = useMemo(
     () => (origem ? [...postos].sort((a, b) => distanciaKm(origem, a) - distanciaKm(origem, b)) : postos),
@@ -51,7 +50,7 @@ export function MapaRede({ postos, origem, aoAbrir }: PropsMapaRede) {
 
   return (
     <View style={estilos.conteudo}>
-      <View style={[estilos.moldura, { height: Math.round(Math.min(520, Math.max(300, height * 0.55))), borderColor: cores.divisoria }]}>
+      <View style={[estilos.moldura, { borderColor: cores.divisoria }]}>
         <MapView
           ref={mapa}
           testID="mapa-rede"
@@ -122,8 +121,9 @@ export function MapaRede({ postos, origem, aoAbrir }: PropsMapaRede) {
 }
 
 const estilos = StyleSheet.create({
-  conteudo: { gap: espaco.md },
-  moldura: { borderRadius: RAIO_CARTAO, borderWidth: 1, overflow: "hidden" },
+  // A aba Mapa não rola: o mapa ocupa o que sobra entre o título e o cartão do posto.
+  conteudo: { flex: 1, gap: espaco.sm },
+  moldura: { flex: 1, minHeight: 220, borderRadius: RAIO_CARTAO, borderWidth: 1, overflow: "hidden" },
   alvo: { width: ALVO_MINIMO, height: ALVO_MINIMO, alignItems: "center", justifyContent: "center" },
   pino: { alignItems: "center", justifyContent: "center", borderWidth: 2 },
   cartao: { borderRadius: RAIO_CARTAO, padding: espaco.md, gap: espaco.sm },

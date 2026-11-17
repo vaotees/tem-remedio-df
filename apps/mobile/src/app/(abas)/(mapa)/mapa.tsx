@@ -2,6 +2,7 @@ import type { Snapshot, Ubs } from "@tem-remedio/shared";
 import { useRouter } from "expo-router";
 import { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Botao } from "@/componentes/Botao";
 import { ComDados } from "@/componentes/ComDados";
 import { Icone } from "@/componentes/Icone";
@@ -19,13 +20,28 @@ import { espaco, useTema } from "@/tema";
 /** Na web (sem mapa), quantos postos aparecem na lista. */
 const NA_LISTA = 10;
 
-/** Aba Mapa: todas as farmácias de UBS, para achar a mais perto e ver se está aberta. */
+/**
+ * Aba Mapa: todas as farmácias de UBS, para achar a mais perto e ver se está aberta.
+ * No celular a tela não rola: o mapa ocupa o espaço que sobra, e arrastar mexe só nele (sem disputar com a
+ * rolagem da tela). Na web, sem mapa, os postos em lista numa tela que rola.
+ */
 export default function Mapa() {
+  const { cores } = useTema();
+  if (!MAPA_REDE_DISPONIVEL) {
+    return (
+      <Tela>
+        <Texto variante="titulo">Mapa dos postos</Texto>
+        <ComDados>{(snapshot) => <Conteudo snapshot={snapshot} />}</ComDados>
+      </Tela>
+    );
+  }
   return (
-    <Tela>
-      <Texto variante="titulo">Mapa dos postos</Texto>
-      <ComDados>{(snapshot) => <Conteudo snapshot={snapshot} />}</ComDados>
-    </Tela>
+    <SafeAreaView edges={["top", "left", "right"]} style={[estilos.fixa, { backgroundColor: cores.fundo }]}>
+      <View style={estilos.conteudoFixo}>
+        <Texto variante="titulo">Mapa dos postos</Texto>
+        <ComDados>{(snapshot) => <Conteudo snapshot={snapshot} />}</ComDados>
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -41,7 +57,7 @@ function Conteudo({ snapshot }: { snapshot: Snapshot }) {
   return (
     <>
       <Texto secundario>
-        As {postos.length} farmácias de UBS do DF. Para saber se um remédio tem hoje, busque pelo nome no Início.
+        As {postos.length} farmácias de UBS do DF. Para saber se um remédio tem hoje, busque no Início.
       </Texto>
 
       {origem.perguntar || (origem.localizacao?.situacao === "sem_permissao" && origem.localizacao.podePedir && !origem.usarRegiao) ? (
@@ -101,6 +117,8 @@ function ListaSemMapa({ postos, coordenadas, aoAbrir, corIcone }: PropsLista) {
 }
 
 const estilos = StyleSheet.create({
+  fixa: { flex: 1 },
+  conteudoFixo: { flex: 1, padding: espaco.md, gap: espaco.sm },
   lista: { gap: espaco.sm },
   linha: { flexDirection: "row", alignItems: "center", gap: espaco.sm },
   flex: { flex: 1 },

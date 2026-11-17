@@ -59,10 +59,28 @@ export function MapaPostos({ postos, ordem, aoAbrir }: PropsMapaPostos) {
 
   return (
     <View style={estilos.conteudo}>
+      {/* A legenda vem antes do mapa: quem desce a tela lê o que cada cor quer dizer antes de chegar nele. */}
+      <View
+        style={[estilos.caixaLegenda, { backgroundColor: cores.superficie }, sombraCartao(cores)]}
+        accessible
+        accessibilityLabel={`Cores dos pinos: ${niveis.map((n) => TEXTO_NIVEL[n]).join(", ")}`}
+      >
+        <Texto variante="destaque">O que cada cor quer dizer</Texto>
+        <View style={estilos.legenda}>
+          {niveis.map((nivel) => (
+            <View key={nivel} style={estilos.itemLegenda}>
+              <Pino nivel={nivel} tamanho={34} />
+              <Texto peso="negrito" style={estilos.textoLegenda}>
+                {TEXTO_NIVEL[nivel]}
+              </Texto>
+            </View>
+          ))}
+        </View>
+      </View>
       <Texto secundario>
         {postos.length === 1
           ? "Toque no pino para ver o posto."
-          : "Toque num pino para ver o posto. Para ver mais postos, afaste o mapa com dois dedos."}
+          : "Toque num pino para ver o posto. Com dois dedos, aproxime ou afaste o mapa. Com um dedo, a tela desce normalmente."}
       </Texto>
       <View
         style={[
@@ -79,6 +97,9 @@ export function MapaPostos({ postos, ordem, aoAbrir }: PropsMapaPostos) {
           showsUserLocation={pertoDeVoce}
           showsPointsOfInterests={false}
           showsCompass={false}
+          // O mapa fica no meio de uma tela que rola: arrastar com um dedo desce a tela, não o mapa (senão a
+          // pessoa fica "presa" nele). Dois dedos aproximam e afastam; "Ver o próximo" leva o mapa até o posto.
+          scrollEnabled={false}
           rotateEnabled={false}
           pitchEnabled={false}
           // Android: sem a barrinha que abre o Google Maps (o "Como chegar" do posto já pergunta o app).
@@ -96,17 +117,6 @@ export function MapaPostos({ postos, ordem, aoAbrir }: PropsMapaPostos) {
             />
           ))}
         </MapView>
-      </View>
-
-      <View style={estilos.legenda}>
-        {niveis.map((nivel) => (
-          <View key={nivel} style={estilos.itemLegenda}>
-            <Pino nivel={nivel} tamanho={28} />
-            <Texto variante="legenda" style={estilos.textoLegenda}>
-              {TEXTO_NIVEL[nivel]}
-            </Texto>
-          </View>
-        ))}
       </View>
 
       <CartaoDoPosto
@@ -221,7 +231,8 @@ const estilos = StyleSheet.create({
   moldura: { borderRadius: RAIO_CARTAO, borderWidth: 1, overflow: "hidden" },
   alvo: { width: ALVO_MINIMO, height: ALVO_MINIMO, alignItems: "center", justifyContent: "center" },
   pino: { alignItems: "center", justifyContent: "center" },
-  legenda: { flexDirection: "row", flexWrap: "wrap", columnGap: espaco.md, rowGap: espaco.xs },
+  caixaLegenda: { borderRadius: RAIO_CARTAO, padding: espaco.md, gap: espaco.sm },
+  legenda: { flexDirection: "row", flexWrap: "wrap", columnGap: espaco.md, rowGap: espaco.sm },
   itemLegenda: { flexDirection: "row", alignItems: "center", gap: espaco.xs, maxWidth: "100%" },
   textoLegenda: { flexShrink: 1 },
   cartao: { borderRadius: RAIO_CARTAO, padding: espaco.md, gap: espaco.sm },
