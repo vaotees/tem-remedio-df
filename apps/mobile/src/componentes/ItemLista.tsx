@@ -1,5 +1,5 @@
 import type { ReactNode, Ref } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View, type HostInstance } from "react-native";
 import { ALVO_MINIMO, espaco, raio, useTema } from "@/tema";
 import { Icone } from "./Icone";
 
@@ -10,7 +10,7 @@ interface Props {
   dica?: string;
   children: ReactNode;
   /** Para levar o foco do leitor de tela até o item (ex.: o primeiro posto novo em "Mostrar mais postos"). */
-  ref?: Ref<View>;
+  ref?: Ref<HostInstance>;
 }
 
 /** Cartão tocável inteiro (não só o título), com borda visível e seta indicando que abre outra tela. */

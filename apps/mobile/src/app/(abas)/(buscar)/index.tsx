@@ -1,7 +1,7 @@
 import type { Snapshot } from "@tem-remedio/shared";
 import { useRouter } from "expo-router";
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, TextInput, View, type TextInputInstance } from "react-native";
 import { Botao } from "@/componentes/Botao";
 import { Cartao } from "@/componentes/Cartao";
 import { ComDados } from "@/componentes/ComDados";
@@ -20,7 +20,7 @@ import { useAnuncio } from "@/util/anuncio";
 export default function Buscar() {
   const { cores } = useTema();
   const [busca, setBusca] = useState("");
-  const campo = useRef<TextInput>(null);
+  const campo = useRef<TextInputInstance>(null);
   // A lista acompanha a digitação sem travar o teclado.
   const termo = useDeferredValue(busca);
 

@@ -1,7 +1,7 @@
 import type { Produto, Snapshot } from "@tem-remedio/shared";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Fragment, useEffect, useMemo, useRef, useState, type Ref } from "react";
-import { AccessibilityInfo, Linking, StyleSheet, View } from "react-native";
+import { AccessibilityInfo, Linking, StyleSheet, View, type HostInstance } from "react-native";
 import { Alternancia } from "@/componentes/Alternancia";
 import { Aviso } from "@/componentes/Aviso";
 import { AvisoLiberacao } from "@/componentes/AvisoLiberacao";
@@ -62,7 +62,7 @@ function ListaPostos({ snapshot, codigo, nomeMarca, procurandoNovos }: Props) {
   const [modo, setModo] = useState<Modo>("lista");
   // "Mostrar mais postos": o leitor de tela vai para o primeiro posto novo, não fica no botão lá embaixo.
   const [primeiroNovo, setPrimeiroNovo] = useState<number | null>(null);
-  const itemNovo = useRef<View>(null);
+  const itemNovo = useRef<HostInstance>(null);
   useEffect(() => {
     if (primeiroNovo !== null && itemNovo.current) AccessibilityInfo.sendAccessibilityEvent(itemNovo.current, "focus");
   }, [primeiroNovo]);
@@ -224,7 +224,7 @@ function textoVazio(produto: Produto): string {
   return `Nenhum posto tem ${nomeSubstancia([produto])} ${rotuloProduto(produto).toLocaleLowerCase("pt-BR")} hoje`;
 }
 
-function ItemPosto({ posto, onPress, ref }: { posto: PostoComEstoque; onPress: () => void; ref?: Ref<View> }) {
+function ItemPosto({ posto, onPress, ref }: { posto: PostoComEstoque; onPress: () => void; ref?: Ref<HostInstance> }) {
   const { nome, onde, rotulo } = descreverPosto(posto);
   return (
     <ItemLista onPress={onPress} rotulo={rotulo} dica="Mostra endereço, telefone e como chegar" ref={ref}>

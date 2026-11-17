@@ -55,9 +55,9 @@ describe("useAnuncio", () => {
     jest.restoreAllMocks();
   });
 
-  it("no iPhone, anuncia só depois que o texto para de mudar", () => {
-    const { rerender } = renderHook(({ m }: { m: string | null }) => useAnuncio(m), { initialProps: { m: "2 remédios encontrados" } });
-    rerender({ m: "1 remédio encontrado" });
+  it("no iPhone, anuncia só depois que o texto para de mudar", async () => {
+    const { rerender } = await renderHook(({ m }: { m: string | null }) => useAnuncio(m), { initialProps: { m: "2 remédios encontrados" } });
+    await rerender({ m: "1 remédio encontrado" });
     jest.advanceTimersByTime(ESPERA_ANUNCIO_MS - 1);
     expect(AccessibilityInfo.announceForAccessibility).not.toHaveBeenCalled();
     jest.advanceTimersByTime(1);
@@ -68,15 +68,15 @@ describe("useAnuncio", () => {
     expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledTimes(1);
   });
 
-  it("sem mensagem, não anuncia", () => {
-    renderHook(() => useAnuncio(null));
+  it("sem mensagem, não anuncia", async () => {
+    await renderHook(() => useAnuncio(null));
     jest.advanceTimersByTime(ESPERA_ANUNCIO_MS * 2);
     expect(AccessibilityInfo.announceForAccessibility).not.toHaveBeenCalled();
   });
 
-  it.each(["android", "web"] as const)("no %s, não anuncia: o accessibilityLiveRegion do texto já faz isso", (os) => {
+  it.each(["android", "web"] as const)("no %s, não anuncia: o accessibilityLiveRegion do texto já faz isso", async (os) => {
     jest.replaceProperty(Platform, "OS", os);
-    renderHook(() => useAnuncio("1 remédio encontrado"));
+    await renderHook(() => useAnuncio("1 remédio encontrado"));
     jest.advanceTimersByTime(ESPERA_ANUNCIO_MS * 2);
     expect(AccessibilityInfo.announceForAccessibility).not.toHaveBeenCalled();
   });
