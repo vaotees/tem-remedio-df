@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <title>Tem Remédio DF: símbolo para fundo escuro</title>
+  <g>
+    <mask id="corte" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024">
+      <rect width="1024" height="1024" fill="#FFFFFF"/>
+      <path d="M512 765.5 L833.4 382.5 A84 84 0 0 0 704.7 274.5 L383.3 657.5 A84 84 0 0 0 512 765.5 Z" fill="#000000" stroke="#000000" stroke-width="60"/>
+    </mask>
+    <path d="M212.9 624.2 L393.7 775.9 A84 84 0 0 0 501.7 647.2 L320.9 495.5 A84 84 0 0 0 212.9 624.2 Z" fill="#6CB4F5" mask="url(#corte)"/>
+    <path d="M537 474.4 L383.3 657.5 A84 84 0 0 0 512 765.5 L665.7 582.4 Z" fill="#6CB4F5"/>
+    <path d="M679.8 565.6 L833.4 382.5 A84 84 0 0 0 704.7 274.5 L551.1 457.6 Z" fill="#86E3BC"/>
+  </g>
+</svg>
