@@ -85,7 +85,7 @@ Tabela CMED (Anvisa)          ─┘
 ```
 
 - **Sem servidor no MVP**: snapshot de ~465 KB (~120 KB com gzip); busca e distância no celular; custo zero; nenhum dado do usuário sai do aparelho.
-- O coletor **valida antes de publicar** (schema, mínimos, queda > 25%); se rejeitar, o snapshot anterior continua valendo. Se a SES-DF não atualizou, não republica.
+- O coletor **valida antes de publicar** (schema, mínimos, queda > 25%, data no futuro, tetos de tamanho); se rejeitar, o snapshot anterior continua valendo. Se a SES-DF não atualizou, não republica. Um publicado com data no futuro é ignorado, para não travar as coletas seguintes.
 - O app nunca consulta o Power BI direto.
 
 ### Stack
@@ -99,6 +99,9 @@ Tabela CMED (Anvisa)          ─┘
 - Depois usa o último snapshot baixado (cache), se for válido e mais novo que o embutido.
 - Em segundo plano, baixa só o `meta.json`; o `snapshot.json` inteiro só vem se a SES-DF atualizou. Também procura ao voltar o app para a frente.
 - Tudo que vem de fora passa pelo mesmo schema zod do coletor. Snapshot de outra `versaoSchema` é ignorado (app desatualizado).
+- O link "Ver a lista oficial" só aceita `https` em `saude.df.gov.br` e subdomínios; o schema recusa snapshot com outro endereço.
+- Snapshot com data mais de 1 dia no futuro é recusado (e o cache assim, descartado): senão nenhum dado novo passaria. "Agora" é o mais tarde entre o relógio do aparelho e o `Last-Modified` do `meta.json`, para um aparelho com o relógio atrasado continuar recebendo dados.
+- Downloads com prazo de 20 s e teto de 5 MB (`LIMITES_SNAPSHOT`; o snapshot tem ~480 KB).
 - Armazenamento: `expo-file-system` no celular, `localStorage` na web.
 - Endereço dos dados: `EXPO_PUBLIC_SNAPSHOT_URL` (GitHub Pages). Sem ele, só o embutido.
 

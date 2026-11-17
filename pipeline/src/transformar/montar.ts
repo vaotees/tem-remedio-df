@@ -1,6 +1,7 @@
 import {
   calcularDias,
   LIMITES_DF,
+  linkOficialPermitido,
   normalizar,
   VERSAO_SCHEMA,
   type ItemEstoque,
@@ -57,6 +58,7 @@ export function montarSnapshot(e: EntradaSnapshot): ResultadoMontagem {
   const vistos = new Set<string>();
   const ubsSemCoordenada = new Set<string>();
   const naoReconhecidas = new Set<string>();
+  const linksRecusados = new Set<string>();
 
   for (const l of e.estoque) {
     if (/^ALMOXARIFADO/i.test(l.local)) {
@@ -84,6 +86,9 @@ export function montarSnapshot(e: EntradaSnapshot): ResultadoMontagem {
     if (iProduto === undefined) {
       const { retirada, link, naoReconhecida } = classificarRetirada(regrasPorCodigo.get(l.codProduto) ?? []);
       if (naoReconhecida) naoReconhecidas.add(naoReconhecida);
+      // O botão do app diz "Abre o site da Secretaria de Saúde do DF": outro endereço fica sem botão.
+      const linkInfo = link && linkOficialPermitido(link) ? link : null;
+      if (link && !linkInfo) linksRecusados.add(link);
       if (retirada === "aplicado_no_posto") {
         indiceProduto.set(l.codProduto, -1);
         descartar("aplicado_no_posto");
@@ -102,7 +107,7 @@ export function montarSnapshot(e: EntradaSnapshot): ResultadoMontagem {
         liberacaoProlongada: d.liberacaoProlongada,
         controlado: l.controlado || retirada === "controlado",
         retirada,
-        linkInfo: link,
+        linkInfo,
         busca: normalizar(l.descricao),
       });
     }
@@ -149,6 +154,7 @@ export function montarSnapshot(e: EntradaSnapshot): ResultadoMontagem {
 
   if (ubsSemCoordenada.size) avisos.push(`UBS sem coordenada no CNES (fora do app): ${[...ubsSemCoordenada].join("; ")}`);
   for (const t of naoReconhecidas) avisos.push(`Observação de retirada não reconhecida: "${t}"`);
+  for (const l of linksRecusados) avisos.push(`Link fora dos domínios oficiais (o remédio fica sem "Ver a lista oficial"): ${l}`);
 
   const marcas = construirMarcas(e.cmed, componentesProduto.map((c) => ({ componentes: c })));
 

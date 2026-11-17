@@ -13,7 +13,7 @@ import { Tela } from "@/componentes/Tela";
 import { Texto } from "@/componentes/Texto";
 import { Voltar } from "@/componentes/Voltar";
 import { capitalizarNome, indiceProduto, nomeSubstancia, rotuloProduto } from "@/busca/remedios";
-import { formatarCep, linkTelefone, linkWhatsApp, linkWhatsAppApp, textoCompartilhar } from "@/postos/links";
+import { formatarCep, linkOficial, linkTelefone, linkWhatsApp, linkWhatsAppApp, textoCompartilhar } from "@/postos/links";
 import { acharUbs, estoqueNoPosto, temOutraFarmacia } from "@/postos/postos";
 import { espaco } from "@/tema";
 import { formatarAtualizacao } from "@/util/datas";
@@ -65,6 +65,7 @@ function Detalhe({ snapshot, cnes, farmacia, codigoProduto }: Props) {
   const remedio = produto ? `${nomeSubstancia([produto])}, ${rotuloProduto(produto).toLocaleLowerCase("pt-BR")}` : null;
   const atualizacao = formatarAtualizacao(snapshot.meta.atualizadoEm);
   const telefone = ubs.telefone ? linkTelefone(ubs.telefone) : null;
+  const listaOficial = produto ? linkOficial(produto) : null;
   const nome = capitalizarNome(ubs.nome);
 
   return (
@@ -85,13 +86,13 @@ function Detalhe({ snapshot, cnes, farmacia, codigoProduto }: Props) {
           )}
           <Texto secundario>Estoque de {atualizacao}, ligue antes de ir.</Texto>
           <Texto>{TEXTO_RETIRADA[produto.retirada]}</Texto>
-          {produto.linkInfo ? (
+          {listaOficial ? (
             <Botao
               titulo="Ver a lista oficial"
               icone="open-outline"
               variante="secundario"
               dica="Abre o site da Secretaria de Saúde do DF"
-              onPress={() => Linking.openURL(produto.linkInfo!)}
+              onPress={() => Linking.openURL(listaOficial)}
             />
           ) : null}
         </Cartao>

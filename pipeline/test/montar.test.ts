@@ -129,6 +129,33 @@ describe("montarSnapshot", () => {
     const { snapshot } = montar([linha({ codProduto: "12345", descricao: "CAPTOPRIL COMPRIMIDO SULCADO 25 MG" })]);
     expect(snapshot.produtos[0]!.retirada).toBe("sem_informacao");
   });
+
+  it("link fora do site da SES-DF não vira botão: fica sem link e avisa no log", () => {
+    const comLink = (link: string) =>
+      montarSnapshot({
+        atualizadoEm: "2026-10-17T00:16:33",
+        estoque: [base],
+        regras: [{ codigo: "8944", tipo: "Observações", texto: "Disponível somente em unidades específicas.", link }],
+        cadastroUbs,
+        cnes,
+        cmed,
+        agora: new Date("2026-10-17T04:00:00Z"),
+      });
+
+    const oficial = comLink("https://www.saude.df.gov.br/tabagismo/");
+    expect(oficial.snapshot.produtos[0]).toMatchObject({
+      retirada: "unidades_especificas",
+      linkInfo: "https://www.saude.df.gov.br/tabagismo/",
+    });
+
+    for (const link of ["http://www.saude.df.gov.br/tabagismo/", "https://saude.df.gov.br.exemplo.com/lista"]) {
+      const { snapshot, avisos } = comLink(link);
+      expect(snapshot.produtos[0]).toMatchObject({ retirada: "unidades_especificas", linkInfo: null });
+      expect(avisos.join(" ")).toContain(`Link fora dos domínios oficiais (o remédio fica sem "Ver a lista oficial"): ${link}`);
+      // Um link estranho na fonte não derruba a publicação.
+      expect(snapshotSchema.safeParse(snapshot).success).toBe(true);
+    }
+  });
 });
 
 // Dados reais de 17/10/2026: anlodipino 5 mg numa UBS comum e nas 3 unidades prisionais que tinham

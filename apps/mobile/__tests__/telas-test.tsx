@@ -535,6 +535,19 @@ describe("detalhe do posto", () => {
     expect(await screen.findByText("Não achei esse posto")).toBeOnTheScreen();
   });
 
+  it("unidade prisional não abre por link direto", async () => {
+    await renderRouter(APP, { initialUrl: "/posto/0263680?produto=8944" });
+    expect(await screen.findByText("Não achei esse posto")).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: "Ligar" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Como chegar" })).toBeNull();
+  });
+
+  it("Ver a lista oficial abre o site da SES-DF", async () => {
+    await renderRouter(APP, { initialUrl: "/posto/0010626?produto=MSE765" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Ver a lista oficial" }));
+    expect(Linking.openURL).toHaveBeenLastCalledWith("https://www.saude.df.gov.br/tabagismo/");
+  });
+
   it("Voltar volta para a lista", async () => {
     const r = await renderRouter(APP, { initialUrl: "/postos/8944" });
     await fireEvent.press(await screen.findByRole("button", { name: /^UBS 05 Taguatinga/ }));

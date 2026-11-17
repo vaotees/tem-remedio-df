@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   calcularDias,
+  dataNoFuturo,
+  LIMITES_SNAPSHOT,
+  linkOficialPermitido,
   nivelEstoque,
   normalizar,
   snapshotSchema,
@@ -104,5 +107,82 @@ describe("snapshotSchema", () => {
     const s = snapshotValido();
     s.ubs[0]!.lat = -23.55;
     expect(snapshotSchema.safeParse(s).success).toBe(false);
+  });
+});
+
+describe("linkOficialPermitido", () => {
+  it("aceita https no site da SES-DF e nos subdomínios", () => {
+    expect(linkOficialPermitido("https://www.saude.df.gov.br/tabagismo/")).toBe(true);
+    expect(linkOficialPermitido("https://saude.df.gov.br/")).toBe(true);
+    expect(linkOficialPermitido("https://info.saude.df.gov.br/painel")).toBe(true);
+    expect(linkOficialPermitido("HTTPS://WWW.SAUDE.DF.GOV.BR/x")).toBe(true);
+  });
+
+  it("recusa outro tipo de link, outro site e endereço disfarçado", () => {
+    for (const link of [
+      "javascript:alert(document.domain)",
+      "http://www.saude.df.gov.br/tabagismo/",
+      "intent://x#Intent;scheme=https;end",
+      "sms:+5561999999999?body=oi",
+      "whatsapp://send?text=oi",
+      "tel:+5561999999999",
+      "file:///etc/passwd",
+      "https://saude.df.gov.br.exemplo.com/",
+      "https://outrosaude.df.gov.br/",
+      "https://www.df.gov.br/",
+      "https://saude.df.gov.br@exemplo.com/",
+      "https://exemplo.com@saude.df.gov.br/",
+      "https://saude.df.gov.br:8443/",
+      "não é link",
+      "",
+    ]) {
+      expect([link, linkOficialPermitido(link)]).toEqual([link, false]);
+    }
+  });
+});
+
+describe("dataNoFuturo", () => {
+  const agora = Date.parse("2026-11-16T15:00:00Z");
+
+  it("aceita dados de hoje e de antes", () => {
+    expect(dataNoFuturo({ atualizadoEm: "2026-11-16T00:16:09", geradoEm: "2026-11-16T12:36:50.134Z" }, agora)).toBe(false);
+    expect(dataNoFuturo({ atualizadoEm: "2026-10-17T00:16:33" }, agora)).toBe(false);
+  });
+
+  it("tolera um dia de relógio desacertado", () => {
+    expect(dataNoFuturo({ atualizadoEm: "2026-11-17T11:00:00" }, agora)).toBe(false);
+    expect(dataNoFuturo({ atualizadoEm: "2026-11-17T13:00:00" }, agora)).toBe(true);
+  });
+
+  it("recusa ano errado, geradoEm no futuro e data ilegível", () => {
+    expect(dataNoFuturo({ atualizadoEm: "2062-11-16T00:16:09" }, agora)).toBe(true);
+    expect(dataNoFuturo({ atualizadoEm: "2026-11-16T00:16:09", geradoEm: "2099-01-01T00:00:00Z" }, agora)).toBe(true);
+    expect(dataNoFuturo({ atualizadoEm: "9999-99-99T99:99:99" }, agora)).toBe(true);
+  });
+});
+
+describe("snapshotSchema: o que vem de fora", () => {
+  it("aceita o link oficial da SES-DF", () => {
+    const s = snapshotValido();
+    s.produtos[0]!.linkInfo = "https://www.saude.df.gov.br/tabagismo/";
+    expect(snapshotSchema.safeParse(s).success).toBe(true);
+  });
+
+  it("rejeita link fora dos domínios oficiais", () => {
+    for (const link of ["javascript:alert(1)", "http://www.saude.df.gov.br/", "https://exemplo.com/"]) {
+      const s = snapshotValido();
+      s.produtos[0]!.linkInfo = link;
+      expect(snapshotSchema.safeParse(s).success).toBe(false);
+    }
+  });
+
+  it("rejeita texto e listas acima dos tetos", () => {
+    const longo = snapshotValido();
+    longo.ubs[0]!.endereco = "A".repeat(LIMITES_SNAPSHOT.texto + 1);
+    expect(snapshotSchema.safeParse(longo).success).toBe(false);
+
+    const muitos = snapshotValido();
+    muitos.estoque = Array.from({ length: LIMITES_SNAPSHOT.estoque + 1 }, () => [0, 0, 1, null]);
+    expect(snapshotSchema.safeParse(muitos).success).toBe(false);
   });
 });
