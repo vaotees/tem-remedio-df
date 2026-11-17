@@ -142,6 +142,13 @@ Tabela CMED (Anvisa)          ─┘
 - O app **não avisa sozinho** quando um remédio chega (isso é a v1.1): a tela vazia e a Ajuda dizem para abrir a aba e conferir, sem prometer aviso.
 - **Ajuda**: "Como usar" (buscar, escolher a dose, ver os postos, tocar no posto), cartão "Meus remédios" (guardar, ver, tirar; não avisa sozinho; a lista fica só no celular), dados sem internet e "alguns remédios só são entregues em certas UBSs, como os controlados". Nada de telefone, endereço ou regra que não venha de fonte oficial.
 
+### Marca, ícone e tela de abertura
+- **Símbolo**: um visto feito de cápsula (o "tem" e o remédio numa forma só), escolhido em 16/11/2026 entre três conceitos (visto, casa, pino de mapa). Sem texto, sem cruz e sem brasão ou bandeira: o app não imita a marca do GDF, da SES-DF, do SUS nem do Farmácia Popular.
+- **Cores**: azul `#0B5FA5` da paleta e uma cor nova só da marca, menta `#86E3BC` (verde `#1F8A5E` no fundo claro). O símbolo não aparece ao lado do semáforo, onde o verde seria lido como estoque.
+- **Ícone**: fundo azul; Android com ícone adaptável (cor de fundo + frente na área segura de 66 dp) e versão de uma cor para o ícone temático do Android 13+.
+- **Tela de abertura**: pelo plugin `expo-splash-screen` (o SDK 57 não tem mais a chave `splash`), símbolo com 160 dp sobre o fundo do app em cada tema (`#FFFFFF` / `#0F1115`). O Expo Go mostra o próprio ícone; o do app só aparece num build.
+- Desenho, arquivos e regras de uso em `apps/mobile/assets/marca/README.md`; os SVGs e PNGs saem de `apps/mobile/scripts/gerar-marca.mjs`.
+
 ### Como testar no celular
 - **Expo Go** no celular (de preferência Android), lendo o QR code do `pnpm app`.
 - **Web** para conferência rápida de layout.
