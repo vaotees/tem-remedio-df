@@ -28,7 +28,7 @@ O app só lê esse arquivo: não há servidor nem login, e nenhum dado de saúde
 
 ## Rodando
 
-Requer Node 22+ e pnpm.
+Requer Node 22.13+ ou 24.3+ (o `.nvmrc` usa o 24) e pnpm.
 
 ```bash
 pnpm install

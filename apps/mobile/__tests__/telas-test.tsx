@@ -93,9 +93,9 @@ beforeEach(() => {
   mockGps.pedidos = 0;
   mockGps.posicao = { coords: { latitude: NO_PLANO_PILOTO.lat, longitude: NO_PLANO_PILOTO.lng } };
   mockGps.desligado = false;
-  jest.spyOn(Linking, "openURL").mockResolvedValue(true);
+  jest.spyOn(Linking, "openURL").mockResolvedValue(undefined);
   jest.spyOn(Linking, "openSettings").mockResolvedValue(undefined);
-  jest.spyOn(Share, "share").mockResolvedValue({ action: Share.sharedAction });
+  jest.spyOn(Share, "share").mockResolvedValue({ action: Share.sharedAction, activityType: undefined });
   jest.spyOn(AccessibilityInfo, "announceForAccessibility").mockImplementation(() => {});
 });
 

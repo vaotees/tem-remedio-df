@@ -90,9 +90,9 @@ Tabela CMED (Anvisa)          ─┘
 
 ### Stack
 - Monorepo pnpm: `packages/shared` (schemas zod + regras), `pipeline` (coletor), `apps/mobile` (Expo).
-- App: Expo SDK 57 + TypeScript + Expo Router (abas em JS), TanStack Query, expo-file-system (snapshot, região e Meus remédios em arquivos JSON), Fuse.js (busca), expo-location, react-native-maps.
-- **Por que SDK 57:** o SDK 58 saiu em 15/10/2026, mas o Expo Go para ele ainda não está nas lojas. Quando chegar, o novo Expo Go só abre SDK 58: aí subimos o projeto (`pnpm exec expo install expo@~58.0.0` + `expo install --fix`, Testing Library 14 e Jest 30).
-- Testes: Vitest (coletor e shared); Jest 29 + Testing Library 13 (app); Maestro (E2E, M6).
+- App: Expo SDK 58 (React Native 0.88, React 19.3) + TypeScript + Expo Router (abas em JS), TanStack Query, expo-file-system (snapshot, região e Meus remédios em arquivos JSON), Fuse.js (busca), expo-location, react-native-maps.
+- **SDK 58:** o projeto começou no SDK 57 porque o SDK 58 saiu em 15/10/2026 sem o Expo Go dele nas lojas. O Expo Go 58.0.5 chegou à App Store em 22/10/2026 e só abre projetos do SDK 58; o app subiu para o 58 em 04/11/2026 (`pnpm exec expo install expo@~58.0.0` + `expo install --fix`, Jest 30 e Testing Library 14). O código do app não mudou: só os mocks de teste, para os tipos do React Native 0.88.
+- Testes: Vitest (coletor e shared); Jest 30 + Testing Library 14 (app); Maestro (E2E, M6).
 
 ### Dados no app (M2)
 - O app **abre com o snapshot embutido** (`apps/mobile/assets/dados/snapshot-inicial.json`): funciona na primeira abertura, sem internet.
@@ -123,7 +123,7 @@ Tabela CMED (Anvisa)          ─┘
 
 ### Mapa e região (M4)
 - Rota nova: `/regiao` ("Qual é a sua região?"), fora das abas, aberta pela lista de postos e pela aba Ajuda; ao escolher, volta para onde estava.
-- **Lista | Mapa** na tela de postos (abas lado a lado; a escolhida fica preenchida e com ícone de marcado). O mapa (react-native-maps 1.27.2, a versão do SDK 57, que já vem no Expo Go: Mapas da Apple no iPhone, Google Maps no Android, sem chave) mostra os mesmos postos, na mesma ordem e com o mesmo filtro de retirada da lista. Abre enquadrando a pessoa (ou o centro da região escolhida) e os 5 primeiros postos.
+- **Lista | Mapa** na tela de postos (abas lado a lado; a escolhida fica preenchida e com ícone de marcado). O mapa (react-native-maps 1.29.11, a versão do SDK 58, que já vem no Expo Go: Mapas da Apple no iPhone, Google Maps no Android, sem chave) mostra os mesmos postos, na mesma ordem e com o mesmo filtro de retirada da lista. Abre enquadrando a pessoa (ou o centro da região escolhida) e os 5 primeiros postos.
 - **Pinos**: bolinha com a cor e o ícone do semáforo, borda branca e área de toque de 56; o escolhido fica maior. Cores próprias (`cores.pino`), iguais nos dois temas porque o mapa do Android continua claro no tema escuro. O teste de contraste confere o ícone sobre o pino (4,5:1) e o pino sobre o chão do mapa claro e do escuro (3:1). Legenda com os níveis que aparecem no mapa.
 - **Cartão embaixo do mapa**: começa no mais perto (ou no primeiro da lista, sem localização), com nome, região, distância, semáforo (cor + ícone + texto), horário, **Ver posto** e **Ver o próximo mais perto**, que anda pela lista sem precisar acertar o pino (mais fácil para quem treme a mão e para quem usa leitor de tela). O leitor de tela anuncia "Mapa com N postos que têm hoje" quando o mapa aparece, e o posto novo a cada "Ver o próximo".
 - **Web**: o react-native-maps não funciona no navegador. `MapaPostos.web.tsx` faz o Metro nunca carregá-lo; a tela mostra só a lista, com um aviso discreto ("O mapa dos postos aparece no app do celular").
