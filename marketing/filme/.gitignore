@@ -1,0 +1,5 @@
+node_modules/
+saida/
+public/voz/
+.env*
+public/musica.mp3
