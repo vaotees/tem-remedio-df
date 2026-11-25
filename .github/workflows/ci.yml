@@ -19,3 +19,9 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm test
+      # A versão web vai para o GitHub Pages (workflow do coletor): o PR já confere que ela exporta.
+      - name: Exporta a versão web
+        working-directory: apps/mobile
+        env:
+          TEM_REMEDIO_BASE_URL: /tem-remedio-df/app
+        run: pnpm exec expo export --platform web --output-dir dist
