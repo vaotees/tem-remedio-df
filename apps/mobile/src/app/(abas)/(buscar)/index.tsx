@@ -51,8 +51,14 @@ export default function Inicio() {
       keyboardShouldPersistTaps="handled"
     >
       <View style={[estilos.faixa, { backgroundColor: cores.faixa, paddingTop: top + espaco.md }]}>
-        <View style={estilos.marcaDagua} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-          <Simbolo tamanho={220} cor={cores.textoFaixa} corCapsula={cores.textoFaixa} />
+        {/*
+          A marca d'água passa da borda da faixa: fica numa camada própria que a recorta. Sem isso, na web,
+          focar a busca faz o navegador rolar a faixa para o lado (ela tem conteúdo além da largura da tela).
+        */}
+        <View style={estilos.recorte} pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+          <View style={estilos.marcaDagua}>
+            <Simbolo tamanho={220} cor={cores.textoFaixa} corCapsula={cores.textoFaixa} />
+          </View>
         </View>
         <View style={estilos.topo}>
           <Assinatura sobreFaixa />
@@ -402,6 +408,7 @@ const estilos = StyleSheet.create({
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
   },
+  recorte: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, overflow: "hidden" },
   marcaDagua: { position: "absolute", right: -96, bottom: -40, opacity: 0.08 },
   topo: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: espaco.sm, marginBottom: espaco.md },
   ajuda: { width: ALVO_MINIMO, height: ALVO_MINIMO, borderRadius: RAIO_CAPSULA, borderWidth: 1.5, alignItems: "center", justifyContent: "center" },
