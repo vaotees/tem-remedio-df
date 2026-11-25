@@ -11,6 +11,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
+import { MolduraWeb } from "@/componentes/MolduraWeb";
 import { ligarFocoDoApp, queryClient } from "@/dados/consultas";
 import { carregarPreferencias } from "@/preferencias/preferencias";
 import { useTema } from "@/tema";
@@ -43,9 +44,11 @@ export default function LayoutRaiz() {
   return (
     <QueryClientProvider client={queryClient}>
       <StatusBar style={escuro ? "light" : "dark"} />
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: cores.fundo } }}>
-        <Stack.Screen name="(abas)" />
-      </Stack>
+      <MolduraWeb>
+        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: cores.fundo } }}>
+          <Stack.Screen name="(abas)" />
+        </Stack>
+      </MolduraWeb>
     </QueryClientProvider>
   );
 }

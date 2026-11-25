@@ -2,14 +2,19 @@
   "expo": {
     "name": "Tem Remédio DF",
     "slug": "tem-remedio-df",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "io.github.vaotees.temremediodf",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "io.github.vaotees.temremediodf",
       "adaptiveIcon": {
         "backgroundColor": "#0B5FA5",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -18,7 +23,14 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "output": "single",
+      "name": "Tem Remédio DF",
+      "shortName": "Tem Remédio",
+      "lang": "pt-BR",
+      "themeColor": "#0B5FA5",
+      "backgroundColor": "#F2F5F9",
+      "description": "Em qual farmácia de UBS do DF tem o seu remédio hoje. Dados públicos da SES-DF."
     },
     "plugins": [
       "expo-router",
@@ -47,6 +59,12 @@
     "scheme": "temremedio",
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b146d10b-02c2-4538-a1e0-b9d30c6b7a0e"
+      }
+    },
+    "owner": "estevao.marques"
   }
 }

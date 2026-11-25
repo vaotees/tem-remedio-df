@@ -4,7 +4,15 @@
 
 App para idosos (e seus cuidadores) descobrirem **qual posto de saúde do DF tem o remédio hoje**, antes de sair de casa. Usa só dados públicos e oficiais da Secretaria de Saúde do DF.
 
-Projeto de portfólio em React Native (Expo) + TypeScript. Status: **coletor de dados (M1), base do app (M2), fluxo principal (M3: busca → dose → postos mais perto → detalhe), mapa com escolha da região (M4) e Meus remédios (M5: lista guardada só no celular, com a situação de hoje de cada remédio) prontos**; acabamento (M6) em construção, com a acessibilidade já revisada (leitor de tela, letra grande do celular, alvos de toque de 56).
+Projeto de portfólio em React Native (Expo SDK 58) + TypeScript.
+
+## Experimente
+
+- **No navegador:** [vaotees.github.io/tem-remedio-df/app](https://vaotees.github.io/tem-remedio-df/app/). É a mesma base do app; na web o mapa dá lugar à lista dos postos.
+- **No Android:** baixe o APK em [Releases](https://github.com/vaotees/tem-remedio-df/releases/latest) e abra no celular. O Android vai pedir para permitir a instalação de fora da Play Store.
+- **No iPhone:** pelo navegador, no link acima. A versão da App Store depende da conta de desenvolvedor da Apple (o projeto já está configurado para o build).
+
+Status: coletor de dados, busca → dose → postos mais perto → detalhe, mapa, Meus remédios, acessibilidade revisada (leitor de tela, letra grande, alvos de toque de 56) e redesenho visual (marca, gráficos de cobertura e de dias de estoque, Perfil sem cadastro). Antes das lojas faltam os itens de confiança da revisão de UX (aviso de versão, dado antigo, tela "Sobre").
 
 ## Como funciona
 
@@ -58,15 +66,31 @@ Leia o QR code com o **Expo Go** no celular, ou aperte `w` para abrir no navegad
 |---|---|
 | `packages/shared` | Formato do snapshot (zod), semáforo, regras de retirada |
 | `pipeline` | Coletor: Power BI → limpeza → tradutor de marcas → validação → publicação |
-| `apps/mobile` | App Expo: busca, postos (lista e mapa), Meus remédios, tema acessível (contraste testado), snapshot embutido + cache |
+| `apps/mobile` | App Expo: Início com a busca, postos (lista e mapa), aba Mapa, Meus remédios, Perfil sem cadastro, tema acessível (contraste testado), snapshot embutido + cache |
+| `scripts/montar-site.mjs` | Junta os dados e a versão web do app no site do GitHub Pages |
 | `docs/SPEC.md` | Escopo, telas, regras e decisões |
 | `spike/` | Teste de extração (M0) |
 
-## Publicação (GitHub Pages)
+## Publicação
 
-1. Em *Settings → Pages*, escolha **GitHub Actions** como fonte.
-2. O workflow `Coletor diário` publica `snapshot.json` e `meta.json`. Rode-o uma vez à mão em *Actions → Coletor diário → Run workflow*.
-3. Se a SES-DF não atualizou, ele não republica; se os dados vierem quebrados, rejeita e o snapshot anterior continua no ar.
+### Site (GitHub Pages)
+
+O site tem os dados na raiz (`snapshot.json`, `meta.json`) e a versão web do app em `/app`. O GitHub Pages publica o site inteiro de uma vez, então o workflow `Coletor diário` sempre sai com os dois:
+
+- **dado novo da SES-DF:** coleta, exporta o app e publica;
+- **mudança no app na `main`:** pega os dados que já estão no ar, exporta o app e publica, sem coletar.
+
+Na primeira vez: em *Settings → Pages*, escolha **GitHub Actions** como fonte e rode o workflow à mão (*Actions → Coletor diário → Run workflow*). Se a SES-DF não atualizou, ele não republica; se os dados vierem quebrados, rejeita e o snapshot anterior continua no ar.
+
+### Celular (EAS Build)
+
+Os perfis ficam em `apps/mobile/eas.json`; o identificador do app é `io.github.vaotees.temremediodf` (Android e iOS).
+
+```bash
+cd apps/mobile && npx eas-cli@latest build --platform android --profile preview
+```
+
+Gera um APK para instalar direto no Android (a chave de assinatura fica guardada no EAS). Para as lojas, o perfil `production` gera o pacote da Google Play (AAB) e o build de iOS; o iOS precisa da conta de desenvolvedor da Apple.
 
 ## Fontes dos dados
 

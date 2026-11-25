@@ -15,6 +15,8 @@ App React Native (Expo) que mostra o estoque de remédios das UBSs do Distrito F
 - `pnpm --filter @tem-remedio/pipeline coletar --anterior saida/meta.json` — simula "SES-DF ainda não atualizou"
 - `pnpm snapshot:app` — copia o snapshot gerado pelo coletor para dentro do app (rode `pnpm coletar` antes)
 - `pnpm app` — servidor do Expo (Expo Go no celular; `w` abre a versão web)
+- APK: `npx eas-cli@latest build --platform android --profile preview` em `apps/mobile` (perfis em `eas.json`; projeto `@estevao.marques/tem-remedio-df`). O EAS lê a configuração pelo `expo` do projeto: sem `node_modules` instalado, ele acha um `expo` 42 antigo em `~/node_modules` e trava.
+- Versão web para o Pages: `TEM_REMEDIO_BASE_URL=/tem-remedio-df/app pnpm exec expo export --platform web --output-dir dist` em `apps/mobile`, depois `node scripts/montar-site.mjs --dados pipeline/saida --web apps/mobile/dist --saida _site`. O workflow `Coletor diário` faz isso sozinho.
 
 ## App (apps/mobile)
 - Instalar pacote: `pnpm exec expo install <pacote>` **dentro de `apps/mobile`**. Não use `npx expo`: há um `expo-cli` global antigo (2021) nesta máquina que entra no lugar quando o `expo` local não é achado e instala versões erradas com npm.

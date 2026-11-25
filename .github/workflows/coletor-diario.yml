@@ -3,10 +3,22 @@ name: Coletor diário
 # A SES-DF atualiza o painel por volta de 00h16 e de 16h16 (alguns dias, 19h16), horário de Brasília.
 # Os agendamentos em hora cheia chegaram a atrasar 8 horas no GitHub (o das 01h00 rodava entre 08h e 09h30).
 # Por isso confere de hora em hora, no minuto 47: sem dado novo, o coletor para depois de uma consulta.
+#
+# O site do GitHub Pages tem os dados (snapshot.json, meta.json) na raiz e a versão web do app em /app.
+# O Pages publica o site inteiro de uma vez, então os dois sempre saem juntos:
+# - dado novo da SES-DF: coleta, exporta o app e publica;
+# - mudança no app na main: pega os dados que já estão publicados, exporta o app e publica (sem coletar).
 on:
   schedule:
     - cron: "47 * * * *"
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "apps/mobile/**"
+      - "packages/shared/**"
+      - "scripts/montar-site.mjs"
+      - ".github/workflows/coletor-diario.yml"
 
 permissions:
   contents: read
@@ -21,7 +33,7 @@ jobs:
   coletar:
     runs-on: ubuntu-latest
     outputs:
-      publicar: ${{ steps.coletor.outputs.publicar }}
+      publicar: ${{ steps.decidir.outputs.publicar }}
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -35,13 +47,15 @@ jobs:
         uses: actions/configure-pages@v6
 
       # Cópia da CMED, usada se a Anvisa estiver fora do ar.
-      - uses: actions/cache/restore@v6
+      - if: github.event_name != 'push'
+        uses: actions/cache/restore@v6
         with:
           path: pipeline/.cache
           key: cmed-${{ github.run_id }}
           restore-keys: cmed-
 
       - id: coletor
+        if: github.event_name != 'push'
         working-directory: pipeline
         env:
           ANTERIOR_URL: ${{ steps.pages.outputs.base_url }}/meta.json
@@ -54,10 +68,32 @@ jobs:
           path: pipeline/.cache
           key: cmed-${{ github.run_id }}
 
-      - if: steps.coletor.outputs.publicar == 'true'
+      # Mudança no app: os dados continuam os que já estão no ar.
+      - if: github.event_name == 'push'
+        env:
+          BASE: ${{ steps.pages.outputs.base_url }}
+        run: |
+          mkdir -p pipeline/saida
+          curl -fsS "$BASE/meta.json" -o pipeline/saida/meta.json
+          curl -fsS "$BASE/snapshot.json" -o pipeline/saida/snapshot.json
+
+      - id: decidir
+        run: echo "publicar=${{ github.event_name == 'push' || steps.coletor.outputs.publicar == 'true' }}" >> "$GITHUB_OUTPUT"
+
+      # Versão web do app, com os endereços a partir de /<repositório>/app.
+      - if: steps.decidir.outputs.publicar == 'true'
+        working-directory: apps/mobile
+        env:
+          TEM_REMEDIO_BASE_URL: ${{ steps.pages.outputs.base_path }}/app
+        run: pnpm exec expo export --platform web --output-dir dist
+
+      - if: steps.decidir.outputs.publicar == 'true'
+        run: node scripts/montar-site.mjs --dados pipeline/saida --web apps/mobile/dist --saida _site
+
+      - if: steps.decidir.outputs.publicar == 'true'
         uses: actions/upload-pages-artifact@v5
         with:
-          path: pipeline/saida
+          path: _site
 
   publicar:
     needs: coletar
