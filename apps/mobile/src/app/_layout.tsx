@@ -1,4 +1,3 @@
-import { AtkinsonHyperlegibleMono_700Bold } from "@expo-google-fonts/atkinson-hyperlegible-mono";
 import {
   AtkinsonHyperlegibleNext_400Regular,
   AtkinsonHyperlegibleNext_500Medium,
@@ -10,7 +9,8 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { Abertura } from "@/componentes/Abertura";
 import { MolduraWeb } from "@/componentes/MolduraWeb";
 import { ligarFocoDoApp, queryClient } from "@/dados/consultas";
 import { carregarPreferencias } from "@/preferencias/preferencias";
@@ -26,9 +26,11 @@ export default function LayoutRaiz() {
     AtkinsonHyperlegibleNext_500Medium,
     AtkinsonHyperlegibleNext_700Bold,
     AtkinsonHyperlegibleNext_800ExtraBold,
-    AtkinsonHyperlegibleMono_700Bold,
   });
   const [preferencias, setPreferencias] = useState(false);
+  // A abertura animada fica por cima do app até terminar (uma vez, quando o app abre).
+  const [abertura, setAbertura] = useState(true);
+  const fimDaAbertura = useCallback(() => setAbertura(false), []);
   useEffect(ligarFocoDoApp, []);
   useEffect(() => {
     carregarPreferencias().finally(() => setPreferencias(true));
@@ -49,6 +51,7 @@ export default function LayoutRaiz() {
           <Stack.Screen name="(abas)" />
         </Stack>
       </MolduraWeb>
+      {abertura ? <Abertura aoTerminar={fimDaAbertura} /> : null}
     </QueryClientProvider>
   );
 }

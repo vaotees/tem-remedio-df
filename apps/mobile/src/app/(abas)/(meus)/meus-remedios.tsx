@@ -6,10 +6,11 @@ import { Botao } from "@/componentes/Botao";
 import { Cartao } from "@/componentes/Cartao";
 import { ComDados } from "@/componentes/ComDados";
 import { FaixaAtualizacao } from "@/componentes/FaixaAtualizacao";
-import { Anel } from "@/componentes/Graficos";
+import { BarraRede } from "@/componentes/Graficos";
 import { Icone, type NomeIcone } from "@/componentes/Icone";
 import { ItemLista } from "@/componentes/ItemLista";
 import { PerguntarOrigem, ProcurandoLocalizacao, SituacaoOrigem } from "@/componentes/OrigemPostos";
+import { Pictograma } from "@/componentes/Pictograma";
 import { SeloEstoque } from "@/componentes/SeloEstoque";
 import { Tela } from "@/componentes/Tela";
 import { Texto } from "@/componentes/Texto";
@@ -178,7 +179,7 @@ function ItemRemedio({ snapshot, remedio, hoje, ordem, onPress }: PropsItem) {
   return (
     <ItemLista onPress={onPress} rotulo={rotulo} dica="Mostra os postos que têm hoje" semSeta>
       <View style={estilos.topoRemedio}>
-        <Anel valor={hoje.tipo === "tem" ? hoje.postos : 0} total={snapshot.ubs.length} tamanho={68} />
+        <Pictograma forma={produto.forma} />
         <View style={estilos.flex}>
           <Texto variante="destaque">{nome}</Texto>
           <Texto secundario>{apresentacao}</Texto>
@@ -191,6 +192,7 @@ function ItemRemedio({ snapshot, remedio, hoje, ordem, onPress }: PropsItem) {
         </Linha>
       ) : null}
       <Linha icone={primeiro ? "medkit-outline" : "close-circle-outline"}>{quantos}</Linha>
+      {hoje.tipo === "tem" ? <BarraRede contagem={hoje.niveis} compacta /> : null}
       {primeiro && posto ? (
         <View style={[estilos.primeiro, { backgroundColor: cores.superficie2 }]}>
           <Texto variante="legenda" secundario>

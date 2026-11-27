@@ -10,9 +10,6 @@ importers:
 
   apps/mobile:
     dependencies:
-      '@expo-google-fonts/atkinson-hyperlegible-mono':
-        specifier: ^0.4.1
-        version: 0.4.1
       '@expo-google-fonts/atkinson-hyperlegible-next':
         specifier: ^0.4.1
         version: 0.4.1
@@ -850,9 +847,6 @@ packages:
   '@eslint/plugin-kit@0.4.1':
     resolution: {integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@expo-google-fonts/atkinson-hyperlegible-mono@0.4.1':
-    resolution: {integrity: sha512-RNEAOW3LdEJ493vEtaTBl5+DseEgrDWmOndYxflHoRwNRhJM1McQbso/skJLDmpKOs6wbD/Rj3FB4dxUla8HIA==}
 
   '@expo-google-fonts/atkinson-hyperlegible-next@0.4.1':
     resolution: {integrity: sha512-tA5NUQCrb4GnQ8kvghyF6Kqw72zr4zSNmMwhCTcHlsu/jE5JoF8Fje5/WwL44y17Lue99pG9cyq3PW5X/7ZDng==}
@@ -6192,8 +6186,6 @@ snapshots:
     dependencies:
       '@eslint/core': 0.17.0
       levn: 0.4.1
-
-  '@expo-google-fonts/atkinson-hyperlegible-mono@0.4.1': {}
 
   '@expo-google-fonts/atkinson-hyperlegible-next@0.4.1': {}
 

@@ -7,7 +7,7 @@ import { Texto } from "./Texto";
 
 /**
  * "Aberto agora, fecha às 17h" / "Fechado agora, abre amanhã às 07h".
- * Selo neutro, com contorno e relógio: não se confunde com o verde do estoque.
+ * Selo neutro, com contorno, relógio e letra mais leve: não se confunde com o verde do estoque nem compete com ele.
  * Quando o horário do cadastro não dá para entender, não mostra nada (melhor que errar).
  */
 export function SeloHorario({ horario, agora = new Date() }: { horario: string | null; agora?: Date }) {
@@ -23,7 +23,7 @@ export function SeloHorario({ horario, agora = new Date() }: { horario: string |
       accessibilityLabel={texto}
     >
       <Icone name={aberto ? "time-outline" : "moon-outline"} size={20} color={cores.textoSecundario} />
-      <Texto variante="legenda" peso="negrito" secundario style={estilosSelo.texto}>
+      <Texto variante="legenda" peso="medio" secundario style={estilosSelo.texto}>
         {texto}
       </Texto>
     </View>

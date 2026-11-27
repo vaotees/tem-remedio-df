@@ -29,7 +29,7 @@ Em até 3 toques, a pessoa (idosa, ou o filho/cuidador) descobre **qual posto de
 - **Fora**: login, farmácias particulares, preços, qualquer dado de saúde do usuário em servidor.
 
 ## Telas
-1. Início: busca grande, microfone, "Seus remédios", data dos dados.
+1. Início: busca grande, microfone, "Hoje para você" (os remédios guardados, com o posto mais perto), data dos dados.
 2. Escolher a dose.
 3. Postos com estoque (lista), com semáforo e distância.
 4. Mapa.
@@ -150,6 +150,7 @@ Tabela CMED (Anvisa)          ─┘
 - **Cores**: azul `#0B5FA5` da paleta e uma cor nova só da marca, menta `#86E3BC` (verde `#1F8A5E` no fundo claro). O símbolo não aparece ao lado do semáforo, onde o verde seria lido como estoque.
 - **Ícone**: fundo azul; Android com ícone adaptável (cor de fundo + frente na área segura de 66 dp) e versão de uma cor para o ícone temático do Android 13+.
 - **Tela de abertura**: pelo plugin `expo-splash-screen` (o SDK 57 não tem mais a chave `splash`), símbolo com 160 dp sobre o fundo do app em cada tema (`#FFFFFF` / `#0F1115`). O Expo Go mostra o próprio ícone; o do app só aparece num build.
+- **Abertura animada** (`src/componentes/Abertura.tsx`, 26/11/2026): por cima do app, logo depois da do sistema e igual a ela; as metades da cápsula se soltam e se encaixam com um "clique" (como no filme), o nome sobe e a tela some. 1,15 s, correndo enquanto o app carrega por baixo, sem som. Com "Reduzir movimento" ou leitor de tela, só some (150 ms); na web vale só o "Reduzir movimento" (o react-native-web não sabe do leitor de tela). Escondida do leitor; nos testes de tela fica de fora (`jest.setup.tsx`).
 - Desenho, arquivos e regras de uso em `apps/mobile/assets/marca/README.md`; os SVGs e PNGs saem de `apps/mobile/scripts/gerar-marca.mjs`.
 
 ### Acabamento (M6)
@@ -186,7 +187,7 @@ Revisão de VoiceOver/TalkBack, letra grande e alvos de toque. O que mudou:
 ## Riscos
 - O endpoint do Power BI não é API oficial. Mitigação: validação + pedido dos dados em formato aberto por LAI.
 - Farmácias zeradas podem ser dispensação suspensa → mostrar "sem informação de estoque", não "não tem".
-- Telefone falta em ~20% das UBSs (CNES + cadastro SES-DF).
+- Telefone falta em ~20% das UBSs (CNES + cadastro SES-DF), e alguns vêm fora do formato (ficam sem Ligar, com aviso no log do coletor).
 
 ### Redesenho visual (17/11/2026)
 Pedido do usuário depois de ver o app no iPhone: o visual estava básico demais. Proposta aprovada na página privada https://claude.ai/artifact/HaW9K9Cn7VgrCvCcsBMUxn.
@@ -197,7 +198,17 @@ Pedido do usuário depois de ver o app no iPhone: o visual estava básico demais
 - **Aba Mapa**: as farmácias de UBS (sem as prisionais) num mapa; o cartão mostra o posto, o horário e "Ver posto". Na web, lista.
 - **Perfil sem cadastro**: nome opcional (só para a saudação), tamanho da letra (normal, grande, maior, por cima do ajuste do celular) e cores (do celular, claro, escuro). Fica só no aparelho. **Sem login**: a lista de remédios é dado de saúde (LGPD art. 11) e senha é barreira e porta de golpe para o público idoso.
 - **Detalhe do posto**: mapa pequeno no alto (só no celular), horário com os dias da semana, uma ação principal (Como chegar) e Ligar/WhatsApp lado a lado com o número à vista.
-- Ainda não: "Pessoas que eu cuido" (listas separadas por pessoa, muda o formato de `meus-remedios.json`), histórico de 30 dias ("costuma ter neste posto"), ilustrações e animações.
+- Ainda não: "Pessoas que eu cuido" (listas separadas por pessoa, muda o formato de `meus-remedios.json`), histórico de 30 dias ("costuma ter neste posto"), ilustrações.
+
+### Redesenho v2: a resposta primeiro (26/11/2026)
+Revisão de design sobre as telas do redesenho: a resposta ("onde eu pego hoje") ficava embaixo da dobra e o anel não dizia o que contava. Telas propostas aprovadas pelo usuário na conversa.
+- **Postos**: o mais perto (ou o primeiro da região) logo depois do resumo, em destaque, com semáforo, horário, medidor e "Como chegar"; a região, os filtros e o resto da lista vêm depois. Sem localização nem região, nenhum destaque (não há "mais perto"). "Guardar" curto no alto, ao lado do Voltar; "Está na aba Meus remédios." aparece só logo depois do toque.
+- **Filtros** "Aberto agora" (pelo horário do cadastro; horário que o app não entende não conta como aberto) e "Tem bastante": mudam a lista e o mapa, não a contagem do remédio. Sem nenhum posto, um botão mostra todos de novo.
+- **Início, "Hoje para você"**: os remédios guardados um embaixo do outro (o carrossel escondia o segundo pela metade), cada um com a contagem, a barra do semáforo dos postos que têm, o mais perto com selo e horário, e "Como chegar" fora do botão do cartão.
+- **Sem anel**: o anel (número dentro de um círculo) parecia porcentagem e não dizia "postos". No lugar, a barra do semáforo compacta, no Início e em Meus remédios; o leitor de tela lê a contagem de cada nível.
+- **Letra**: números na Atkinson Hyperlegible Next (a Mono dava cara de sistema e saiu do app); selo de horário mais leve que o do estoque.
+- **Mapa**: legenda em cápsulas numa linha, no lugar do cartão com título; a explicação de como mexer no mapa vira dica com "Entendi" (`Dica`), que some de vez e fica guardada com o Perfil (`preferencias.json`, campo `dicas`).
+- **Telefone**: `normalizarTelefone` (`packages/shared/src/telefone.ts`) confere o formato brasileiro (DDD + fixo de 8 dígitos começando de 2 a 5, ou celular de 9 começando por 9; sem DDD, é o 61) e formata "(61) 3563-9176", com o ramal escrito. O coletor grava formatado e troca o fora do formato por `null`, com aviso no log; o app confere de novo e, se o número veio com erro, diz isso e não mostra Ligar. Caso real: "61334494826" (UBS 1 Asa Norte, um dígito a mais).
 
 ### Publicação: web, APK e lojas (24/11/2026)
 - **Versão web** em `https://vaotees.github.io/tem-remedio-df/app/`, no mesmo site do GitHub Pages que publica os dados. É a forma principal de apresentar o projeto (abre num clique, inclusive no iPhone). Na web não há mapa (lista dos postos); no computador, o app fica numa coluna da largura de um celular (`MolduraWeb`). Saída `single` (SPA): o `404.html` do site é o `index.html` do app, para os links diretos (`/app/postos/8944`) abrirem a tela certa.

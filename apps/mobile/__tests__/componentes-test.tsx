@@ -1,4 +1,4 @@
-import { render, renderHook, screen, userEvent } from "@testing-library/react-native";
+import { render, renderHook, screen, userEvent, waitFor } from "@testing-library/react-native";
 import { AccessibilityInfo, Platform, StyleSheet } from "react-native";
 import { Botao } from "@/componentes/Botao";
 import { FaixaAtualizacao } from "@/componentes/FaixaAtualizacao";
@@ -162,5 +162,33 @@ describe("saudação do Início", () => {
     expect(saudacao(new Date(2026, 10, 17, 8, 12), null)).toBe("Bom dia");
     expect(saudacao(new Date(2026, 10, 17, 14, 0), "Lúcia")).toBe("Boa tarde, Lúcia");
     expect(saudacao(new Date(2026, 10, 17, 19, 30), "Lúcia")).toBe("Boa noite, Lúcia");
+  });
+});
+
+describe("Abertura", () => {
+  // O jest.setup troca a abertura por nada nos testes de tela; aqui vale a de verdade.
+  const { Abertura } = jest.requireActual<typeof import("@/componentes/Abertura")>("@/componentes/Abertura");
+  const lema = "Veja se tem antes de sair de casa";
+
+  afterEach(() => jest.restoreAllMocks());
+
+  it("fica escondida do leitor de tela e, com Reduzir movimento, só some", async () => {
+    jest.spyOn(AccessibilityInfo, "isReduceMotionEnabled").mockResolvedValue(true);
+    jest.spyOn(AccessibilityInfo, "isScreenReaderEnabled").mockResolvedValue(false);
+    const fim = jest.fn();
+    await render(<Abertura aoTerminar={fim} />);
+    expect(screen.queryByText(lema)).toBeNull();
+    expect(screen.getByText(lema, { includeHiddenElements: true })).toBeOnTheScreen();
+    await waitFor(() => expect(fim).toHaveBeenCalledTimes(1), { timeout: 1000 });
+  });
+
+  it("anima o encaixe da cápsula e termina sozinha, em pouco mais de 1 s", async () => {
+    jest.spyOn(AccessibilityInfo, "isReduceMotionEnabled").mockResolvedValue(false);
+    jest.spyOn(AccessibilityInfo, "isScreenReaderEnabled").mockResolvedValue(false);
+    const fim = jest.fn();
+    const inicio = Date.now();
+    await render(<Abertura aoTerminar={fim} />);
+    await waitFor(() => expect(fim).toHaveBeenCalledTimes(1), { timeout: 3000 });
+    expect(Date.now() - inicio).toBeGreaterThan(800);
   });
 });

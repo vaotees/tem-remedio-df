@@ -197,14 +197,70 @@ describe("lista de postos", () => {
     expect(await screen.findByText("Do mais perto para o mais longe de você, em linha reta.")).toBeOnTheScreen();
     expect(postosNaTela()).toEqual(["UBS 1 Asa Norte", "UBS 05 Taguatinga", "UBS 01 Samambaia", "UBS 3 Ceilandia"]);
 
+    // O mais perto vem no alto, em destaque, com "Como chegar" embaixo.
     const asaNorte = screen.getByRole("button", { name: /^UBS 1 Asa Norte/ });
-    // A distância vem num selo ao lado do nome; embaixo, a região e o medidor dos dias de estoque.
-    expect(within(asaNorte).getByText("4,0 km")).toBeOnTheScreen();
-    expect(within(asaNorte).getByText("Plano Piloto")).toBeOnTheScreen();
+    expect(asaNorte.props.accessibilityHint).toBe("Mais perto de você. Mostra endereço, telefone e como chegar");
+    expect(within(asaNorte).getByText("Mais perto de você")).toBeOnTheScreen();
+    expect(within(asaNorte).getByText("Plano Piloto · 4,0 km")).toBeOnTheScreen();
     expect(within(asaNorte).getByText("Quase acabando, ligue antes")).toBeOnTheScreen();
+    expect(screen.getAllByRole("button", { name: "Como chegar" })).toHaveLength(1);
+    // Os outros, na lista: a distância num selo ao lado do nome, embaixo a região e o medidor dos dias.
+    const taguatinga = screen.getByRole("button", { name: /^UBS 05 Taguatinga/ });
+    expect(within(taguatinga).getByText(/^\d+(,\d)? km$/)).toBeOnTheScreen();
+    expect(within(taguatinga).getByText("Taguatinga")).toBeOnTheScreen();
     expect(asaNorte.props.accessibilityLabel).toMatch(/a 4,0 km em linha reta\. Estoque: Quase acabando, ligue antes\. (Aberto|Fechado) agora/);
     // UBS sem horário no cadastro: sem "Aberto agora".
     expect(screen.getByRole("button", { name: /^UBS 3 Ceilandia/ }).props.accessibilityLabel).not.toMatch(/agora/);
+  });
+
+  it("Como chegar do mais perto: pergunta o app de mapa e abre o caminho até ele", async () => {
+    await renderRouter(APP, { initialUrl: "/postos/8944" });
+    await esperarPostos();
+    await fireEvent.press(screen.getByRole("button", { name: "Como chegar" }));
+    expect(screen.getByText("Abrir o caminho com qual app?")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Waze" }));
+    expect(Linking.openURL).toHaveBeenCalledWith("https://waze.com/ul?ll=-15.773349675527177,-47.89260685443878&navigate=yes");
+  });
+
+  describe("filtros", () => {
+    // Só o relógio é de mentira: sábado, 17/10/2026, às 10h. Só a UBS 1 Asa Norte abre no sábado (das 07h às 12h).
+    const SO_O_RELOGIO = [
+      "hrtime",
+      "nextTick",
+      "performance",
+      "queueMicrotask",
+      "requestAnimationFrame",
+      "cancelAnimationFrame",
+      "requestIdleCallback",
+      "cancelIdleCallback",
+      "setImmediate",
+      "clearImmediate",
+      "setInterval",
+      "clearInterval",
+      "setTimeout",
+      "clearTimeout",
+    ] as const;
+    beforeEach(() => jest.useFakeTimers({ now: new Date(2026, 9, 17, 10, 0), doNotFake: [...SO_O_RELOGIO] }));
+    afterEach(() => jest.useRealTimers());
+
+    it("Aberto agora e Tem bastante mostram só os postos que servem; sem nenhum, um botão volta a mostrar todos", async () => {
+      await renderRouter(APP, { initialUrl: "/postos/8944" });
+      await esperarPostos();
+      expect(postosNaTela()).toHaveLength(4);
+
+      await fireEvent.press(screen.getByRole("button", { name: "Aberto agora" }));
+      expect(screen.getByRole("button", { name: "Aberto agora" }).props.accessibilityState).toEqual({ selected: true });
+      expect(postosNaTela()).toEqual(["UBS 1 Asa Norte"]);
+      // A contagem do remédio continua a mesma: o filtro muda só a lista.
+      expect(screen.getByText("4 postos têm hoje")).toBeOnTheScreen();
+
+      // A Asa Norte está quase acabando: com "Tem bastante" também, nenhum serve.
+      await fireEvent.press(screen.getByRole("button", { name: "Tem bastante" }));
+      expect(screen.getByText("Nenhum posto com esses filtros agora")).toBeOnTheScreen();
+      await fireEvent.press(screen.getByRole("button", { name: "Mostrar todos os postos" }));
+      expect(postosNaTela()).toHaveLength(4);
+      expect(screen.getByRole("button", { name: "Aberto agora" }).props.accessibilityState).toEqual({ selected: false });
+    });
   });
 
   it("sem permissão de localização: por Região Administrativa, com aviso", async () => {
@@ -305,7 +361,7 @@ describe("região escolhida", () => {
     expect(r.getPathname()).toBe("/postos/8944");
     expect(await screen.findByText("Sua região: Taguatinga")).toBeOnTheScreen();
     expect(postosNaTela()).toEqual(["UBS 05 Taguatinga", "UBS 3 Ceilandia", "UBS 01 Samambaia", "UBS 1 Asa Norte"]);
-    expect(screen.getByRole("header", { name: "Taguatinga" })).toBeOnTheScreen();
+    expect(within(screen.getByRole("button", { name: /^UBS 05 Taguatinga/ })).getByText("Na sua região")).toBeOnTheScreen();
     expect(screen.getByRole("header", { name: "Outras regiões, da mais perto para a mais longe" })).toBeOnTheScreen();
     // Sem localização, a distância não aparece (o centro da região não é onde a pessoa está).
     expect(screen.queryByText(/ km$/)).toBeNull();
@@ -376,6 +432,15 @@ describe("região escolhida", () => {
 
 describe("mapa", () => {
   const pinos = () => screen.getAllByTestId(/^pino-\d{7}$/);
+
+  it("a dica de como mexer no mapa some com Entendi e fica guardada", async () => {
+    await renderRouter(APP, { initialUrl: "/postos/8944" });
+    await fireEvent.press(await screen.findByRole("tab", { name: "Mapa" }));
+    expect(screen.getByText(/Com dois dedos, aproxime ou afaste o mapa/)).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Entendi" }));
+    expect(screen.queryByText(/Com dois dedos/)).toBeNull();
+    expect(JSON.parse(mockArquivos.get("preferencias.json") ?? "null")).toMatchObject({ dicas: ["mapa-gestos"] });
+  });
 
   it("alterna entre lista e mapa, com os mesmos postos e o cartão do mais perto", async () => {
     await renderRouter(APP, { initialUrl: "/postos/8944" });
@@ -592,7 +657,7 @@ describe("Meus remédios", () => {
 
     await fireEvent.press(await screen.findByRole("button", { name: "Guardar em Meus remédios" }));
     expect(await screen.findByRole("button", { name: "Guardado em Meus remédios" })).toBeOnTheScreen();
-    expect(screen.getByText("Está na aba Meus remédios. Para tirar, toque no botão de novo.")).toBeOnTheScreen();
+    expect(screen.getByText("Está na aba Meus remédios.")).toBeOnTheScreen();
     expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledWith("Guardado em Meus remédios");
     // Só no aparelho: o código SES-DF, o nome, a marca buscada e a data.
     expect(meusRemediosSalvos()).toEqual({
@@ -642,7 +707,7 @@ describe("Meus remédios", () => {
     await fireEvent.press(await screen.findByRole("button", { name: "Guardado em Meus remédios" }));
 
     expect(await screen.findByRole("button", { name: "Guardar em Meus remédios" })).toBeOnTheScreen();
-    expect(screen.queryByText(/Para tirar, toque no botão de novo/)).toBeNull();
+    expect(screen.queryByText(/Está na aba Meus remédios/)).toBeNull();
     expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledWith("Tirado de Meus remédios");
     expect(meusRemediosSalvos()?.remedios.map((r) => r.codigo)).toEqual(["MSE24551"]);
   });
@@ -734,16 +799,31 @@ describe("Meus remédios", () => {
     expect(r.getPathname()).toBe("/");
   });
 
-  it("na busca, antes de digitar: Seus remédios, com um toque até os postos", async () => {
+  it("no Início, antes de digitar: Hoje para você, com o mais perto, Como chegar e um toque até os postos", async () => {
     guardados(LOSARTANA, OSELTAMIVIR, SUMIU, CLONAZEPAM);
     const r = await renderRouter(APP, { initialUrl: "/" });
 
-    expect(await screen.findByText("Seus remédios")).toBeOnTheScreen();
-    // Os três primeiros em ordem alfabética; o resto na aba.
-    // Cada um com o anel e, quando o app sabe de onde contar, o posto mais perto.
-    expect(await screen.findByRole("button", { name: /^Clonazepam\. Comprimido 2 mg\. Em 2 postos hoje\. Mais perto: / })).toBeOnTheScreen();
+    expect(await screen.findByText("Hoje para você")).toBeOnTheScreen();
+    // Os três primeiros em ordem alfabética, um embaixo do outro; o resto na aba.
+    expect(
+      await screen.findByRole("button", { name: /^Clonazepam\. Comprimido 2 mg\. Em 2 postos hoje\. Mais perto de você: UBS / }),
+    ).toBeOnTheScreen();
     expect(screen.getByRole("button", { name: "Oseltamivir (fosfato). Cápsula 75 mg. Nenhum posto tem hoje" })).toBeOnTheScreen();
     expect(screen.queryByText("Remédio antigo")).toBeNull();
+
+    // A resposta no cartão: o mais perto, o semáforo dele e a barra de como está o estoque nos postos que têm.
+    const losartana = screen.getByRole("button", { name: /^Losartana potassica\. Comprimido 50 mg\. Em 4 postos hoje/ });
+    expect(within(losartana).getByText("Mais perto de você")).toBeOnTheScreen();
+    expect(within(losartana).getByText("UBS 1 Asa Norte")).toBeOnTheScreen();
+    expect(within(losartana).getByLabelText("Estoque: Quase acabando, ligue antes")).toBeOnTheScreen();
+    expect(within(losartana).getByLabelText(/\d+ quase acabando/)).toBeOnTheScreen();
+
+    // "Como chegar" fica fora do cartão (sem botão dentro de botão) e pergunta o app de mapa.
+    const caminhos = screen.getAllByRole("button", { name: "Como chegar" });
+    expect(caminhos).toHaveLength(2);
+    await fireEvent.press(caminhos[1]!);
+    await fireEvent.press(await screen.findByRole("button", { name: "Google Maps" }));
+    expect(Linking.openURL).toHaveBeenCalledWith(expect.stringContaining("destination=-15.773349675527177,-47.89260685443878"));
 
     await fireEvent.press(screen.getByRole("button", { name: /^Losartana potassica\. Comprimido 50 mg\. Em 4 postos hoje/ }));
     expect(r.getPathname()).toBe("/postos/8944");
@@ -757,7 +837,7 @@ describe("Meus remédios", () => {
     await fireEvent.press(screen.getByRole("button", { name: "Início, buscar remédio" }));
     await buscarPor("losartana");
     expect(await screen.findByText("1 remédio encontrado")).toBeOnTheScreen();
-    expect(screen.queryByText("Seus remédios")).toBeNull();
+    expect(screen.queryByText("Hoje para você")).toBeNull();
   });
 });
 
@@ -809,7 +889,7 @@ describe("acessibilidade", () => {
   }
   it.each<Caso>([
     { tela: "busca, antes de digitar", url: "/", esperar: () => screen.findByText("Rede pública do DF") },
-    { tela: "busca, com Seus remédios", url: "/", esperar: () => screen.findByText("Seus remédios"), preparar: guardarLosartana },
+    { tela: "Início, com Hoje para você", url: "/", esperar: () => screen.findByText("Mais perto de você"), preparar: guardarLosartana },
     {
       tela: "busca, com resultados",
       url: "/",
@@ -923,8 +1003,19 @@ describe("acessibilidade", () => {
     const ligar = await screen.findByRole("button", { name: "Ligar" });
     expect(ligar.props.accessibilityHint).toBe("Liga para 6 1, 3 5 6 3, 9 1 7 6");
     expect(screen.getByLabelText("6 1, 3 5 6 3, 9 1 7 6")).toBeOnTheScreen();
-    // Na tela, o número continua como veio da SES-DF (embaixo do Ligar e no cartão do telefone).
+    // Na tela, o número formatado (embaixo do Ligar e no cartão do telefone).
     expect(screen.getAllByText("(61) 3563-9176")).toHaveLength(2);
+  });
+
+  it("detalhe: telefone que veio sem formato aparece formatado; com erro no cadastro, não vira Ligar", async () => {
+    await renderRouter(APP, { initialUrl: "/posto/0010995?produto=8944" });
+    expect(await screen.findByRole("button", { name: "Ligar" })).toBeOnTheScreen();
+    expect(screen.getAllByText("(61) 2017-2074")).toHaveLength(2);
+
+    // UBS 1 Asa Norte: veio "61334494826" do cadastro da SES-DF, um dígito a mais.
+    await renderRouter(APP, { initialUrl: "/posto/0010707?produto=8944" });
+    expect(await screen.findByText("O telefone que a SES-DF informou para este posto está com erro.")).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: "Ligar" })).toBeNull();
   });
 
   it("Como chegar: o gesto de voltar do VoiceOver fecha a folha", async () => {
@@ -949,7 +1040,7 @@ describe("Perfil", () => {
     await fireEvent.press(screen.getByRole("radio", { name: "Maior" }));
     await fireEvent.press(screen.getByRole("radio", { name: /^Escuro\./ }));
     expect(screen.getByRole("radio", { name: "Maior" }).props.accessibilityState).toEqual({ checked: true });
-    expect(preferenciasSalvas()).toEqual({ nome: "Lúcia", letra: "maior", tema: "escuro" });
+    expect(preferenciasSalvas()).toEqual({ nome: "Lúcia", letra: "maior", tema: "escuro", dicas: [] });
     expect(await screen.findByText("Lúcia")).toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole("button", { name: "Início, buscar remédio" }));

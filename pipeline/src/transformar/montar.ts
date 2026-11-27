@@ -3,6 +3,7 @@ import {
   LIMITES_DF,
   linkOficialPermitido,
   normalizar,
+  normalizarTelefone,
   VERSAO_SCHEMA,
   type ItemEstoque,
   type Produto,
@@ -59,6 +60,7 @@ export function montarSnapshot(e: EntradaSnapshot): ResultadoMontagem {
   const ubsSemCoordenada = new Set<string>();
   const naoReconhecidas = new Set<string>();
   const linksRecusados = new Set<string>();
+  const telefonesRecusados = new Set<string>();
 
   for (const l of e.estoque) {
     if (/^ALMOXARIFADO/i.test(l.local)) {
@@ -137,7 +139,7 @@ export function montarSnapshot(e: EntradaSnapshot): ResultadoMontagem {
         ra: l.ra,
         endereco: c.endereco,
         cep: c.cep,
-        telefone: cad?.telefone ?? c.telefone,
+        telefone: telefoneDoPosto(cad?.telefone ?? c.telefone, `${l.cnes} ${c.nome}`, telefonesRecusados),
         horario: cad?.horario ?? null,
         entregaControlados: cad?.entregaControlados ?? false,
         lat: c.lat,
@@ -154,6 +156,7 @@ export function montarSnapshot(e: EntradaSnapshot): ResultadoMontagem {
 
   if (ubsSemCoordenada.size) avisos.push(`UBS sem coordenada no CNES (fora do app): ${[...ubsSemCoordenada].join("; ")}`);
   for (const t of naoReconhecidas) avisos.push(`Observação de retirada não reconhecida: "${t}"`);
+  for (const t of telefonesRecusados) avisos.push(`Telefone fora do formato (o posto fica sem Ligar): ${t}`);
   for (const l of linksRecusados) avisos.push(`Link fora dos domínios oficiais (o remédio fica sem "Ver a lista oficial"): ${l}`);
 
   const marcas = construirMarcas(e.cmed, componentesProduto.map((c) => ({ componentes: c })));
@@ -197,4 +200,15 @@ function agrupar<T>(itens: T[], chave: (t: T) => string): Map<string, T[]> {
     else m.set(k, [i]);
   }
   return m;
+}
+
+/**
+ * Telefone do cadastro já formatado: "(61) 3563-9176". Fora do formato brasileiro (ex.: um dígito a mais),
+ * o posto fica sem telefone e o log avisa: um número errado faz a pessoa ligar para outro lugar.
+ */
+function telefoneDoPosto(bruto: string | null, posto: string, recusados: Set<string>): string | null {
+  if (!bruto) return null;
+  const telefone = normalizarTelefone(bruto);
+  if (!telefone) recusados.add(`${posto}: "${bruto}"`);
+  return telefone?.exibir ?? null;
 }

@@ -5,10 +5,10 @@ import { espaco, useTema } from "@/tema";
 import { Texto } from "./Texto";
 
 /** Desenho do símbolo (o mesmo de `assets/marca/`, gerado por `scripts/gerar-marca.mjs`). */
-const CORTE = "M512 765.5 L833.4 382.5 A84 84 0 0 0 704.7 274.5 L383.3 657.5 A84 84 0 0 0 512 765.5 Z";
-const HASTE_CURTA = "M212.9 624.2 L393.7 775.9 A84 84 0 0 0 501.7 647.2 L320.9 495.5 A84 84 0 0 0 212.9 624.2 Z";
-const CAPSULA_BAIXO = "M537 474.4 L383.3 657.5 A84 84 0 0 0 512 765.5 L665.7 582.4 Z";
-const CAPSULA_CIMA = "M679.8 565.6 L833.4 382.5 A84 84 0 0 0 704.7 274.5 L551.1 457.6 Z";
+export const CORTE = "M512 765.5 L833.4 382.5 A84 84 0 0 0 704.7 274.5 L383.3 657.5 A84 84 0 0 0 512 765.5 Z";
+export const HASTE_CURTA = "M212.9 624.2 L393.7 775.9 A84 84 0 0 0 501.7 647.2 L320.9 495.5 A84 84 0 0 0 212.9 624.2 Z";
+export const CAPSULA_BAIXO = "M537 474.4 L383.3 657.5 A84 84 0 0 0 512 765.5 L665.7 582.4 Z";
+export const CAPSULA_CIMA = "M679.8 565.6 L833.4 382.5 A84 84 0 0 0 704.7 274.5 L551.1 457.6 Z";
 
 interface PropsSimbolo {
   tamanho: number;

@@ -1,4 +1,4 @@
-import { linkOficialPermitido, type Produto, type Ubs } from "@tem-remedio/shared";
+import { linkOficialPermitido, normalizarTelefone, type Produto, type Ubs } from "@tem-remedio/shared";
 import { capitalizarNome } from "@/busca/remedios";
 
 /**
@@ -44,13 +44,11 @@ export function appsDeMapa(ubs: Ubs, plataforma: string): AppDeMapa[] {
 
 /**
  * "(61) 3563-9176" → "tel:+556135639176". Com o +55 a ligação funciona de qualquer celular,
- * sem código de operadora. Número sem DDD ganha o 61 do DF.
+ * sem código de operadora. Número sem DDD ganha o 61 do DF; número fora do formato, nenhum link.
  */
 export function linkTelefone(telefone: string): string | null {
-  let digitos = telefone.replace(/\D/g, "").replace(/^0+/, "");
-  if (digitos.length === 8 || digitos.length === 9) digitos = `61${digitos}`;
-  if (digitos.length < 10) return null;
-  return `tel:+55${digitos}`;
+  const numero = normalizarTelefone(telefone);
+  return numero ? `tel:${numero.discar}` : null;
 }
 
 /**
@@ -91,11 +89,12 @@ interface Compartilhar {
 
 /** Mensagem para mandar no WhatsApp: o filho manda para a mãe, ou a pessoa guarda para si. */
 export function textoCompartilhar({ ubs, remedio, atualizacao }: Compartilhar): string {
+  const numero = normalizarTelefone(ubs.telefone);
   return [
     remedio && `${remedio}`,
     capitalizarNome(ubs.nome),
     ubs.endereco,
-    ubs.telefone && `Telefone: ${ubs.telefone}`,
+    numero && `Telefone: ${numero.exibir}`,
     ubs.horario && `Horário: ${ubs.horario}`,
     `Como chegar: ${linkGoogleMaps(ubs)}`,
     remedio && `Estoque de ${atualizacao} (SES-DF). Ligue antes de ir.`,

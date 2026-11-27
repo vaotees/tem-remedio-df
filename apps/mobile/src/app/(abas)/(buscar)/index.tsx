@@ -1,25 +1,29 @@
-import type { Snapshot } from "@tem-remedio/shared";
+import type { Snapshot, Ubs } from "@tem-remedio/shared";
 import { useFocusEffect, useRouter } from "expo-router";
 import { setStatusBarStyle } from "expo-status-bar";
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, TextInput, useWindowDimensions, View, type TextInputInstance } from "react-native";
+import { Pressable, ScrollView, StyleSheet, TextInput, View, type TextInputInstance } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Botao } from "@/componentes/Botao";
 import { Cartao } from "@/componentes/Cartao";
 import { ComDados } from "@/componentes/ComDados";
+import { EscolherMapa } from "@/componentes/EscolherMapa";
 import { FaixaAtualizacao } from "@/componentes/FaixaAtualizacao";
-import { Anel } from "@/componentes/Graficos";
+import { BarraRede } from "@/componentes/Graficos";
 import { Icone, type NomeIcone } from "@/componentes/Icone";
 import { ItemLista } from "@/componentes/ItemLista";
 import { Assinatura, Simbolo } from "@/componentes/Marca";
 import { Pictograma } from "@/componentes/Pictograma";
 import { SeloEstoque } from "@/componentes/SeloEstoque";
+import { SeloHorario } from "@/componentes/SeloHorario";
 import { Texto } from "@/componentes/Texto";
 import { buscar, MINIMO_LETRAS, prepararBusca, type GrupoResultado } from "@/busca/buscar";
 import { capitalizarNome, nomeSubstancia, rotuloProduto } from "@/busca/remedios";
-import { useMeusRemedios } from "@/meus-remedios/guardados";
-import { situacaoHoje, textoQuantos } from "@/meus-remedios/situacao";
+import { useMeusRemedios, type RemedioGuardado } from "@/meus-remedios/guardados";
+import { situacaoHoje, textoQuantos, tituloPrimeiro } from "@/meus-remedios/situacao";
 import { descreverPosto } from "@/postos/descricao";
 import { useOrigem } from "@/postos/origem";
+import type { Ordem } from "@/postos/postos";
 import { usePreferencias } from "@/preferencias/preferencias";
 import { ALVO_MINIMO, espaco, familia, fonte, RAIO_CAPSULA, RAIO_CARTAO, sombraCartao, useTema } from "@/tema";
 import { useAnuncio } from "@/util/anuncio";
@@ -143,7 +147,7 @@ function Resultados({ snapshot, termo }: { snapshot: Snapshot; termo: string }) 
   if (curto) {
     return (
       <>
-        <SeusRemedios snapshot={snapshot} />
+        <HojeParaVoce snapshot={snapshot} />
         <Atalhos />
         <Rede snapshot={snapshot} />
       </>
@@ -208,15 +212,16 @@ function Resultados({ snapshot, termo }: { snapshot: Snapshot; termo: string }) 
 const GUARDADOS_NO_INICIO = 3;
 
 /**
- * Painel dos remédios guardados: cada um com o anel (em quantos postos tem hoje) e, quando o app sabe
- * de onde contar, o posto mais perto. Um toque leva aos postos.
+ * "Hoje para você": a resposta primeiro. Cada remédio guardado num cartão, um embaixo do outro (nada
+ * escondido para o lado): em quantos postos tem, como está o estoque neles (a barra do semáforo) e,
+ * quando o app sabe de onde contar, o posto mais perto, com "Como chegar".
  */
-function SeusRemedios({ snapshot }: { snapshot: Snapshot }) {
+function HojeParaVoce({ snapshot }: { snapshot: Snapshot }) {
   const router = useRouter();
   const { cores } = useTema();
-  const { width } = useWindowDimensions();
   const { remedios, carregando } = useMeusRemedios();
   const { ordem, carregando: procurandoOrigem } = useOrigem(snapshot);
+  const [caminhoPara, setCaminhoPara] = useState<Ubs | null>(null);
   if (carregando) return null;
 
   if (remedios.length === 0) {
@@ -233,13 +238,14 @@ function SeusRemedios({ snapshot }: { snapshot: Snapshot }) {
     );
   }
 
-  const larguraCartao = Math.min(320, Math.max(250, width * 0.72));
   const mais = remedios.length > GUARDADOS_NO_INICIO;
+  // Enquanto o GPS não responde, não existe "mais perto": os cartões mostram só a contagem.
+  const de: Ordem = procurandoOrigem ? { por: "nome" } : ordem;
   return (
     <View style={estilos.secao}>
       <View style={estilos.cabecalhoSecao}>
         <Texto variante="subtitulo" style={estilos.flex}>
-          Seus remédios
+          Hoje para você
         </Texto>
         {mais ? (
           <Pressable
@@ -255,63 +261,88 @@ function SeusRemedios({ snapshot }: { snapshot: Snapshot }) {
           </Pressable>
         ) : null}
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={estilos.carrossel} style={estilos.foraDaMargem}>
-        {remedios.slice(0, GUARDADOS_NO_INICIO).map((r) => {
-          const hoje = situacaoHoje(snapshot, r.codigo, procurandoOrigem ? { por: "nome" } : ordem);
-          const nome = hoje.tipo === "fora_dos_dados" ? r.nome : nomeSubstancia([hoje.produto]);
-          const apresentacao = hoje.tipo === "fora_dos_dados" ? r.apresentacao : rotuloProduto(hoje.produto);
-          const postos = hoje.tipo === "tem" ? hoje.postos : 0;
-          const situacao = hoje.tipo === "fora_dos_dados" ? "Não aparece nos dados de hoje" : textoQuantos(postos);
-          const perto = hoje.tipo === "tem" && ordem.por !== "nome" && !procurandoOrigem ? descreverPosto(hoje.primeiro) : null;
-          // Fora dos dados: a aba Meus remédios explica e deixa tirar da lista.
-          const abrir = () =>
-            hoje.tipo === "fora_dos_dados"
-              ? router.navigate("/meus-remedios")
-              : router.push({ pathname: "/postos/[codigo]", params: { codigo: r.codigo, marca: r.marca ?? undefined } });
-          return (
-            <Pressable
-              key={r.codigo}
-              onPress={abrir}
-              accessibilityRole="button"
-              accessibilityLabel={[nome, apresentacao, situacao, perto && `Mais perto: ${perto.nome}, ${perto.onde}`].filter(Boolean).join(". ")}
-              accessibilityHint="Mostra os postos que têm"
-              style={({ pressed }) => [
-                estilos.cartaoRemedio,
-                { width: larguraCartao, backgroundColor: cores.superficie },
-                sombraCartao(cores),
-                pressed && { opacity: 0.75 },
-              ]}
-            >
-              <View style={estilos.linhaResultado}>
-                <Anel valor={postos} total={snapshot.ubs.length} />
-                <View style={estilos.flex}>
-                  <Texto variante="destaque">{nome}</Texto>
-                  <Texto variante="legenda" secundario>
-                    {apresentacao}
-                  </Texto>
-                </View>
-              </View>
-              <Texto variante="legenda" peso="medio">
-                {situacao}
-              </Texto>
-              {hoje.tipo === "tem" && perto ? (
-                <>
-                  <SeloEstoque dias={hoje.primeiro.dias} />
-                  <View style={estilos.linhaPerto}>
-                    <Icone name="location-outline" size={18} color={cores.primaria} />
-                    <Texto variante="legenda" secundario style={estilos.flex}>
-                      <Texto variante="legenda" peso="negrito">
-                        {perto.nome}
-                      </Texto>{" "}
-                      · {perto.onde}
-                    </Texto>
-                  </View>
-                </>
-              ) : null}
-            </Pressable>
-          );
-        })}
-      </ScrollView>
+      {remedios.slice(0, GUARDADOS_NO_INICIO).map((r) => (
+        <CartaoHoje key={r.codigo} snapshot={snapshot} remedio={r} ordem={de} aoComoChegar={setCaminhoPara} />
+      ))}
+      <EscolherMapa ubs={caminhoPara} aoFechar={() => setCaminhoPara(null)} />
+    </View>
+  );
+}
+
+interface PropsCartaoHoje {
+  snapshot: Snapshot;
+  remedio: RemedioGuardado;
+  ordem: Ordem;
+  aoComoChegar: (ubs: Ubs) => void;
+}
+
+/**
+ * Um remédio guardado. A parte de cima é um botão só (leva aos postos, e o leitor de tela lê tudo de uma
+ * vez); "Como chegar" fica embaixo, separado, para não ter um botão dentro do outro.
+ */
+function CartaoHoje({ snapshot, remedio: r, ordem, aoComoChegar }: PropsCartaoHoje) {
+  const router = useRouter();
+  const { cores } = useTema();
+  const hoje = situacaoHoje(snapshot, r.codigo, ordem);
+  const nome = hoje.tipo === "fora_dos_dados" ? r.nome : nomeSubstancia([hoje.produto]);
+  const apresentacao = hoje.tipo === "fora_dos_dados" ? r.apresentacao : rotuloProduto(hoje.produto);
+  const situacao = hoje.tipo === "fora_dos_dados" ? "Não aparece nos dados de hoje" : textoQuantos(hoje.tipo === "tem" ? hoje.postos : 0);
+  const titulo = hoje.tipo === "tem" ? tituloPrimeiro(ordem, hoje.primeiro) : null;
+  const perto = hoje.tipo === "tem" && titulo ? descreverPosto(hoje.primeiro) : null;
+  // Fora dos dados: a aba Meus remédios explica e deixa tirar da lista.
+  const abrir = () =>
+    hoje.tipo === "fora_dos_dados"
+      ? router.navigate("/meus-remedios")
+      : router.push({ pathname: "/postos/[codigo]", params: { codigo: r.codigo, marca: r.marca ?? undefined } });
+
+  return (
+    <View style={[estilos.cartaoRemedio, { backgroundColor: cores.superficie }, sombraCartao(cores)]}>
+      <Pressable
+        onPress={abrir}
+        accessibilityRole="button"
+        accessibilityLabel={[nome, apresentacao, situacao, perto && `${titulo}: ${perto.rotulo}`].filter(Boolean).join(". ")}
+        accessibilityHint="Mostra os postos que têm"
+        style={({ pressed }) => [estilos.topoCartao, pressed && { opacity: 0.75 }]}
+      >
+        <View style={estilos.linhaResultado}>
+          {hoje.tipo === "fora_dos_dados" ? null : <Pictograma forma={hoje.produto.forma} />}
+          <View style={estilos.flex}>
+            <Texto variante="destaque">{nome}</Texto>
+            <Texto variante="legenda" secundario>
+              {apresentacao}
+            </Texto>
+          </View>
+          <Icone name="chevron-forward" size={24} color={cores.primaria} />
+        </View>
+        <Texto variante="legenda" peso="medio">
+          {situacao}
+        </Texto>
+        {hoje.tipo === "tem" ? <BarraRede contagem={hoje.niveis} compacta /> : null}
+        {hoje.tipo === "tem" && perto ? (
+          <View style={estilos.perto}>
+            <Texto variante="legenda" secundario>
+              {titulo}
+            </Texto>
+            <Texto variante="destaque">{perto.nome}</Texto>
+            <View style={estilos.selos}>
+              <SeloEstoque dias={hoje.primeiro.dias} />
+              <SeloHorario horario={hoje.primeiro.ubs.horario} />
+            </View>
+            <Texto variante="legenda" secundario>
+              {perto.onde}
+            </Texto>
+          </View>
+        ) : null}
+      </Pressable>
+      {hoje.tipo === "tem" && perto ? (
+        <Botao
+          titulo="Como chegar"
+          icone="navigate"
+          variante="secundario"
+          dica={`Até ${perto.nome}. Pergunta qual app de mapa você quer usar`}
+          onPress={() => aoComoChegar(hoje.primeiro.ubs)}
+        />
+      ) : null}
     </View>
   );
 }
@@ -428,11 +459,11 @@ const estilos = StyleSheet.create({
   secao: { gap: espaco.sm },
   cabecalhoSecao: { flexDirection: "row", alignItems: "center", gap: espaco.sm },
   verTodos: { minHeight: 44, justifyContent: "center" },
-  foraDaMargem: { marginHorizontal: -espaco.md },
-  carrossel: { gap: espaco.sm, paddingHorizontal: espaco.md, paddingVertical: espaco.sm },
-  cartaoRemedio: { borderRadius: RAIO_CARTAO, padding: espaco.md, gap: espaco.sm, minHeight: ALVO_MINIMO },
+  cartaoRemedio: { borderRadius: RAIO_CARTAO, padding: espaco.md, gap: espaco.sm },
+  topoCartao: { gap: espaco.sm, minHeight: ALVO_MINIMO },
   linhaResultado: { flexDirection: "row", alignItems: "center", gap: espaco.md },
-  linhaPerto: { flexDirection: "row", alignItems: "center", gap: espaco.xs },
+  perto: { gap: 2, marginTop: espaco.xs },
+  selos: { flexDirection: "row", flexWrap: "wrap", gap: espaco.xs, marginVertical: espaco.xs },
   flex: { flex: 1, flexShrink: 1 },
   convite: { flexDirection: "row", alignItems: "center", gap: espaco.md },
   coracao: { width: 48, height: 48, borderRadius: 16, alignItems: "center", justifyContent: "center" },

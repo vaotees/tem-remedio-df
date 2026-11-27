@@ -1,4 +1,4 @@
-import { DOCUMENTOS_UBS, nivelEstoque, TEXTO_RETIRADA, type Snapshot } from "@tem-remedio/shared";
+import { DOCUMENTOS_UBS, nivelEstoque, normalizarTelefone, TEXTO_RETIRADA, type Snapshot } from "@tem-remedio/shared";
 import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Linking, Platform, Share, StyleSheet, View } from "react-native";
@@ -77,10 +77,12 @@ function Detalhe({ snapshot, cnes, farmacia, codigoProduto }: Props) {
   const estoque = produto ? estoqueNoPosto(snapshot, ubs, iProduto) : null;
   const remedio = produto ? `${nomeSubstancia([produto])}, ${rotuloProduto(produto).toLocaleLowerCase("pt-BR")}` : null;
   const atualizacao = formatarAtualizacao(snapshot.meta.atualizadoEm);
-  const telefone = ubs.telefone ? linkTelefone(ubs.telefone) : null;
+  // Formatado e conferido de novo aqui: um snapshot antigo pode trazer o número como veio do cadastro.
+  const numero = normalizarTelefone(ubs.telefone);
+  const telefone = numero ? linkTelefone(numero.exibir) : null;
   const listaOficial = produto ? linkOficial(produto) : null;
   // O leitor de tela fala o número dígito por dígito.
-  const telefoneFalado = ubs.telefone ? telefoneParaLeitor(ubs.telefone) : undefined;
+  const telefoneFalado = numero ? telefoneParaLeitor(numero.exibir) : undefined;
   const nome = capitalizarNome(ubs.nome);
 
   return (
@@ -137,7 +139,7 @@ function Detalhe({ snapshot, cnes, farmacia, codigoProduto }: Props) {
               titulo="Ligar"
               icone="call"
               variante="tonal"
-              detalhe={ubs.telefone ?? undefined}
+              detalhe={numero?.exibir}
               dica={`Liga para ${telefoneFalado}`}
               onPress={() => Linking.openURL(telefone)}
             />
@@ -175,7 +177,10 @@ function Detalhe({ snapshot, cnes, farmacia, codigoProduto }: Props) {
       <Cartao>
         <Texto variante="subtitulo">Telefone</Texto>
         <Texto selectable accessibilityLabel={telefoneFalado}>
-          {ubs.telefone ?? "A SES-DF não informou o telefone deste posto."}
+          {numero?.exibir ??
+            (ubs.telefone
+              ? "O telefone que a SES-DF informou para este posto está com erro."
+              : "A SES-DF não informou o telefone deste posto.")}
         </Texto>
       </Cartao>
 
