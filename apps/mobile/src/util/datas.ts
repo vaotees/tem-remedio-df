@@ -30,3 +30,25 @@ export function saudacao(agora: Date, nome: string | null): string {
   const parte = hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";
   return nome ? `${parte}, ${nome}` : parte;
 }
+
+const DIAS_SEMANA = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"];
+const MESES = [
+  "janeiro",
+  "fevereiro",
+  "março",
+  "abril",
+  "maio",
+  "junho",
+  "julho",
+  "agosto",
+  "setembro",
+  "outubro",
+  "novembro",
+  "dezembro",
+];
+
+/** "Quinta-feira, 27 de novembro": a data de hoje no alto do Início, escrita por extenso. */
+export function dataPorExtenso(agora: Date): string {
+  const dia = DIAS_SEMANA[agora.getDay()]!;
+  return `${dia.charAt(0).toLocaleUpperCase("pt-BR")}${dia.slice(1)}, ${agora.getDate()} de ${MESES[agora.getMonth()]}`;
+}

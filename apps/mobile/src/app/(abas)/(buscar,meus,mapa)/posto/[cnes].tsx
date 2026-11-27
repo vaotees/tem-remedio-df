@@ -1,14 +1,15 @@
 import { DOCUMENTOS_UBS, nivelEstoque, normalizarTelefone, TEXTO_RETIRADA, type Snapshot } from "@tem-remedio/shared";
 import { useLocalSearchParams } from "expo-router";
-import { useState } from "react";
-import { Linking, Platform, Share, StyleSheet, View } from "react-native";
+import { useState, type ReactNode } from "react";
+import { Animated, Linking, Platform, Pressable, Share, StyleSheet, View } from "react-native";
 import { Botao } from "@/componentes/Botao";
 import { Cartao } from "@/componentes/Cartao";
 import { ComDados } from "@/componentes/ComDados";
 import { EscolherMapa } from "@/componentes/EscolherMapa";
-import { MedidorDias } from "@/componentes/Graficos";
-import { Icone } from "@/componentes/Icone";
+import { MedidorArco } from "@/componentes/Graficos";
+import { Icone, type NomeIcone } from "@/componentes/Icone";
 import { MapaPosto } from "@/componentes/MapaPosto";
+import { Surgir, useToque } from "@/componentes/Movimento";
 import { NaoEncontrado } from "@/componentes/NaoEncontrado";
 import { Pictograma } from "@/componentes/Pictograma";
 import { SeloEstoque } from "@/componentes/SeloEstoque";
@@ -16,6 +17,7 @@ import { SeloHorario } from "@/componentes/SeloHorario";
 import { Tela } from "@/componentes/Tela";
 import { Texto } from "@/componentes/Texto";
 import { Voltar } from "@/componentes/Voltar";
+import { useSnapshot } from "@/dados/useSnapshot";
 import { capitalizarNome, indiceProduto, nomeSubstancia, rotuloProduto } from "@/busca/remedios";
 import {
   formatarCep,
@@ -28,20 +30,21 @@ import {
 } from "@/postos/links";
 import { interpretarHorario } from "@/postos/horario";
 import { acharUbs, estoqueNoPosto, temOutraFarmacia } from "@/postos/postos";
-import { espaco, useTema } from "@/tema";
+import { ALVO_MINIMO, espaco, RAIO_CARTAO, sombraCartao, useTema } from "@/tema";
 import { formatarAtualizacao } from "@/util/datas";
 
 /** Detalhe do posto: onde fica, quando abre, como chegar, ligar e mandar para alguém. */
 export default function DetalhePosto() {
   const { cnes, farmacia, produto } = useLocalSearchParams<{ cnes: string; farmacia?: string; produto?: string }>();
-  return (
-    <Tela>
-      <Voltar />
-      <ComDados>
-        {(snapshot) => <Detalhe snapshot={snapshot} cnes={cnes} farmacia={farmacia} codigoProduto={produto} />}
-      </ComDados>
-    </Tela>
-  );
+  const { snapshot } = useSnapshot();
+  // A faixa mostra o posto: enquanto os dados carregam, só o Voltar e o "carregando".
+  if (!snapshot)
+    return (
+      <Tela topo={<Voltar sobreFaixa />}>
+        <ComDados>{() => null}</ComDados>
+      </Tela>
+    );
+  return <Detalhe snapshot={snapshot} cnes={cnes} farmacia={farmacia} codigoProduto={produto} />;
 }
 
 interface Props {
@@ -68,9 +71,15 @@ async function enviar(texto: string) {
 }
 
 function Detalhe({ snapshot, cnes, farmacia, codigoProduto }: Props) {
+  const { cores } = useTema();
   const [escolhendoMapa, setEscolhendoMapa] = useState(false);
   const ubs = acharUbs(snapshot, cnes, farmacia);
-  if (!ubs) return <NaoEncontrado oQue="posto" />;
+  if (!ubs)
+    return (
+      <Tela topo={<Voltar sobreFaixa />}>
+        <NaoEncontrado oQue="posto" />
+      </Tela>
+    );
 
   const iProduto = codigoProduto ? indiceProduto(snapshot, codigoProduto) : -1;
   const produto = snapshot.produtos[iProduto];
@@ -86,115 +95,196 @@ function Detalhe({ snapshot, cnes, farmacia, codigoProduto }: Props) {
   const nome = capitalizarNome(ubs.nome);
 
   return (
-    <>
-      <MapaPosto ubs={ubs} nivel={estoque ? nivelEstoque(estoque.dias) : null} />
-
-      <View style={estilos.cabecalho}>
-        <Texto variante="titulo">{nome}</Texto>
-        <Texto secundario>{ubs.ra}</Texto>
-        {temOutraFarmacia(snapshot, ubs) ? <Texto variante="legenda" secundario>{ubs.farmacia}</Texto> : null}
-        <SeloHorario horario={ubs.horario} />
-      </View>
-
-      {produto && remedio ? (
-        <Cartao>
-          <View style={estilos.linha}>
-            <Pictograma forma={produto.forma} tamanho={40} />
-            <Texto variante="destaque" style={estilos.flex}>
-              {remedio}
+    <Tela
+      cartaoPorCima
+      topo={<Voltar sobreFaixa />}
+      faixa={
+        <View style={estilos.cabecalho}>
+          <Texto variante="titulo" cor={cores.textoFaixa}>
+            {nome}
+          </Texto>
+          <Texto peso="medio" cor={cores.textoFaixaSecundario}>
+            {ubs.ra}
+          </Texto>
+          {temOutraFarmacia(snapshot, ubs) ? (
+            <Texto variante="legenda" cor={cores.textoFaixaSecundario}>
+              {ubs.farmacia}
             </Texto>
-          </View>
-          {estoque ? (
-            <>
-              <SeloEstoque dias={estoque.dias} />
-              <MedidorDias dias={estoque.dias} />
-            </>
-          ) : (
-            <Texto>Este posto não tem este remédio nos dados de hoje.</Texto>
-          )}
-          <Texto secundario>Estoque de {atualizacao}, ligue antes de ir.</Texto>
-          <Texto>{TEXTO_RETIRADA[produto.retirada]}</Texto>
-          {listaOficial ? (
-            <Botao
-              titulo="Ver a lista oficial"
-              icone="open-outline"
-              variante="secundario"
-              dica="Abre o site da Secretaria de Saúde do DF"
-              onPress={() => Linking.openURL(listaOficial)}
-            />
           ) : null}
-        </Cartao>
-      ) : null}
-
-      <View style={estilos.botoes}>
-        <Botao
-          titulo="Como chegar"
-          icone="navigate"
-          dica="Pergunta qual app de mapa você quer usar"
-          onPress={() => setEscolhendoMapa(true)}
-        />
-        <View style={estilos.par}>
+          <SeloHorario horario={ubs.horario} sobreFaixa />
+        </View>
+      }
+    >
+      {/* As três ações num cartão que sobe por cima da faixa: o que se faz com um posto, logo de cara. */}
+      <Surgir>
+        <View style={[estilos.acoes, { backgroundColor: cores.superficie }, sombraCartao(cores)]}>
+          <AcaoRedonda
+            titulo="Como chegar"
+            icone="navigate"
+            principal
+            dica="Pergunta qual app de mapa você quer usar"
+            onPress={() => setEscolhendoMapa(true)}
+          />
           {telefone ? (
-            <Botao
+            <AcaoRedonda
               titulo="Ligar"
               icone="call"
-              variante="tonal"
               detalhe={numero?.exibir}
               dica={`Liga para ${telefoneFalado}`}
               onPress={() => Linking.openURL(telefone)}
             />
           ) : null}
-          <Botao
+          <AcaoRedonda
             titulo="WhatsApp"
             rotulo="Enviar no WhatsApp"
             icone="logo-whatsapp"
-            variante="tonal"
             detalhe="Mandar o endereço"
             dica="Abre o WhatsApp com o endereço e o horário deste posto"
             onPress={() => enviar(textoCompartilhar({ ubs, remedio, atualizacao }))}
           />
         </View>
-      </View>
+      </Surgir>
 
-      <Cartao>
-        <Texto variante="subtitulo">Horário</Texto>
-        <Semana horario={ubs.horario} />
-        <Texto>{ubs.horario ? capitalizarPrimeira(ubs.horario) : "Horário não informado."}</Texto>
-        <Texto variante="legenda" secundario>
-          Em feriados o horário pode mudar.
-        </Texto>
-      </Cartao>
+      <MapaPosto ubs={ubs} nivel={estoque ? nivelEstoque(estoque.dias) : null} />
 
-      <Cartao>
-        <Texto variante="subtitulo">Endereço</Texto>
-        <Texto selectable>{ubs.endereco}</Texto>
-        <Texto secundario>
-          {ubs.ra}
-          {ubs.cep ? ` · CEP ${formatarCep(ubs.cep)}` : ""}
-        </Texto>
-      </Cartao>
+      {produto && remedio ? (
+        <Surgir ordem={1}>
+          <Cartao style={estilos.cartaoRemedio}>
+            <View style={estilos.linha}>
+              <Pictograma forma={produto.forma} tamanho={44} />
+              <Texto variante="destaque" style={estilos.flex}>
+                {remedio}
+              </Texto>
+            </View>
+            {estoque ? (
+              <>
+                {estoque.dias !== null ? <MedidorArco dias={estoque.dias} /> : null}
+                <View style={estilos.centroSelo}>
+                  <SeloEstoque dias={estoque.dias} />
+                </View>
+              </>
+            ) : (
+              <Texto>Este posto não tem este remédio nos dados de hoje.</Texto>
+            )}
+            <Texto secundario>Estoque de {atualizacao}, ligue antes de ir.</Texto>
+            <Texto>{TEXTO_RETIRADA[produto.retirada]}</Texto>
+            {listaOficial ? (
+              <Botao
+                titulo="Ver a lista oficial"
+                icone="open-outline"
+                variante="secundario"
+                dica="Abre o site da Secretaria de Saúde do DF"
+                onPress={() => Linking.openURL(listaOficial)}
+              />
+            ) : null}
+          </Cartao>
+        </Surgir>
+      ) : null}
 
-      <Cartao>
-        <Texto variante="subtitulo">Telefone</Texto>
-        <Texto selectable accessibilityLabel={telefoneFalado}>
-          {numero?.exibir ??
-            (ubs.telefone
-              ? "O telefone que a SES-DF informou para este posto está com erro."
-              : "A SES-DF não informou o telefone deste posto.")}
-        </Texto>
-      </Cartao>
+      <Surgir ordem={2}>
+        <CartaoInfo icone="time" titulo="Horário">
+          <Semana horario={ubs.horario} />
+          <Texto>{ubs.horario ? capitalizarPrimeira(ubs.horario) : "Horário não informado."}</Texto>
+          <Texto variante="legenda" secundario>
+            Em feriados o horário pode mudar.
+          </Texto>
+        </CartaoInfo>
+      </Surgir>
 
-      <Cartao>
-        <Texto variante="subtitulo">O que levar</Texto>
-        {[...DOCUMENTOS_UBS, ...(produto?.retirada === "controlado" ? ["Receita de controle especial em 2 vias (não aceitam xerox)"] : [])].map(
-          (doc) => (
-            <ItemLevar key={doc} texto={doc} />
-          ),
-        )}
-      </Cartao>
+      <Surgir ordem={3}>
+        <CartaoInfo icone="location" titulo="Endereço">
+          <Texto selectable>{ubs.endereco}</Texto>
+          <Texto secundario>
+            {ubs.ra}
+            {ubs.cep ? ` · CEP ${formatarCep(ubs.cep)}` : ""}
+          </Texto>
+        </CartaoInfo>
+      </Surgir>
+
+      <Surgir ordem={4}>
+        <CartaoInfo icone="call" titulo="Telefone">
+          <Texto selectable accessibilityLabel={telefoneFalado}>
+            {numero?.exibir ??
+              (ubs.telefone
+                ? "O telefone que a SES-DF informou para este posto está com erro."
+                : "A SES-DF não informou o telefone deste posto.")}
+          </Texto>
+        </CartaoInfo>
+      </Surgir>
+
+      <Surgir ordem={5}>
+        <CartaoInfo icone="document-text" titulo="O que levar">
+          {[...DOCUMENTOS_UBS, ...(produto?.retirada === "controlado" ? ["Receita de controle especial em 2 vias (não aceitam xerox)"] : [])].map(
+            (doc) => (
+              <ItemLevar key={doc} texto={doc} />
+            ),
+          )}
+        </CartaoInfo>
+      </Surgir>
 
       <EscolherMapa ubs={escolhendoMapa ? ubs : null} aoFechar={() => setEscolhendoMapa(false)} />
-    </>
+    </Tela>
+  );
+}
+
+interface PropsAcao {
+  titulo: string;
+  icone: NomeIcone;
+  onPress: () => void;
+  dica?: string;
+  rotulo?: string;
+  /** Linha pequena embaixo (o número do telefone, por exemplo). */
+  detalhe?: string;
+  /** A ação principal: círculo cheio azul. As outras, azul-claro. */
+  principal?: boolean;
+}
+
+/** Ação do posto: um círculo grande com o ícone e o nome embaixo, como os atalhos do telefone. */
+function AcaoRedonda({ titulo, icone, onPress, dica, rotulo, detalhe, principal }: PropsAcao) {
+  const { cores } = useTema();
+  const toque = useToque(0.92);
+  return (
+    <Pressable
+      onPress={onPress}
+      onPressIn={toque.aoEncostar}
+      onPressOut={toque.aoSoltar}
+      accessibilityRole="button"
+      accessibilityLabel={rotulo ?? titulo}
+      accessibilityHint={dica}
+      style={estilos.acao}
+    >
+      <Animated.View
+        style={[estilos.circuloAcao, { backgroundColor: principal ? cores.primaria : cores.primariaTinta }, toque.estilo]}
+      >
+        <Icone name={icone} size={28} color={principal ? cores.textoSobrePrimaria : cores.textoTonal} />
+      </Animated.View>
+      <Texto variante="legenda" peso="negrito" cor={cores.texto} style={estilos.centro}>
+        {titulo}
+      </Texto>
+      {detalhe ? (
+        <Texto variante="legenda" tamanho={13} secundario style={estilos.centro}>
+          {detalhe}
+        </Texto>
+      ) : null}
+    </Pressable>
+  );
+}
+
+/** Cartão de informação com o ícone no alto, ao lado do título. */
+function CartaoInfo({ icone, titulo, children }: { icone: NomeIcone; titulo: string; children: ReactNode }) {
+  const { cores } = useTema();
+  return (
+    <Cartao>
+      <View style={estilos.linha}>
+        <View style={[estilos.iconeInfo, { backgroundColor: cores.primariaTinta }]}>
+          <Icone name={icone} size={20} color={cores.textoTonal} />
+        </View>
+        <Texto variante="subtitulo" style={estilos.flex}>
+          {titulo}
+        </Texto>
+      </View>
+      {children}
+    </Cartao>
   );
 }
 
@@ -262,11 +352,24 @@ function capitalizarPrimeira(texto: string): string {
 }
 
 const estilos = StyleSheet.create({
-  cabecalho: { gap: espaco.xs },
+  cabecalho: { gap: espaco.xs, marginTop: espaco.xs },
+  acoes: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "flex-start",
+    gap: espaco.sm,
+    borderRadius: RAIO_CARTAO,
+    paddingVertical: espaco.md,
+    paddingHorizontal: espaco.sm,
+  },
+  acao: { flex: 1, alignItems: "center", gap: 6, minHeight: ALVO_MINIMO },
+  circuloAcao: { width: 64, height: 64, borderRadius: 32, alignItems: "center", justifyContent: "center" },
+  centro: { textAlign: "center" },
+  cartaoRemedio: { gap: espaco.md },
+  centroSelo: { flexDirection: "row", justifyContent: "center" },
+  iconeInfo: { width: 40, height: 40, borderRadius: 14, alignItems: "center", justifyContent: "center" },
   linha: { flexDirection: "row", alignItems: "center", gap: espaco.sm },
   flex: { flex: 1 },
-  botoes: { gap: espaco.sm },
-  par: { flexDirection: "row", gap: espaco.sm },
   semana: { flexDirection: "row", gap: espaco.xs },
   dia: { flex: 1, minHeight: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },
   fechado: { textDecorationLine: "line-through" },

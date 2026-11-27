@@ -3,6 +3,7 @@ import { AccessibilityInfo, StyleSheet, View } from "react-native";
 import { useMeusRemedios, type NovoRemedio } from "@/meus-remedios/guardados";
 import { espaco } from "@/tema";
 import { Botao } from "./Botao";
+import { BotaoVidro } from "./Faixa";
 import { Texto } from "./Texto";
 
 interface Props {
@@ -15,6 +16,8 @@ interface Props {
    * alargar o botão e empurrar ele para outra linha.
    */
   compacto?: boolean;
+  /** Na faixa do alto da tela de postos: botão de vidro, curto ("Guardar" / "Guardado"). */
+  sobreFaixa?: boolean;
   aoMudar?: (guardado: boolean) => void;
 }
 
@@ -23,7 +26,7 @@ interface Props {
  * "Guardado") e tira da lista com outro toque. A explicação de onde o remédio foi parar aparece só logo
  * depois do toque, não toda vez que a tela abre.
  */
-export function BotaoGuardar({ remedio, principal, compacto, aoMudar }: Props) {
+export function BotaoGuardar({ remedio, principal, compacto, sobreFaixa, aoMudar }: Props) {
   const { carregando, estaGuardado, guardar, tirar } = useMeusRemedios();
   const [acabouDeGuardar, setAcabouDeGuardar] = useState(false);
   // Enquanto lê a lista do aparelho, não mostra um estado que pode estar errado.
@@ -38,6 +41,20 @@ export function BotaoGuardar({ remedio, principal, compacto, aoMudar }: Props) {
     AccessibilityInfo.announceForAccessibility(guardado ? "Tirado de Meus remédios" : "Guardado em Meus remédios");
   };
   const rotulo = guardado ? "Guardado em Meus remédios" : "Guardar em Meus remédios";
+  const dica = guardado ? "Toque para tirar da sua lista" : "Para ver depois na aba Meus remédios";
+
+  if (sobreFaixa) {
+    return (
+      <BotaoVidro
+        titulo={guardado ? "Guardado" : "Guardar"}
+        rotulo={rotulo}
+        icone={guardado ? "heart" : "heart-outline"}
+        ligado={guardado}
+        dica={dica}
+        onPress={alternar}
+      />
+    );
+  }
 
   return (
     <View style={compacto ? estilos.compacto : estilos.grupo}>
@@ -47,7 +64,7 @@ export function BotaoGuardar({ remedio, principal, compacto, aoMudar }: Props) {
         icone={guardado ? "heart" : "heart-outline"}
         variante={principal && !guardado ? "primario" : "secundario"}
         compacto={compacto}
-        dica={guardado ? "Toque para tirar da sua lista" : "Para ver depois na aba Meus remédios"}
+        dica={dica}
         onPress={alternar}
       />
       {guardado && acabouDeGuardar && !compacto ? (

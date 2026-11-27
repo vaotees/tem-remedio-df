@@ -48,3 +48,10 @@ jest.mock("expo-splash-screen", () => ({
 
 // A abertura animada fica por cima do app: nos testes de tela ela não aparece (tem teste próprio).
 jest.mock("@/componentes/Abertura", () => ({ Abertura: () => null }));
+
+// Nos testes de tela nada anima: números, gráficos e cartões aparecem prontos (os textos são os finais).
+jest.mock("@/util/movimento", () => ({
+  DRIVER_NATIVO: false,
+  carregarMovimento: () => Promise.resolve(),
+  useAnimar: () => false,
+}));

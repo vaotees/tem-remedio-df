@@ -1,14 +1,16 @@
 import type { Snapshot } from "@tem-remedio/shared";
 import { useRouter } from "expo-router";
 import { useMemo, type ReactNode } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { Botao } from "@/componentes/Botao";
 import { Cartao } from "@/componentes/Cartao";
 import { ComDados } from "@/componentes/ComDados";
+import { BotaoVidro, TituloFaixa } from "@/componentes/Faixa";
 import { FaixaAtualizacao } from "@/componentes/FaixaAtualizacao";
-import { BarraRede } from "@/componentes/Graficos";
+import { Anel, BarraRede } from "@/componentes/Graficos";
 import { Icone, type NomeIcone } from "@/componentes/Icone";
 import { ItemLista } from "@/componentes/ItemLista";
+import { NumeroAnimado, Surgir } from "@/componentes/Movimento";
 import { PerguntarOrigem, ProcurandoLocalizacao, SituacaoOrigem } from "@/componentes/OrigemPostos";
 import { Pictograma } from "@/componentes/Pictograma";
 import { SeloEstoque } from "@/componentes/SeloEstoque";
@@ -20,20 +22,34 @@ import { situacaoHoje, textoQuantos, tituloPrimeiro, type SituacaoHoje } from "@
 import { descreverPosto } from "@/postos/descricao";
 import { useOrigem } from "@/postos/origem";
 import { avisoRetirada, type Ordem } from "@/postos/postos";
-import { ALVO_MINIMO, espaco, RAIO_CAPSULA, useTema } from "@/tema";
+import { espaco, useTema } from "@/tema";
 
 /** Os remédios que a pessoa guardou, com a situação de hoje de cada um. A lista fica só no aparelho. */
 export default function MeusRemedios() {
+  const router = useRouter();
   const { carregando, remedios } = useMeusRemedios();
+  const temLista = !carregando && remedios.length > 0;
 
   return (
-    <Tela>
-      <View style={estilos.cabecalho}>
-        <Texto variante="titulo" style={estilos.flex}>
-          Meus remédios
-        </Texto>
-        {remedios.length > 0 ? <Adicionar /> : null}
-      </View>
+    <Tela
+      cartaoPorCima={temLista}
+      faixa={
+        <View style={estilos.cabecalho}>
+          <View style={estilos.flex}>
+            <TituloFaixa titulo="Meus remédios" subtitulo="A situação de hoje, num toque" />
+          </View>
+          {remedios.length > 0 ? (
+            <BotaoVidro
+              titulo="Adicionar"
+              rotulo="Adicionar remédio"
+              dica="Vai para a busca"
+              icone="add"
+              onPress={() => router.navigate("/")}
+            />
+          ) : null}
+        </View>
+      }
+    >
       {carregando ? null : remedios.length === 0 ? (
         <Convite />
       ) : (
@@ -97,8 +113,11 @@ function Lista({ snapshot, remedios, procurandoNovos }: PropsLista) {
 
   return (
     <>
-      <Resumo tem={situacoes.filter((x) => x.hoje.tipo === "tem").length} total={situacoes.length} />
-      <FaixaAtualizacao atualizadoEm={snapshot.meta.atualizadoEm} procurandoNovos={procurandoNovos} />
+      <Surgir>
+        <Resumo tem={situacoes.filter((x) => x.hoje.tipo === "tem").length} total={situacoes.length}>
+          <FaixaAtualizacao atualizadoEm={snapshot.meta.atualizadoEm} procurandoNovos={procurandoNovos} />
+        </Resumo>
+      </Surgir>
 
       {origem.carregando ? (
         <ProcurandoLocalizacao />
@@ -109,25 +128,26 @@ function Lista({ snapshot, remedios, procurandoNovos }: PropsLista) {
       )}
 
       <View style={estilos.listaRemedios}>
-        {situacoes.map(({ remedio, hoje }) =>
-          hoje.tipo === "fora_dos_dados" ? (
-            <ForaDosDados key={remedio.codigo} remedio={remedio} />
-          ) : (
-            <ItemRemedio
-              key={remedio.codigo}
-              snapshot={snapshot}
-              remedio={remedio}
-              hoje={hoje}
-              ordem={ordem}
-              onPress={() =>
-                router.push({
-                  pathname: "/postos/[codigo]",
-                  params: { codigo: remedio.codigo, marca: remedio.marca ?? undefined },
-                })
-              }
-            />
-          ),
-        )}
+        {situacoes.map(({ remedio, hoje }, i) => (
+          <Surgir key={remedio.codigo} ordem={i + 1}>
+            {hoje.tipo === "fora_dos_dados" ? (
+              <ForaDosDados remedio={remedio} />
+            ) : (
+              <ItemRemedio
+                snapshot={snapshot}
+                remedio={remedio}
+                hoje={hoje}
+                ordem={ordem}
+                onPress={() =>
+                  router.push({
+                    pathname: "/postos/[codigo]",
+                    params: { codigo: remedio.codigo, marca: remedio.marca ?? undefined },
+                  })
+                }
+              />
+            )}
+          </Surgir>
+        ))}
       </View>
 
       <Texto variante="legenda" secundario>
@@ -216,8 +236,11 @@ function ItemRemedio({ snapshot, remedio, hoje, ordem, onPress }: PropsItem) {
   );
 }
 
-/** A pergunta de toda manhã, respondida no alto: os meus remédios têm hoje? */
-function Resumo({ tem, total }: { tem: number; total: number }) {
+/**
+ * A pergunta de toda manhã, respondida no alto, num cartão que sobe por cima da faixa: os meus remédios
+ * têm hoje? O anel enche com a parte que tem.
+ */
+function Resumo({ tem, total, children }: { tem: number; total: number; children?: ReactNode }) {
   const { cores } = useTema();
   const todos = tem === total;
   const par = todos ? cores.semaforo.alto : cores.aviso;
@@ -231,33 +254,28 @@ function Resumo({ tem, total }: { tem: number; total: number }) {
         : "Nenhum dos seus remédios tem hoje"
       : `${tem} de ${total} remédios têm em algum posto hoje`;
   return (
-    <View style={[estilos.resumo, { backgroundColor: par.fundo }]} accessible accessibilityLabel={texto}>
-      <View style={[estilos.bola, { backgroundColor: todos ? cores.barraSemaforo.alto : cores.barraSemaforo.baixo }]}>
-        <Icone name={todos ? "checkmark" : "alert"} size={26} color={cores.superficie} />
+    <Cartao style={estilos.resumo}>
+      <View style={estilos.linhaResumo} accessible accessibilityLabel={texto}>
+        <Anel parte={total ? tem / total : 0} tamanho={92} espessura={10} cor={cores.primaria} trilho={cores.trilho}>
+          <View style={estilos.fracao}>
+            <NumeroAnimado valor={tem} peso="numero" tamanho={28} cor={cores.texto} />
+            <Texto variante="legenda" peso="negrito" secundario>
+              /{total}
+            </Texto>
+          </View>
+        </Anel>
+        <View style={estilos.flex}>
+          <View style={[estilos.situacao, { backgroundColor: par.fundo }]}>
+            <Icone name={todos ? "checkmark-circle" : "alert-circle"} size={20} color={par.texto} />
+            <Texto variante="legenda" peso="negrito" cor={par.texto} style={estilos.flexTexto}>
+              {todos ? "Tudo certo hoje" : tem === 0 ? "Nenhum tem hoje" : "Falta algum hoje"}
+            </Texto>
+          </View>
+          <Texto variante="destaque">{texto}</Texto>
+        </View>
       </View>
-      <Texto variante="destaque" cor={par.texto} style={estilos.flex}>
-        {texto}
-      </Texto>
-    </View>
-  );
-}
-
-function Adicionar() {
-  const router = useRouter();
-  const { cores } = useTema();
-  return (
-    <Pressable
-      onPress={() => router.navigate("/")}
-      accessibilityRole="button"
-      accessibilityLabel="Adicionar remédio"
-      accessibilityHint="Vai para a busca"
-      style={({ pressed }) => [estilos.adicionar, { backgroundColor: cores.primaria }, pressed && { opacity: 0.75 }]}
-    >
-      <Icone name="add" size={24} color={cores.textoSobrePrimaria} />
-      <Texto variante="legenda" peso="negrito" cor={cores.textoSobrePrimaria}>
-        Adicionar
-      </Texto>
-    </Pressable>
+      {children}
+    </Cartao>
   );
 }
 
@@ -291,11 +309,23 @@ function Linha({ icone, cor, children }: { icone: NomeIcone; cor?: string; child
 }
 
 const estilos = StyleSheet.create({
-  cabecalho: { flexDirection: "row", alignItems: "center", gap: espaco.sm },
-  adicionar: { flexDirection: "row", alignItems: "center", gap: 4, minHeight: ALVO_MINIMO, paddingHorizontal: espaco.md, borderRadius: RAIO_CAPSULA },
+  cabecalho: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: espaco.sm, marginTop: espaco.sm },
+  resumo: { gap: espaco.md, padding: espaco.md + 4 },
+  linhaResumo: { flexDirection: "row", alignItems: "center", gap: espaco.md },
+  fracao: { flexDirection: "row", alignItems: "baseline" },
+  situacao: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 6,
+    paddingHorizontal: espaco.sm + 2,
+    paddingVertical: 4,
+    borderRadius: 999,
+    marginBottom: espaco.xs,
+    maxWidth: "100%",
+  },
+  flexTexto: { flexShrink: 1 },
   circulo: { width: 96, height: 96, borderRadius: 48, alignItems: "center", justifyContent: "center" },
-  resumo: { flexDirection: "row", alignItems: "center", gap: espaco.md, padding: espaco.md, borderRadius: 18 },
-  bola: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
   listaRemedios: { gap: espaco.md },
   topoRemedio: { flexDirection: "row", alignItems: "center", gap: espaco.md },
   ver: { flexDirection: "row", alignItems: "center", gap: espaco.xs },

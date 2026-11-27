@@ -201,7 +201,9 @@ describe("lista de postos", () => {
     const asaNorte = screen.getByRole("button", { name: /^UBS 1 Asa Norte/ });
     expect(asaNorte.props.accessibilityHint).toBe("Mais perto de você. Mostra endereço, telefone e como chegar");
     expect(within(asaNorte).getByText("Mais perto de você")).toBeOnTheScreen();
-    expect(within(asaNorte).getByText("Plano Piloto · 4,0 km")).toBeOnTheScreen();
+    // A distância em número grande, ao lado do título; a região embaixo do nome.
+    expect(within(asaNorte).getByText("4,0 km")).toBeOnTheScreen();
+    expect(within(asaNorte).getByText("Plano Piloto")).toBeOnTheScreen();
     expect(within(asaNorte).getByText("Quase acabando, ligue antes")).toBeOnTheScreen();
     expect(screen.getAllByRole("button", { name: "Como chegar" })).toHaveLength(1);
     // Os outros, na lista: a distância num selo ao lado do nome, embaixo a região e o medidor dos dias.
@@ -888,7 +890,7 @@ describe("acessibilidade", () => {
     preparar?: () => void;
   }
   it.each<Caso>([
-    { tela: "busca, antes de digitar", url: "/", esperar: () => screen.findByText("Rede pública do DF") },
+    { tela: "busca, antes de digitar", url: "/", esperar: () => screen.findByText("A rede agora") },
     { tela: "Início, com Hoje para você", url: "/", esperar: () => screen.findByText("Mais perto de você"), preparar: guardarLosartana },
     {
       tela: "busca, com resultados",

@@ -1,7 +1,7 @@
 import { nivelEstoque, type Produto, type Snapshot, type Ubs } from "@tem-remedio/shared";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Fragment, useEffect, useMemo, useRef, useState, type Ref } from "react";
-import { AccessibilityInfo, Linking, Pressable, StyleSheet, View, type HostInstance } from "react-native";
+import { AccessibilityInfo, Animated, Linking, Pressable, StyleSheet, View, type HostInstance } from "react-native";
 import { Alternancia } from "@/componentes/Alternancia";
 import { Aviso } from "@/componentes/Aviso";
 import { AvisoLiberacao } from "@/componentes/AvisoLiberacao";
@@ -12,10 +12,11 @@ import { ComDados } from "@/componentes/ComDados";
 import { EscolherMapa } from "@/componentes/EscolherMapa";
 import { FaixaAtualizacao } from "@/componentes/FaixaAtualizacao";
 import { Filtro } from "@/componentes/Filtro";
-import { BarraRede, contarNiveis, MedidorDias } from "@/componentes/Graficos";
+import { contarNiveis, LegendaNiveis, LEGENDA_NIVEL, MedidorDias, Rosca } from "@/componentes/Graficos";
 import { Icone } from "@/componentes/Icone";
 import { ItemLista } from "@/componentes/ItemLista";
 import { MAPA_DISPONIVEL, MapaPostos } from "@/componentes/MapaPostos";
+import { NumeroAnimado, Surgir, useToque } from "@/componentes/Movimento";
 import { NaoEncontrado } from "@/componentes/NaoEncontrado";
 import { Pictograma } from "@/componentes/Pictograma";
 import { PerguntarOrigem, ProcurandoLocalizacao, SituacaoOrigem } from "@/componentes/OrigemPostos";
@@ -24,6 +25,7 @@ import { SeloHorario } from "@/componentes/SeloHorario";
 import { Tela } from "@/componentes/Tela";
 import { Texto } from "@/componentes/Texto";
 import { Voltar } from "@/componentes/Voltar";
+import { useSnapshot } from "@/dados/useSnapshot";
 import { acharMarca, indiceProduto, nomeSubstancia, precisaAvisoLiberacao, rotuloProduto } from "@/busca/remedios";
 import type { NovoRemedio } from "@/meus-remedios/guardados";
 import { tituloPrimeiro } from "@/meus-remedios/situacao";
@@ -32,7 +34,7 @@ import { formatarDistancia } from "@/postos/distancia";
 import { interpretarHorario, situacaoHorario } from "@/postos/horario";
 import { useOrigem } from "@/postos/origem";
 import { avisoRetirada, postosComEstoque, type Ordem, type PostoComEstoque } from "@/postos/postos";
-import { ALVO_MINIMO, espaco, RAIO_CARTAO, sombraCartao, useTema } from "@/tema";
+import { ALVO_MINIMO, espaco, RAIO_CAPSULA, RAIO_CARTAO, sombraCartao, useTema } from "@/tema";
 import { useAnuncio } from "@/util/anuncio";
 
 /** Quantos postos aparecem de cada vez: lista curta é mais fácil de ler. */
@@ -42,15 +44,15 @@ type Modo = "lista" | "mapa";
 
 export default function Postos() {
   const { codigo, marca } = useLocalSearchParams<{ codigo: string; marca?: string }>();
-  return (
-    <Tela>
-      <ComDados semDados={<Voltar />}>
-        {(snapshot, { procurandoNovos }) => (
-          <ListaPostos snapshot={snapshot} codigo={codigo} nomeMarca={marca} procurandoNovos={procurandoNovos} />
-        )}
-      </ComDados>
-    </Tela>
-  );
+  const { snapshot, procurandoNovos } = useSnapshot();
+  // A faixa mostra o remédio: enquanto os dados carregam, só o Voltar e o "carregando".
+  if (!snapshot)
+    return (
+      <Tela topo={<Voltar sobreFaixa />}>
+        <ComDados>{() => null}</ComDados>
+      </Tela>
+    );
+  return <ListaPostos snapshot={snapshot} codigo={codigo} nomeMarca={marca} procurandoNovos={procurandoNovos} />;
 }
 
 interface Props {
@@ -62,6 +64,7 @@ interface Props {
 
 function ListaPostos({ snapshot, codigo, nomeMarca, procurandoNovos }: Props) {
   const router = useRouter();
+  const { cores } = useTema();
   const origem = useOrigem(snapshot);
   const { ordem } = origem;
   const [quantos, setQuantos] = useState(POR_PAGINA);
@@ -98,10 +101,9 @@ function ListaPostos({ snapshot, codigo, nomeMarca, procurandoNovos }: Props) {
 
   if (!produto)
     return (
-      <>
-        <Voltar />
+      <Tela topo={<Voltar sobreFaixa />}>
         <NaoEncontrado oQue="remédio" />
-      </>
+      </Tela>
     );
 
   const nome = nomeSubstancia([produto]);
@@ -132,40 +134,70 @@ function ListaPostos({ snapshot, codigo, nomeMarca, procurandoNovos }: Props) {
     setQuantos(POR_PAGINA);
   };
 
+  const niveis = contarNiveis(postos.map((p) => p.dias));
+
   return (
-    <>
-      <View style={estilos.barraTopo}>
-        <Voltar />
-        {postos.length > 0 ? <BotaoGuardar remedio={paraGuardar} compacto aoMudar={setAcabouDeGuardar} /> : null}
-      </View>
-      {acabouDeGuardar ? (
-        <Texto variante="legenda" secundario style={estilos.guardado}>
-          Está na aba Meus remédios.
-        </Texto>
-      ) : null}
-
-      <View style={estilos.titulo}>
-        <Pictograma forma={produto.forma} tamanho={56} />
-        <View style={estilos.flex}>
-          <Texto variante="titulo">{nome}</Texto>
-          <Texto variante="destaque" peso="medio" secundario>
-            {rotuloProduto(produto)}
-            {produto.liberacaoProlongada ? " · liberação prolongada" : ""}
-          </Texto>
-        </View>
-      </View>
-
+    <Tela
+      cartaoPorCima={postos.length > 0}
+      topo={
+        <>
+          <Voltar sobreFaixa />
+          {postos.length > 0 ? <BotaoGuardar remedio={paraGuardar} sobreFaixa aoMudar={setAcabouDeGuardar} /> : null}
+        </>
+      }
+      faixa={
+        <>
+          {acabouDeGuardar ? (
+            <Texto variante="legenda" cor={cores.textoFaixaSecundario} style={estilos.guardado}>
+              Está na aba Meus remédios.
+            </Texto>
+          ) : null}
+          <View style={estilos.titulo}>
+            <Pictograma forma={produto.forma} tamanho={60} sobreFaixa />
+            <View style={estilos.flex}>
+              <Texto variante="titulo" cor={cores.textoFaixa}>
+                {nome}
+              </Texto>
+              <Texto variante="destaque" peso="medio" cor={cores.textoFaixaSecundario}>
+                {rotuloProduto(produto)}
+                {produto.liberacaoProlongada ? " · liberação prolongada" : ""}
+              </Texto>
+            </View>
+          </View>
+        </>
+      }
+    >
       {postos.length > 0 ? (
-        <Cartao>
-          <Texto variante="subtitulo" accessibilityLiveRegion="polite">
-            {contagem}
-          </Texto>
-          <Texto variante="legenda" secundario>
-            De {snapshot.ubs.length} farmácias de UBS do DF.
-          </Texto>
-          <BarraRede contagem={contarNiveis(postos.map((p) => p.dias))} />
-          <FaixaAtualizacao atualizadoEm={snapshot.meta.atualizadoEm} procurandoNovos={procurandoNovos} />
-        </Cartao>
+        <Surgir>
+          <Cartao style={estilos.resumo}>
+            <View style={estilos.linhaResumo}>
+              <Rosca contagem={niveis} tamanho={112} espessura={16}>
+                <NumeroAnimado valor={postos.length} peso="numero" tamanho={30} cor={cores.texto} />
+                <Texto variante="legenda" tamanho={12} peso="medio" secundario>
+                  {postos.length === 1 ? "posto" : "postos"}
+                </Texto>
+              </Rosca>
+              <View style={estilos.flex}>
+                <Texto variante="subtitulo" accessibilityLiveRegion="polite">
+                  {contagem}
+                </Texto>
+                <Texto variante="legenda" secundario>
+                  De {snapshot.ubs.length} farmácias de UBS do DF.
+                </Texto>
+              </View>
+            </View>
+            <View
+              accessible
+              accessibilityLabel={(["alto", "baixo", "critico", "sem_consumo"] as const)
+                .filter((n) => niveis[n] > 0)
+                .map((n) => `${niveis[n]} ${LEGENDA_NIVEL[n]}`)
+                .join(", ")}
+            >
+              <LegendaNiveis contagem={niveis} />
+            </View>
+            <FaixaAtualizacao atualizadoEm={snapshot.meta.atualizadoEm} procurandoNovos={procurandoNovos} />
+          </Cartao>
+        </Surgir>
       ) : (
         <FaixaAtualizacao atualizadoEm={snapshot.meta.atualizadoEm} procurandoNovos={procurandoNovos} />
       )}
@@ -187,12 +219,14 @@ function ListaPostos({ snapshot, codigo, nomeMarca, procurandoNovos }: Props) {
       ) : null}
 
       {destaque ? (
+        <Surgir ordem={1}>
         <PrimeiroPosto
           posto={destaque.posto}
           titulo={destaque.titulo}
           aoAbrir={() => abrir(destaque.posto)}
           aoComoChegar={() => setCaminhoPara(destaque.posto.ubs)}
         />
+        </Surgir>
       ) : null}
 
       {postos.length === 0 ? (
@@ -256,7 +290,9 @@ function ListaPostos({ snapshot, codigo, nomeMarca, procurandoNovos }: Props) {
                           {cabecalho}
                         </Texto>
                       ) : null}
-                      <ItemPosto posto={p} onPress={() => abrir(p)} ref={n === primeiroNovo ? itemNovo : undefined} />
+                      <Surgir ordem={primeiroNovo !== null && n >= primeiroNovo ? n - primeiroNovo : n + 2}>
+                        <ItemPosto posto={p} onPress={() => abrir(p)} ref={n === primeiroNovo ? itemNovo : undefined} />
+                      </Surgir>
                     </Fragment>
                   );
                 })}
@@ -278,7 +314,7 @@ function ListaPostos({ snapshot, codigo, nomeMarca, procurandoNovos }: Props) {
         </>
       )}
       <EscolherMapa ubs={caminhoPara} aoFechar={() => setCaminhoPara(null)} />
-    </>
+    </Tela>
   );
 }
 
@@ -301,26 +337,41 @@ interface PropsPrimeiro {
  */
 function PrimeiroPosto({ posto, titulo, aoAbrir, aoComoChegar }: PropsPrimeiro) {
   const { cores } = useTema();
-  const { nome, onde, rotulo } = descreverPosto(posto);
+  const toque = useToque(0.98);
+  const { nome, rotulo } = descreverPosto(posto);
   return (
-    <View style={[estilos.primeiro, { backgroundColor: cores.superficie, borderColor: cores.primaria }, sombraCartao(cores)]}>
+    <Animated.View style={[estilos.primeiro, { backgroundColor: cores.superficie, borderColor: cores.primaria }, sombraCartao(cores), toque.estilo]}>
       <Pressable
         onPress={aoAbrir}
+        onPressIn={toque.aoEncostar}
+        onPressOut={toque.aoSoltar}
         accessibilityRole="button"
         accessibilityLabel={rotulo}
         accessibilityHint={`${titulo}. Mostra endereço, telefone e como chegar`}
-        style={({ pressed }) => [estilos.topoPrimeiro, pressed && { opacity: 0.75 }]}
+        style={estilos.topoPrimeiro}
       >
-        <Texto variante="legenda" peso="negrito" cor={cores.primaria}>
-          {titulo}
-        </Texto>
+        <View style={estilos.linha}>
+          <View style={[estilos.etiqueta, { backgroundColor: cores.primaria }]}>
+            <Icone name="location" size={18} color={cores.textoSobrePrimaria} />
+            <Texto variante="legenda" peso="negrito" cor={cores.textoSobrePrimaria} style={estilos.flexTexto}>
+              {titulo}
+            </Texto>
+          </View>
+          {posto.distanciaKm !== null ? (
+            <Texto peso="numero" tamanho={22} cor={cores.primaria}>
+              {formatarDistancia(posto.distanciaKm)}
+            </Texto>
+          ) : null}
+        </View>
         <View style={estilos.topoPosto}>
-          <Texto variante="destaque" peso="extra" tamanho={22} style={estilos.flex}>
+          <Texto variante="destaque" peso="extra" tamanho={24} style={estilos.flex}>
             {nome}
           </Texto>
-          <Icone name="chevron-forward" size={26} color={cores.primaria} />
+          <View style={[estilos.seta, { backgroundColor: cores.primariaTinta }]}>
+            <Icone name="chevron-forward" size={22} color={cores.textoTonal} />
+          </View>
         </View>
-        <Texto secundario>{onde}</Texto>
+        <Texto secundario>{posto.ubs.ra}</Texto>
         <View style={estilos.selos}>
           <SeloEstoque dias={posto.dias} />
           <SeloHorario horario={posto.ubs.horario} />
@@ -328,7 +379,7 @@ function PrimeiroPosto({ posto, titulo, aoAbrir, aoComoChegar }: PropsPrimeiro) 
         <MedidorDias dias={posto.dias} />
       </Pressable>
       <Botao titulo="Como chegar" icone="navigate" dica={`Até ${nome}. Pergunta qual app de mapa você quer usar`} onPress={aoComoChegar} />
-    </View>
+    </Animated.View>
   );
 }
 
@@ -361,14 +412,20 @@ function ItemPosto({ posto, onPress, ref }: { posto: PostoComEstoque; onPress: (
   const { cores } = useTema();
   const { nome, rotulo } = descreverPosto(posto);
   return (
-    <ItemLista onPress={onPress} rotulo={rotulo} dica="Mostra endereço, telefone e como chegar" ref={ref}>
+    <ItemLista
+      onPress={onPress}
+      rotulo={rotulo}
+      dica="Mostra endereço, telefone e como chegar"
+      ref={ref}
+      filete={cores.barraSemaforo[nivelEstoque(posto.dias)]}
+    >
       <View style={estilos.topoPosto}>
         <Texto variante="destaque" style={estilos.flex}>
           {nome}
         </Texto>
         {posto.distanciaKm !== null ? (
-          <View style={[estilos.distancia, { backgroundColor: cores.superficie2 }]}>
-            <Texto variante="legenda" peso="numero">
+          <View style={[estilos.distancia, { backgroundColor: cores.primariaTinta }]}>
+            <Texto variante="legenda" peso="numero" cor={cores.textoTonal}>
               {formatarDistancia(posto.distanciaKm)}
             </Texto>
           </View>
@@ -417,12 +474,26 @@ function Vazio({ produto, paraGuardar }: { produto: Produto; paraGuardar: NovoRe
 }
 
 const estilos = StyleSheet.create({
-  guardado: { textAlign: "right", marginTop: -espaco.sm },
-  barraTopo: { flexDirection: "row", flexWrap: "wrap", alignItems: "flex-start", justifyContent: "space-between", gap: espaco.sm },
-  titulo: { flexDirection: "row", alignItems: "center", gap: espaco.md },
+  guardado: { textAlign: "right", marginTop: -espaco.xs },
+  titulo: { flexDirection: "row", alignItems: "center", gap: espaco.md, marginTop: espaco.xs },
+  resumo: { gap: espaco.md, padding: espaco.md + 4 },
+  linhaResumo: { flexDirection: "row", alignItems: "center", gap: espaco.md },
   filtros: { flexDirection: "row", flexWrap: "wrap", gap: espaco.sm },
   primeiro: { borderRadius: RAIO_CARTAO, borderWidth: 2, padding: espaco.md, gap: espaco.md },
   topoPrimeiro: { gap: espaco.xs, minHeight: ALVO_MINIMO },
+  etiqueta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingLeft: espaco.sm,
+    paddingRight: espaco.sm + 4,
+    paddingVertical: 5,
+    borderRadius: RAIO_CAPSULA,
+    flexShrink: 1,
+    marginRight: "auto",
+  },
+  flexTexto: { flexShrink: 1 },
+  seta: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
   topoPosto: { flexDirection: "row", alignItems: "flex-start", gap: espaco.sm },
   distancia: { borderRadius: 10, paddingHorizontal: espaco.sm, paddingVertical: 2 },
   selos: { flexDirection: "row", flexWrap: "wrap", gap: espaco.xs },
