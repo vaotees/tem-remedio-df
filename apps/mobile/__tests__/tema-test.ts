@@ -37,7 +37,14 @@ describe.each([
       ["botão tonal (Ligar, WhatsApp) e aba escolhida", c.textoTonal, c.primariaTinta],
       ["faixa do Início", c.textoFaixa, c.faixa],
       ["saudação na faixa", c.textoFaixaSecundario, c.faixa],
-      ["texto escuro sobre a menta (avatar)", "#0E1B2B", c.marca.menta],
+      ["texto escuro sobre a menta (avatar)", c.textoSobreMenta, c.marca.menta],
+      ...c.degrade.flatMap(
+        (parada, i) =>
+          [
+            [`faixa sobre o degradê (${i})`, c.textoFaixa, parada],
+            [`saudação sobre o degradê (${i})`, c.textoFaixaSecundario, parada],
+          ] as [string, string, string][],
+      ),
     ];
     for (const [nome, frente, fundo] of pares) {
       expect({ nome, razao: contraste(frente, fundo) >= 4.5 }).toEqual({ nome, razao: true });
@@ -49,6 +56,10 @@ describe.each([
       expect({ nivel, visivel: contraste(cor, c.superficie) >= 3 }).toEqual({ nivel, visivel: true });
     }
     expect(contraste(c.primaria, c.trilho)).toBeGreaterThanOrEqual(3);
+  });
+
+  it("o anel em menta aparece sobre todo o degradê da faixa (3:1)", () => {
+    for (const parada of c.degrade) expect(contraste(c.marca.menta, parada)).toBeGreaterThanOrEqual(3);
   });
 
   it("bordas de campo passam de 3:1 (componentes de interface)", () => {

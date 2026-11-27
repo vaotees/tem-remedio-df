@@ -8,6 +8,7 @@ import { ItemLista } from "@/componentes/ItemLista";
 import { NaoEncontrado } from "@/componentes/NaoEncontrado";
 import { Tela } from "@/componentes/Tela";
 import { Texto } from "@/componentes/Texto";
+import { TituloFaixa } from "@/componentes/Faixa";
 import { Voltar } from "@/componentes/Voltar";
 import {
   acharMarca,
@@ -24,8 +25,7 @@ import { espaco, useTema } from "@/tema";
 export default function QualDestes() {
   const { codigo, marca } = useLocalSearchParams<{ codigo: string; marca?: string }>();
   return (
-    <Tela>
-      <Voltar />
+    <Tela topo={<Voltar sobreFaixa />} faixa={<TituloFaixa titulo="Qual destes?" subtitulo="Confira na receita ou na caixa" />}>
       <ComDados>{(snapshot) => <Opcoes snapshot={snapshot} codigo={codigo} nomeMarca={marca} />}</ComDados>
     </Tela>
   );
@@ -60,10 +60,9 @@ function Opcoes({ snapshot, codigo, nomeMarca }: { snapshot: Snapshot; codigo: s
   return (
     <>
       <View>
-        <Texto variante="titulo">Qual destes?</Texto>
         <Texto variante="subtitulo">{nome}</Texto>
+        <Texto secundario>Confira na receita ou na caixa a forma e a dose.</Texto>
       </View>
-      <Texto secundario>Confira na receita ou na caixa a forma e a dose.</Texto>
 
       {marca && naoProlongados > 0 ? (
         <AvisoLiberacao marca={marca} quais={naoProlongados === opcoes.length ? "todos" : "alguns"} />

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { Icone } from "@/componentes/Icone";
 import { Tela } from "@/componentes/Tela";
 import { Texto } from "@/componentes/Texto";
+import { TituloFaixa } from "@/componentes/Faixa";
 import { Voltar } from "@/componentes/Voltar";
 import { useRegiaoEscolhida } from "@/postos/regiao-escolhida";
 import { REGIOES_EM_ORDEM, type Regiao } from "@/postos/regioes";
@@ -23,9 +24,7 @@ export default function EscolherRegiao() {
   };
 
   return (
-    <Tela>
-      <Voltar />
-      <Texto variante="titulo">Qual é a sua região?</Texto>
+    <Tela topo={<Voltar sobreFaixa />} faixa={<TituloFaixa titulo="Qual é a sua região?" subtitulo="Os postos dela aparecem primeiro" />}>
       <Texto>Os postos da região que você escolher aparecem primeiro. A escolha fica só neste celular.</Texto>
       <Texto secundario>
         São as Regiões Administrativas do DF, em ordem alfabética. Não achou a sua? Escolha a mais perto de onde você

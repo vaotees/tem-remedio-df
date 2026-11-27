@@ -1,6 +1,7 @@
-import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Animated, Pressable, StyleSheet, View } from "react-native";
 import { ALVO_MINIMO, espaco, RAIO_CAPSULA, raio, useTema } from "@/tema";
 import { Icone, type NomeIcone } from "./Icone";
+import { useToque } from "./Movimento";
 import { Texto } from "./Texto";
 
 interface Props {
@@ -23,9 +24,10 @@ interface Props {
   compacto?: boolean;
 }
 
-/** Botão grande (56 de altura mínima) em forma de cápsula, como o símbolo da marca. */
+/** Botão grande (56 de altura mínima) em forma de cápsula, como o símbolo da marca. Afunda um pouco ao toque. */
 export function Botao({ titulo, onPress, icone, variante = "primario", detalhe, carregando, dica, rotulo, compacto }: Props) {
   const { cores } = useTema();
+  const toque = useToque(0.96);
   const tonal = variante === "tonal";
   const corTexto =
     variante === "primario" ? cores.textoSobrePrimaria : tonal ? cores.textoTonal : cores.primaria;
@@ -37,36 +39,40 @@ export function Botao({ titulo, onPress, icone, variante = "primario", detalhe, 
         : { backgroundColor: cores.superficie, borderColor: cores.primaria, borderWidth: 2 };
 
   return (
-    <Pressable
-      onPress={carregando ? undefined : onPress}
-      accessibilityRole="button"
-      accessibilityLabel={rotulo ?? titulo}
-      accessibilityHint={dica}
-      accessibilityState={{ busy: !!carregando }}
-      style={({ pressed }) => [
-        estilos.base,
-        tonal ? estilos.tonal : null,
-        compacto ? estilos.compacto : null,
-        fundo,
-        pressed && { opacity: 0.75 },
-      ]}
-    >
-      <View style={tonal ? estilos.conteudoTonal : estilos.conteudo}>
-        {carregando ? (
-          <ActivityIndicator color={corTexto} />
-        ) : (
-          icone && <Icone name={icone} size={tonal ? 26 : 24} color={corTexto} />
-        )}
-        <Texto variante="destaque" cor={corTexto} style={estilos.titulo}>
-          {titulo}
-        </Texto>
-        {tonal && detalhe ? (
-          <Texto variante="legenda" secundario style={estilos.titulo}>
-            {detalhe}
+    <Animated.View style={[tonal ? estilos.tonalFora : null, compacto ? estilos.compactoFora : null, toque.estilo]}>
+      <Pressable
+        onPress={carregando ? undefined : onPress}
+        onPressIn={toque.aoEncostar}
+        onPressOut={toque.aoSoltar}
+        accessibilityRole="button"
+        accessibilityLabel={rotulo ?? titulo}
+        accessibilityHint={dica}
+        accessibilityState={{ busy: !!carregando }}
+        style={({ pressed }) => [
+          estilos.base,
+          tonal ? estilos.tonal : null,
+          compacto ? estilos.compacto : null,
+          fundo,
+          pressed && { opacity: 0.75 },
+        ]}
+      >
+        <View style={tonal ? estilos.conteudoTonal : estilos.conteudo}>
+          {carregando ? (
+            <ActivityIndicator color={corTexto} />
+          ) : (
+            icone && <Icone name={icone} size={tonal ? 26 : 24} color={corTexto} />
+          )}
+          <Texto variante="destaque" cor={corTexto} style={estilos.titulo}>
+            {titulo}
           </Texto>
-        ) : null}
-      </View>
-    </Pressable>
+          {tonal && detalhe ? (
+            <Texto variante="legenda" secundario style={estilos.titulo}>
+              {detalhe}
+            </Texto>
+          ) : null}
+        </View>
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -79,7 +85,10 @@ const estilos = StyleSheet.create({
     justifyContent: "center",
   },
   compacto: { alignSelf: "flex-start", paddingHorizontal: espaco.md, flexShrink: 1 },
-  tonal: { borderRadius: raio + 6, paddingHorizontal: espaco.sm, paddingVertical: espaco.md, flex: 1 },
+  // O invólucro da animação ocupa o lugar que o botão ocuparia (lado a lado, ou do tamanho do texto).
+  compactoFora: { alignSelf: "flex-start", flexShrink: 1 },
+  tonalFora: { flex: 1 },
+  tonal: { borderRadius: raio + 6, paddingHorizontal: espaco.sm, paddingVertical: espaco.md, flexGrow: 1 },
   conteudo: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: espaco.sm },
   conteudoTonal: { alignItems: "center", justifyContent: "center", gap: 2 },
   // Com letra grande, o título quebra linha dentro do botão (sem isso, ele vaza para fora da tela).

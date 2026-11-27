@@ -33,22 +33,29 @@ export default function Perfil() {
   const inicial = preferencias.nome?.charAt(0).toLocaleUpperCase("pt-BR");
 
   return (
-    <Tela>
-      <View style={estilos.cabecalho}>
-        <View style={[estilos.avatar, { backgroundColor: cores.primaria }]} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-          {inicial ? (
-            <Texto peso="extra" tamanho={26} cor={cores.textoSobrePrimaria}>
-              {inicial}
+    <Tela
+      faixa={
+        <View style={estilos.cabecalho}>
+          <View style={[estilos.avatar, { backgroundColor: cores.marca.menta }]} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+            {inicial ? (
+              <Texto peso="extra" tamanho={30} cor={cores.textoSobreMenta}>
+                {inicial}
+              </Texto>
+            ) : (
+              <Icone name="person" size={34} color={cores.textoSobreMenta} />
+            )}
+          </View>
+          <View style={estilos.flex}>
+            <Texto variante="titulo" cor={cores.textoFaixa}>
+              {preferencias.nome ?? "Perfil"}
             </Texto>
-          ) : (
-            <Icone name="person" size={30} color={cores.textoSobrePrimaria} />
-          )}
+            <Texto peso="medio" cor={cores.textoFaixaSecundario}>
+              {ra ? `${ra} · perfil neste celular` : "Perfil neste celular"}
+            </Texto>
+          </View>
         </View>
-        <View style={estilos.flex}>
-          <Texto variante="titulo">{preferencias.nome ?? "Perfil"}</Texto>
-          <Texto secundario>{ra ? `${ra} · perfil neste celular` : "Perfil neste celular"}</Texto>
-        </View>
-      </View>
+      }
+    >
 
       <View style={[estilos.garantia, { backgroundColor: cores.primariaTinta }]}>
         <Icone name="shield-checkmark" size={28} color={cores.textoTonal} />

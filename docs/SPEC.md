@@ -29,7 +29,7 @@ Em até 3 toques, a pessoa (idosa, ou o filho/cuidador) descobre **qual posto de
 - **Fora**: login, farmácias particulares, preços, qualquer dado de saúde do usuário em servidor.
 
 ## Telas
-1. Início: busca grande, microfone, "Seus remédios", data dos dados.
+1. Início: busca grande, microfone, "Hoje para você" (os remédios guardados, com o posto mais perto), data dos dados.
 2. Escolher a dose.
 3. Postos com estoque (lista), com semáforo e distância.
 4. Mapa.
@@ -150,6 +150,7 @@ Tabela CMED (Anvisa)          ─┘
 - **Cores**: azul `#0B5FA5` da paleta e uma cor nova só da marca, menta `#86E3BC` (verde `#1F8A5E` no fundo claro). O símbolo não aparece ao lado do semáforo, onde o verde seria lido como estoque.
 - **Ícone**: fundo azul; Android com ícone adaptável (cor de fundo + frente na área segura de 66 dp) e versão de uma cor para o ícone temático do Android 13+.
 - **Tela de abertura**: pelo plugin `expo-splash-screen` (o SDK 57 não tem mais a chave `splash`), símbolo com 160 dp sobre o fundo do app em cada tema (`#FFFFFF` / `#0F1115`). O Expo Go mostra o próprio ícone; o do app só aparece num build.
+- **Abertura animada** (`src/componentes/Abertura.tsx`, 26/11/2026, refeita em 27/11 no redesenho v3): por cima do app, logo depois da do sistema e igual a ela; a cápsula dá o "clique" (como no filme), o fundo vira o degradê da marca e o nome aparece com o conjunto no meio da tela. Cerca de 3 s, um toque pula, sem som. Com leitor de tela, só some (150 ms); na web vale só o "Reduzir movimento" (o react-native-web não sabe do leitor de tela). Escondida do leitor; nos testes de tela fica de fora (`jest.setup.tsx`).
 - Desenho, arquivos e regras de uso em `apps/mobile/assets/marca/README.md`; os SVGs e PNGs saem de `apps/mobile/scripts/gerar-marca.mjs`.
 
 ### Acabamento (M6)
@@ -186,7 +187,7 @@ Revisão de VoiceOver/TalkBack, letra grande e alvos de toque. O que mudou:
 ## Riscos
 - O endpoint do Power BI não é API oficial. Mitigação: validação + pedido dos dados em formato aberto por LAI.
 - Farmácias zeradas podem ser dispensação suspensa → mostrar "sem informação de estoque", não "não tem".
-- Telefone falta em ~20% das UBSs (CNES + cadastro SES-DF).
+- Telefone falta em ~20% das UBSs (CNES + cadastro SES-DF), e alguns vêm fora do formato (ficam sem Ligar, com aviso no log do coletor).
 
 ### Redesenho visual (17/11/2026)
 Pedido do usuário depois de ver o app no iPhone: o visual estava básico demais. Proposta aprovada na página privada https://claude.ai/artifact/HaW9K9Cn7VgrCvCcsBMUxn.
@@ -197,7 +198,27 @@ Pedido do usuário depois de ver o app no iPhone: o visual estava básico demais
 - **Aba Mapa**: as farmácias de UBS (sem as prisionais) num mapa; o cartão mostra o posto, o horário e "Ver posto". Na web, lista.
 - **Perfil sem cadastro**: nome opcional (só para a saudação), tamanho da letra (normal, grande, maior, por cima do ajuste do celular) e cores (do celular, claro, escuro). Fica só no aparelho. **Sem login**: a lista de remédios é dado de saúde (LGPD art. 11) e senha é barreira e porta de golpe para o público idoso.
 - **Detalhe do posto**: mapa pequeno no alto (só no celular), horário com os dias da semana, uma ação principal (Como chegar) e Ligar/WhatsApp lado a lado com o número à vista.
-- Ainda não: "Pessoas que eu cuido" (listas separadas por pessoa, muda o formato de `meus-remedios.json`), histórico de 30 dias ("costuma ter neste posto"), ilustrações e animações.
+- Ainda não: "Pessoas que eu cuido" (listas separadas por pessoa, muda o formato de `meus-remedios.json`), histórico de 30 dias ("costuma ter neste posto"), ilustrações.
+
+### Redesenho v2: a resposta primeiro (26/11/2026)
+Revisão de design sobre as telas do redesenho: a resposta ("onde eu pego hoje") ficava embaixo da dobra e o anel não dizia o que contava. Telas propostas aprovadas pelo usuário na conversa.
+- **Postos**: o mais perto (ou o primeiro da região) logo depois do resumo, em destaque, com semáforo, horário, medidor e "Como chegar"; a região, os filtros e o resto da lista vêm depois. Sem localização nem região, nenhum destaque (não há "mais perto"). "Guardar" curto no alto, ao lado do Voltar; "Está na aba Meus remédios." aparece só logo depois do toque.
+- **Filtros** "Aberto agora" (pelo horário do cadastro; horário que o app não entende não conta como aberto) e "Tem bastante": mudam a lista e o mapa, não a contagem do remédio. Sem nenhum posto, um botão mostra todos de novo.
+- **Início, "Hoje para você"**: os remédios guardados um embaixo do outro (o carrossel escondia o segundo pela metade), cada um com a contagem, a barra do semáforo dos postos que têm, o mais perto com selo e horário, e "Como chegar" fora do botão do cartão.
+- **Sem anel**: o anel (número dentro de um círculo) parecia porcentagem e não dizia "postos". No lugar, a barra do semáforo compacta, no Início e em Meus remédios; o leitor de tela lê a contagem de cada nível.
+- **Letra**: números na Atkinson Hyperlegible Next (a Mono dava cara de sistema e saiu do app); selo de horário mais leve que o do estoque.
+- **Mapa**: legenda em cápsulas numa linha, no lugar do cartão com título; a explicação de como mexer no mapa vira dica com "Entendi" (`Dica`), que some de vez e fica guardada com o Perfil (`preferencias.json`, campo `dicas`).
+- **Telefone**: `normalizarTelefone` (`packages/shared/src/telefone.ts`) confere o formato brasileiro (DDD + fixo de 8 dígitos começando de 2 a 5, ou celular de 9 começando por 9; sem DDD, é o 61) e formata "(61) 3563-9176", com o ramal escrito. O coletor grava formatado e troca o fora do formato por `null`, com aviso no log; o app confere de novo e, se o número veio com erro, diz isso e não mostra Ligar. Caso real: "61334494826" (UBS 1 Asa Norte, um dígito a mais).
+
+### Redesenho v3: identidade, painel e movimento (27/11/2026)
+O usuário testou a v2 no iPhone e achou o app estático e "amador": sem animação, sem gráfico, sem painel, e a abertura rápida demais para ler e fora do centro. A v3 muda a camada visual inteira, sem mexer nos dados nem nas regras.
+- **Faixa da marca em todas as telas** (`src/componentes/Faixa.tsx`, pelo `Tela`): degradê diagonal azul-noite → azul da marca → azul esverdeado, com brilho menta e o símbolo quase transparente, atrás do relógio do celular (barra de status sempre clara). Título e ações da tela ficam na faixa (Voltar, "Guardar", "Adicionar" e "?" em botões de vidro); o primeiro cartão pode subir por cima dela (`cartaoPorCima`). O texto da faixa passa de 4,5:1 em todas as paradas do degradê (teste de contraste).
+- **Painel "A rede agora" no Início** (`src/postos/rede.ts`, tudo do snapshot do dia): anel dos postos abertos agora (pelo horário do cadastro; de madrugada, "Todos fechados agora" e quantos abrem e quando), a rosca do estoque de todos os remédios em todos os postos (bastante, pouco, quase acabando, sem estimativa, com a porcentagem escrita e "ligue antes de ir") e as barras dos abertos por Região de Saúde (fechados, os postos de cada região). O selo do alto só pulsa com dado de até 1 dia; dado velho vira aviso.
+- **Gráficos** (`Graficos.tsx`): anel, rosca do semáforo, arco dos dias de estoque (detalhe do posto, com as marcas de 7 e 30 dias e o número no meio), barras deitadas e as barras que já existiam. Todos enchem quando aparecem; cor sempre com texto ao lado. O anel volta no Início e em Meus remédios, agora com "postos" escrito dentro (a v2 tirou o anel porque o número sozinho parecia porcentagem).
+- **Movimento** (`Movimento.tsx`, `src/util/movimento.ts`): os blocos entram em sequência (sobem e aparecem), números contam até o valor, cartões e botões afundam ao toque e voltam com mola, a aba escolhida ganha a pílula com mola, e o ponto "ao vivo" pulsa. Com "Reduzir movimento" no celular, tudo aparece pronto, parado. Nos testes nada anima (`jest.setup.tsx`).
+- **Postos**: na faixa, o remédio; por cima dela, o resumo com a rosca dos níveis e a legenda; o mais perto com etiqueta "Mais perto de você" e a distância em número grande; na lista, filete na cor do semáforo à esquerda de cada posto.
+- **Detalhe do posto**: Como chegar, Ligar e WhatsApp em três botões redondos num cartão por cima da faixa; o estoque do remédio no arco; Horário, Endereço, Telefone e O que levar com ícone no título.
+- **Abertura** (`Abertura.tsx`): começa igual à do sistema (símbolo parado no fundo branco), a cápsula dá o "clique", o fundo vira o degradê, o símbolo fica branco e sobe, e o nome e a frase aparecem embaixo; o conjunto (símbolo, nome e frase) fica no meio da tela, medido com a letra do celular. O nome fica parado 1,1 s; ao todo, cerca de 3 s, e um toque pula. Com "Reduzir movimento", aparece montada e parada e some depois de 1,1 s; com leitor de tela, some logo.
 
 ### Publicação: web, APK e lojas (24/11/2026)
 - **Versão web** em `https://vaotees.github.io/tem-remedio-df/app/`, no mesmo site do GitHub Pages que publica os dados. É a forma principal de apresentar o projeto (abre num clique, inclusive no iPhone). Na web não há mapa (lista dos postos); no computador, o app fica numa coluna da largura de um celular (`MolduraWeb`). Saída `single` (SPA): o `404.html` do site é o `index.html` do app, para os links diretos (`/app/postos/8944`) abrirem a tela certa.

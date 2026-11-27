@@ -2,9 +2,9 @@ import type { Snapshot, Ubs } from "@tem-remedio/shared";
 import { useRouter } from "expo-router";
 import { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Botao } from "@/componentes/Botao";
 import { ComDados } from "@/componentes/ComDados";
+import { Faixa, TituloFaixa } from "@/componentes/Faixa";
 import { Icone } from "@/componentes/Icone";
 import { ItemLista } from "@/componentes/ItemLista";
 import { MAPA_REDE_DISPONIVEL, MapaRede } from "@/componentes/MapaRede";
@@ -27,21 +27,21 @@ const NA_LISTA = 10;
  */
 export default function Mapa() {
   const { cores } = useTema();
+  const titulo = <TituloFaixa titulo="Mapa dos postos" subtitulo="Todas as farmácias de UBS do DF" />;
   if (!MAPA_REDE_DISPONIVEL) {
     return (
-      <Tela>
-        <Texto variante="titulo">Mapa dos postos</Texto>
+      <Tela faixa={titulo}>
         <ComDados>{(snapshot) => <Conteudo snapshot={snapshot} />}</ComDados>
       </Tela>
     );
   }
   return (
-    <SafeAreaView edges={["top", "left", "right"]} style={[estilos.fixa, { backgroundColor: cores.fundo }]}>
+    <View style={[estilos.fixa, { backgroundColor: cores.fundo }]}>
+      <Faixa>{titulo}</Faixa>
       <View style={estilos.conteudoFixo}>
-        <Texto variante="titulo">Mapa dos postos</Texto>
         <ComDados>{(snapshot) => <Conteudo snapshot={snapshot} />}</ComDados>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 

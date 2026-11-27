@@ -1,0 +1,1405 @@
+{
+ "atualizadoEm": "2026-11-24T16:16:02",
+ "produto": {
+  "codigo": "8944",
+  "substancia": "LOSARTANA POTASSICA",
+  "forma": "Comprimido",
+  "dose": "50 MG"
+ },
+ "total": 154,
+ "comEstoque": 125,
+ "contagem": {
+  "alto": 69,
+  "baixo": 44,
+  "critico": 9,
+  "sem_consumo": 3
+ },
+ "postos": [
+  {
+   "nome": "UBS 05 TAGUATINGA",
+   "ra": "Taguatinga",
+   "lat": -15.851049,
+   "lng": -48.047118,
+   "tem": true,
+   "dias": 21,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 1 PARANOA",
+   "ra": "Paranoá",
+   "lat": -15.76919515774397,
+   "lng": -47.779919329447786,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 01 SAMAMBAIA",
+   "ra": "Samambaia",
+   "lat": -15.862526,
+   "lng": -48.077073,
+   "tem": true,
+   "dias": 5,
+   "nivel": "critico"
+  },
+  {
+   "nome": "UBS 2 PLANALTINA",
+   "ra": "Planaltina",
+   "lat": -15.6123694,
+   "lng": -47.6432971,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 2 SANTA MARIA",
+   "ra": "Santa Maria",
+   "lat": -16.007247140447177,
+   "lng": -47.98956871032715,
+   "tem": true,
+   "dias": 36,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 04 SAMAMBAIA",
+   "ra": "Samambaia",
+   "lat": -15.878955,
+   "lng": -48.068554,
+   "tem": true,
+   "dias": 15,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 1 ASA NORTE",
+   "ra": "Plano Piloto",
+   "lat": -15.773349675527177,
+   "lng": -47.89260685443878,
+   "tem": true,
+   "dias": 57,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 2 ASA NORTE",
+   "ra": "Plano Piloto",
+   "lat": -15.743074996438855,
+   "lng": -47.89173781871796,
+   "tem": true,
+   "dias": 56,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 1 CRUZEIRO",
+   "ra": "Cruzeiro",
+   "lat": -15.800749940431798,
+   "lng": -47.94215261936188,
+   "tem": true,
+   "dias": 81,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 2 CRUZEIRO",
+   "ra": "Cruzeiro",
+   "lat": -15.783483249623332,
+   "lng": -47.93586552143097,
+   "tem": true,
+   "dias": 47,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 02 SAMAMBAIA",
+   "ra": "Samambaia",
+   "lat": -15.875508,
+   "lng": -48.109087,
+   "tem": true,
+   "dias": 26,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 1 SANTA MARIA",
+   "ra": "Santa Maria",
+   "lat": -16.026466570296016,
+   "lng": -48.02629920944501,
+   "tem": true,
+   "dias": 40,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 1 SAO SEBASTIAO",
+   "ra": "São Sebastião",
+   "lat": -15.902438624241869,
+   "lng": -47.77261823415756,
+   "tem": true,
+   "dias": 8,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 01 RECANTO DAS EMAS",
+   "ra": "Recanto das Emas",
+   "lat": -15.919114,
+   "lng": -48.10147,
+   "tem": true,
+   "dias": 68,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 1 GAMA",
+   "ra": "Gama",
+   "lat": -16.020679169244765,
+   "lng": -48.084760308265686,
+   "tem": true,
+   "dias": 49,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 2 GAMA",
+   "ra": "Gama",
+   "lat": -16.03646493849597,
+   "lng": -48.06116184586904,
+   "tem": true,
+   "dias": 36,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 3 GAMA",
+   "ra": "Gama",
+   "lat": -16.005834275683597,
+   "lng": -48.0527400970459,
+   "tem": true,
+   "dias": 21,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 4 GAMA",
+   "ra": "Gama",
+   "lat": -16.026092975141744,
+   "lng": -48.056854605674744,
+   "tem": true,
+   "dias": 68,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 5 GAMA",
+   "ra": "Gama",
+   "lat": -16.0232691,
+   "lng": -48.06166343155779,
+   "tem": true,
+   "dias": 44,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 6 GAMA",
+   "ra": "Gama",
+   "lat": -16.011547550512397,
+   "lng": -48.07398319244385,
+   "tem": true,
+   "dias": 31,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 7 GAMA",
+   "ra": "Gama",
+   "lat": -16.013811158411322,
+   "lng": -48.067535161972046,
+   "tem": true,
+   "dias": 61,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 01 TAGUATINGA",
+   "ra": "Taguatinga",
+   "lat": -15.795495,
+   "lng": -48.059349,
+   "tem": true,
+   "dias": 20,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 02 TAGUATINGA",
+   "ra": "Taguatinga",
+   "lat": -15.810484,
+   "lng": -48.063039,
+   "tem": true,
+   "dias": 33,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 03 TAGUATINGA",
+   "ra": "Taguatinga",
+   "lat": -15.832884,
+   "lng": -48.076236,
+   "tem": true,
+   "dias": 25,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 06 TAGUATINGA",
+   "ra": "Taguatinga",
+   "lat": -15.836187,
+   "lng": -48.063018,
+   "tem": true,
+   "dias": 32,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 07 TAGUATINGA",
+   "ra": "Taguatinga",
+   "lat": -15.800636,
+   "lng": -48.09323,
+   "tem": true,
+   "dias": 18,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 2 CEILANDIA",
+   "ra": "Ceilândia",
+   "lat": -15.807759,
+   "lng": -48.120503,
+   "tem": true,
+   "dias": 36,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 3 CEILANDIA",
+   "ra": "Ceilândia",
+   "lat": -15.830964,
+   "lng": -48.09647,
+   "tem": true,
+   "dias": 23,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 4 CEILANDIA",
+   "ra": "Ceilândia",
+   "lat": -15.835526,
+   "lng": -48.105032,
+   "tem": true,
+   "dias": 23,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 5 CEILANDIA",
+   "ra": "Ceilândia",
+   "lat": -15.803237,
+   "lng": -48.111877,
+   "tem": true,
+   "dias": 31,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 6 CEILANDIA",
+   "ra": "Ceilândia",
+   "lat": -15.840109,
+   "lng": -48.114345,
+   "tem": true,
+   "dias": 29,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 7 CEILANDIA",
+   "ra": "Ceilândia",
+   "lat": -15.795681,
+   "lng": -48.131103,
+   "tem": true,
+   "dias": 45,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 8 CEILANDIA",
+   "ra": "Ceilândia",
+   "lat": -15.806933,
+   "lng": -48.130009,
+   "tem": true,
+   "dias": 27,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 9 CEILANDIA",
+   "ra": "Ceilândia",
+   "lat": -15.846694,
+   "lng": -48.123528,
+   "tem": true,
+   "dias": 25,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 11 CEILANDIA",
+   "ra": "Ceilândia",
+   "lat": -15.79821,
+   "lng": -48.133603,
+   "tem": true,
+   "dias": 60,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 3 PLANALTINA",
+   "ra": "Planaltina",
+   "lat": -15.6247279,
+   "lng": -47.6551879,
+   "tem": true,
+   "dias": 22,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 01 GUARA",
+   "ra": "Guará",
+   "lat": -15.81994031,
+   "lng": -47.98600674,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 01 NUCLEO BANDEIRANTE",
+   "ra": "Núcleo Bandeirante",
+   "lat": -15.870117592660918,
+   "lng": -47.96659722531585,
+   "tem": true,
+   "dias": 6,
+   "nivel": "critico"
+  },
+  {
+   "nome": "UBS 02 RECANTO DAS EMAS",
+   "ra": "Recanto das Emas",
+   "lat": -15.901553,
+   "lng": -48.058533,
+   "tem": true,
+   "dias": 8,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 1 ASA SUL",
+   "ra": "Plano Piloto",
+   "lat": -15.8327733004566,
+   "lng": -47.90950745344162,
+   "tem": true,
+   "dias": 54,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 01 RIACHO FUNDO I",
+   "ra": "Riacho Fundo",
+   "lat": -15.885245122611966,
+   "lng": -48.023396730422974,
+   "tem": true,
+   "dias": 11,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 1 LAGO NORTE",
+   "ra": "Lago Norte",
+   "lat": -15.72591958000638,
+   "lng": -47.873903810977936,
+   "tem": true,
+   "dias": 43,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 01 CANDANGOLANDIA",
+   "ra": "Candangolândia",
+   "lat": -15.849772600247151,
+   "lng": -47.95138478279114,
+   "tem": true,
+   "dias": 48,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 10 CEILANDIA",
+   "ra": "Ceilândia",
+   "lat": -15.824358,
+   "lng": -48.113465,
+   "tem": true,
+   "dias": 66,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 1 BRAZLANDIA",
+   "ra": "Brazlândia",
+   "lat": -15.677171,
+   "lng": -48.194983,
+   "tem": true,
+   "dias": 53,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 1 SOBRADINHO",
+   "ra": "Sobradinho",
+   "lat": -15.650839573325188,
+   "lng": -47.781912088394165,
+   "tem": true,
+   "dias": 27,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 2 SOBRADINHO",
+   "ra": "Sobradinho",
+   "lat": -15.654831,
+   "lng": -47.809573,
+   "tem": true,
+   "dias": 52,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 1 SOBRADINHO II",
+   "ra": "Sobradinho II",
+   "lat": -15.644568530374748,
+   "lng": -47.82445728778839,
+   "tem": true,
+   "dias": 63,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 02 GUARA",
+   "ra": "Guará",
+   "lat": -15.832765559101615,
+   "lng": -47.97327697277069,
+   "tem": true,
+   "dias": 1,
+   "nivel": "critico"
+  },
+  {
+   "nome": "UBS 03 GUARA",
+   "ra": "Guará",
+   "lat": -15.849194626917619,
+   "lng": -47.96999394893646,
+   "tem": true,
+   "dias": 8,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 3 ASA NORTE VILA PLANALTO",
+   "ra": "Plano Piloto",
+   "lat": -15.795422974875835,
+   "lng": -47.848345041275024,
+   "tem": true,
+   "dias": 36,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 5 NOVA BETANIA SAO SEBASTIAO",
+   "ra": "São Sebastião",
+   "lat": -15.99093195138926,
+   "lng": -47.81321398085175,
+   "tem": true,
+   "dias": 50,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 3 NOVA COLINA SOBRADINHO",
+   "ra": "Sobradinho",
+   "lat": -15.6480293,
+   "lng": -47.7552849,
+   "tem": true,
+   "dias": 57,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 11 RAJADINHA PLANALTINA",
+   "ra": "Planaltina",
+   "lat": -15.747268,
+   "lng": -47.662576,
+   "tem": true,
+   "dias": 117,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 14 TABATINGA PLANALTINA",
+   "ra": "Planaltina",
+   "lat": -15.8203842,
+   "lng": -47.5711038,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 16 PIPIRIPAU PLANALTINA",
+   "ra": "Planaltina",
+   "lat": -15.534638,
+   "lng": -47.511159,
+   "tem": true,
+   "dias": 88,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 4 JARDIM II PARANOA",
+   "ra": "Paranoá",
+   "lat": -16.016344090470348,
+   "lng": -47.379658517013596,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 5 QUEBRADA DOS NERES",
+   "ra": "Paranoá",
+   "lat": -15.907924526306179,
+   "lng": -47.60884904462244,
+   "tem": true,
+   "dias": 86,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 13 SAO JOSE PLANALTINA",
+   "ra": "Planaltina",
+   "lat": -15.704136,
+   "lng": -47.373487,
+   "tem": true,
+   "dias": 17,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 8 PADDF PARANOA",
+   "ra": "Paranoá",
+   "lat": -16.01340682706938,
+   "lng": -47.55843958246178,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 04 GUARA",
+   "ra": "Guará",
+   "lat": -15.81022147583909,
+   "lng": -47.98854947090149,
+   "tem": true,
+   "dias": 48,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 01 PARK WAY",
+   "ra": "Park Way",
+   "lat": -15.93367941225517,
+   "lng": -47.93968075262487,
+   "tem": true,
+   "dias": 58,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 1 JARDINS MANGUEIRAL",
+   "ra": "Jardim Botânico",
+   "lat": -15.889197,
+   "lng": -47.813541,
+   "tem": true,
+   "dias": 7,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 7 BURITIZINHO SOBRADINHO II",
+   "ra": "Sobradinho II",
+   "lat": -15.651387118195753,
+   "lng": -47.82814264297485,
+   "tem": true,
+   "dias": 81,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 5 NOVA BETANIA SAO SEBASTIAO",
+   "ra": "São Sebastião",
+   "lat": -15.99093195138926,
+   "lng": -47.81321398085175,
+   "tem": true,
+   "dias": 0,
+   "nivel": "critico"
+  },
+  {
+   "nome": "UBS 3 LOBEIRAL FERCAL",
+   "ra": "Fercal",
+   "lat": -15.5883961,
+   "lng": -47.8443777,
+   "tem": true,
+   "dias": null,
+   "nivel": "sem_consumo"
+  },
+  {
+   "nome": "UBS 7 JARDIM RORIZ PLANALTINA",
+   "ra": "Planaltina",
+   "lat": -15.602834,
+   "lng": -47.648301,
+   "tem": true,
+   "dias": null,
+   "nivel": "sem_consumo"
+  },
+  {
+   "nome": "UBS 08 TAGUATINGA",
+   "ra": "Taguatinga",
+   "lat": -15.820931,
+   "lng": -48.092265,
+   "tem": true,
+   "dias": 16,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 12 CEILANDIA",
+   "ra": "Ceilândia",
+   "lat": -15.804724,
+   "lng": -48.14357,
+   "tem": true,
+   "dias": 20,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 1 VARJAO",
+   "ra": "Varjão",
+   "lat": -15.710898044258338,
+   "lng": -47.87633389234543,
+   "tem": true,
+   "dias": 26,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 03 RIACHO FUNDO II",
+   "ra": "Riacho Fundo II",
+   "lat": -15.885234803490286,
+   "lng": -48.023402094841,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 15 RIO PRETO PLANALTINA",
+   "ra": "Planaltina",
+   "lat": -15.762626,
+   "lng": -47.492915,
+   "tem": true,
+   "dias": 26,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 10 SANTA MARIA",
+   "ra": "Gama",
+   "lat": -16.046349617294645,
+   "lng": -48.04314851760864,
+   "tem": true,
+   "dias": 22,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 04 RIACHO FUNDO II",
+   "ra": "Riacho Fundo II",
+   "lat": -15.947472,
+   "lng": -48.015139,
+   "tem": true,
+   "dias": 53,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 13 GAMA CASA GRANDE",
+   "ra": "Gama",
+   "lat": -15.964557717170544,
+   "lng": -48.10042440891266,
+   "tem": true,
+   "dias": 39,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 01 ESTRUTURAL",
+   "ra": "SCIA/Estrutural",
+   "lat": -15.783418349849695,
+   "lng": -47.99715930173493,
+   "tem": true,
+   "dias": 8,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 9 ENGENHO DAS LAGES GAMA",
+   "ra": "Gama",
+   "lat": -16.043534742598222,
+   "lng": -48.25393795967102,
+   "tem": true,
+   "dias": 28,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 6 CARIRU PARANOA",
+   "ra": "Paranoá",
+   "lat": -15.906863880625735,
+   "lng": -47.517263444192345,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 12 BICA DO DER PLANALTINA",
+   "ra": "Planaltina",
+   "lat": -15.6564113,
+   "lng": -47.6948355,
+   "tem": true,
+   "dias": 115,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 10 TAQUARA PLANALTINA",
+   "ra": "Planaltina",
+   "lat": -15.6332615,
+   "lng": -47.5212356,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 08 RECANTO DAS EMAS SAO FRANCISCO",
+   "ra": "Recanto das Emas",
+   "lat": -15.93752,
+   "lng": -48.228113,
+   "tem": true,
+   "dias": 25,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 1 ENGENHO VELHO FERCAL",
+   "ra": "Fercal",
+   "lat": -15.600273175065064,
+   "lng": -47.871556878089905,
+   "tem": true,
+   "dias": 41,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 6 LAGO OESTE SOBRADINHO",
+   "ra": "Sobradinho",
+   "lat": -15.619113,
+   "lng": -47.948548,
+   "tem": true,
+   "dias": 10,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 13 BOA ESPERANCA CEILANDIA",
+   "ra": "Ceilândia",
+   "lat": -15.82861,
+   "lng": -48.246674,
+   "tem": true,
+   "dias": 58,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 3 SANTA MARIA",
+   "ra": "Santa Maria",
+   "lat": -16.047370386203777,
+   "lng": -48.037086725234985,
+   "tem": true,
+   "dias": 9,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 7 SANTA MARIA",
+   "ra": "Santa Maria",
+   "lat": -15.993210865317081,
+   "lng": -47.988125681877136,
+   "tem": true,
+   "dias": 4,
+   "nivel": "critico"
+  },
+  {
+   "nome": "UBS 11 PONTE ALTA NORTE GAMA",
+   "ra": "Gama",
+   "lat": -15.9807001141572,
+   "lng": -48.07191252708435,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 5 SANTA MARIA",
+   "ra": "Santa Maria",
+   "lat": -16.010258468486086,
+   "lng": -48.00231456756592,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 6 SANTA MARIA",
+   "ra": "Santa Maria",
+   "lat": -16.040075,
+   "lng": -48.030621,
+   "tem": true,
+   "dias": 36,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 6 SANTA MARIA",
+   "ra": "Santa Maria",
+   "lat": -16.040075,
+   "lng": -48.030621,
+   "tem": true,
+   "dias": 35,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 12 PONTE ALTA GAMA",
+   "ra": "Gama",
+   "lat": -16.009113756670548,
+   "lng": -48.15978705883026,
+   "tem": true,
+   "dias": 60,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 10 RECANTO DAS EMAS",
+   "ra": "Recanto das Emas",
+   "lat": -15.929679,
+   "lng": -48.106555,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 17 JARDIM MORUMBI PLANALTINA",
+   "ra": "Planaltina",
+   "lat": -15.5236961,
+   "lng": -47.618671,
+   "tem": true,
+   "dias": 46,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 6 SAO FRANCISCO SAO SEBASTIAO",
+   "ra": "São Sebastião",
+   "lat": -15.914413565280515,
+   "lng": -47.758104155125984,
+   "tem": true,
+   "dias": 47,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 3 RESIDENCIAL OESTE SAO SEBASTIAO",
+   "ra": "São Sebastião",
+   "lat": -15.907726747417737,
+   "lng": -47.777667362463276,
+   "tem": true,
+   "dias": 10,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 2 T R E SAO SEBASTIAO",
+   "ra": "São Sebastião",
+   "lat": -15.90164,
+   "lng": -47.774913,
+   "tem": true,
+   "dias": 54,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 2 ITAPOA",
+   "ra": "Itapoã",
+   "lat": -15.745567467563017,
+   "lng": -47.76979980179746,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 2 QUADRA 18 PARANOA",
+   "ra": "Paranoá",
+   "lat": -15.770648693810273,
+   "lng": -47.778518402627675,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 02 RIACHO FUNDO II",
+   "ra": "Riacho Fundo II",
+   "lat": -15.909129301736343,
+   "lng": -48.04944246309881,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 02 ESTRUTURAL",
+   "ra": "SCIA/Estrutural",
+   "lat": -15.783583911726057,
+   "lng": -47.99709230661392,
+   "tem": true,
+   "dias": 59,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 14 CONDOMINIO PRIVE CEILANDIA",
+   "ra": "Ceilândia",
+   "lat": -15.785212,
+   "lng": -48.136596,
+   "tem": true,
+   "dias": 29,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 02 AGUAS CLARAS",
+   "ra": "Águas Claras",
+   "lat": -15.859492,
+   "lng": -48.002295,
+   "tem": true,
+   "dias": 44,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 09 SAMAMBAIA",
+   "ra": "Samambaia",
+   "lat": -15.892762,
+   "lng": -48.112735,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 9 RESIDENCIAL DO BOSQUE 1 SAO SEBASTIAO",
+   "ra": "São Sebastião",
+   "lat": -15.905034409567238,
+   "lng": -47.75583193378876,
+   "tem": true,
+   "dias": 0,
+   "nivel": "critico"
+  },
+  {
+   "nome": "UBS 7 MORRO DA CRUZ SAO SEBASTIAO",
+   "ra": "São Sebastião",
+   "lat": -15.915879244795049,
+   "lng": -47.77223026914414,
+   "tem": true,
+   "dias": 53,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 02 RIACHO FUNDO I",
+   "ra": "Riacho Fundo",
+   "lat": -15.879352818069336,
+   "lng": -48.000635504722595,
+   "tem": true,
+   "dias": 24,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 1 LAGO SUL",
+   "ra": "Lago Sul",
+   "lat": -15.846426008505944,
+   "lng": -47.854342460632324,
+   "tem": true,
+   "dias": 33,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 19 VISTA BELA",
+   "ra": "Ceilândia",
+   "lat": -15.809496,
+   "lng": -48.212059,
+   "tem": true,
+   "dias": 51,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 01 RIACHO FUNDO II",
+   "ra": "Riacho Fundo II",
+   "lat": -15.922860384455896,
+   "lng": -48.04377383543672,
+   "tem": true,
+   "dias": 26,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 6 ARAPOANGA PLANALTINA",
+   "ra": "Planaltina",
+   "lat": -15.640751055081747,
+   "lng": -47.64041483402252,
+   "tem": true,
+   "dias": 45,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 8 VALE DO AMANHECER PLANALTINA",
+   "ra": "Planaltina",
+   "lat": -15.67114,
+   "lng": -47.645447,
+   "tem": true,
+   "dias": 49,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 5 GRANJA DO TORTO",
+   "ra": "Plano Piloto",
+   "lat": -15.70872398665197,
+   "lng": -47.913627326488495,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 1 PLANALTINA",
+   "ra": "Planaltina",
+   "lat": -15.617806823948234,
+   "lng": -47.64106817394896,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 9 SANTA MARIA",
+   "ra": "Santa Maria",
+   "lat": -16.01885906626827,
+   "lng": -48.023128509521484,
+   "tem": true,
+   "dias": null,
+   "nivel": "sem_consumo"
+  },
+  {
+   "nome": "UBS 4 PLANALTINA",
+   "ra": "Planaltina",
+   "lat": -15.619833746250539,
+   "lng": -47.680519223213196,
+   "tem": true,
+   "dias": 44,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 5 PLANALTINA",
+   "ra": "Planaltina",
+   "lat": -15.639407948056894,
+   "lng": -47.64712035655975,
+   "tem": true,
+   "dias": 25,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 1 ITAPOA",
+   "ra": "Itapoã",
+   "lat": -15.740243475543059,
+   "lng": -47.76331861961001,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 2 BRAZLANDIA",
+   "ra": "Brazlândia",
+   "lat": -15.658907,
+   "lng": -48.192987,
+   "tem": true,
+   "dias": 35,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 5 BASEVI SOBRADINHO",
+   "ra": "Sobradinho",
+   "lat": -15.646394,
+   "lng": -47.889475,
+   "tem": true,
+   "dias": 168,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 4 SETOR DE MANSOES SOBRADINHO II",
+   "ra": "Sobradinho II",
+   "lat": -15.635751,
+   "lng": -47.8375381,
+   "tem": true,
+   "dias": 26,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 3 VALE DOS PINHEIROS SOBRADINHO II",
+   "ra": "Sobradinho II",
+   "lat": -15.620846339911763,
+   "lng": -47.82162755727768,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 05 SAMAMBAIA",
+   "ra": "Samambaia",
+   "lat": -15.898024,
+   "lng": -48.120954,
+   "tem": true,
+   "dias": 3,
+   "nivel": "critico"
+  },
+  {
+   "nome": "UBS 6 VALE DAS ACACIAS SOBRADINHO II",
+   "ra": "Sobradinho II",
+   "lat": -15.622850847300713,
+   "lng": -47.83646821975708,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 06 SAMAMBAIA",
+   "ra": "Samambaia",
+   "lat": -15.869936,
+   "lng": -48.058807,
+   "tem": true,
+   "dias": 20,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 05 RECANTO DAS EMAS",
+   "ra": "Recanto das Emas",
+   "lat": -15.9241,
+   "lng": -48.056108,
+   "tem": true,
+   "dias": 36,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 7 CAFE SEM TROCO PARANOA",
+   "ra": "Paranoá",
+   "lat": -15.936238212690318,
+   "lng": -47.58023234908678,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 01 AGUAS CLARAS",
+   "ra": "Águas Claras",
+   "lat": -15.859615,
+   "lng": -48.036196,
+   "tem": true,
+   "dias": 60,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 08 SAMAMBAIA",
+   "ra": "Samambaia",
+   "lat": -15.876045,
+   "lng": -48.066794,
+   "tem": true,
+   "dias": 22,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 03 RECANTO DAS EMAS",
+   "ra": "Recanto das Emas",
+   "lat": -15.901925,
+   "lng": -48.074326,
+   "tem": true,
+   "dias": 34,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 02 NUCLEO BANDEIRANTE",
+   "ra": "Núcleo Bandeirante",
+   "lat": -15.879591138453351,
+   "lng": -47.97381773241612,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 07 SAMAMBAIA",
+   "ra": "Samambaia",
+   "lat": -15.878026,
+   "lng": -48.08263,
+   "tem": true,
+   "dias": 15,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 1 CEILANDIA",
+   "ra": "Ceilândia",
+   "lat": -15.819091,
+   "lng": -48.12995,
+   "tem": true,
+   "dias": 26,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 15 CEILANDIA",
+   "ra": "Ceilândia",
+   "lat": -15.809039,
+   "lng": -48.156573,
+   "tem": true,
+   "dias": 39,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 2 SOBRADINHO II",
+   "ra": "Sobradinho II",
+   "lat": -15.639041174991059,
+   "lng": -47.81979560852051,
+   "tem": true,
+   "dias": 39,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 04 RECANTO DAS EMAS",
+   "ra": "Recanto das Emas",
+   "lat": -15.91967,
+   "lng": -48.101341,
+   "tem": true,
+   "dias": 6,
+   "nivel": "critico"
+  },
+  {
+   "nome": "UBS 05 RIACHO FUNDO II",
+   "ra": "Riacho Fundo II",
+   "lat": -15.940087059903828,
+   "lng": -48.0397843,
+   "tem": true,
+   "dias": 31,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 8 SANTA MARIA",
+   "ra": "Santa Maria",
+   "lat": -16.01433193928484,
+   "lng": -47.988415360450745,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 5 SETOR DE MANSOES SOBRADINHO II",
+   "ra": "Sobradinho II",
+   "lat": -15.628401887184364,
+   "lng": -47.83757597208023,
+   "tem": true,
+   "dias": 5,
+   "nivel": "critico"
+  },
+  {
+   "nome": "UBS 4 ROTA DO CAVALO SOBRADINHO",
+   "ra": "Sobradinho",
+   "lat": -15.702389,
+   "lng": -47.758696,
+   "tem": true,
+   "dias": 112,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 11 SAMAMBAIA",
+   "ra": "Samambaia",
+   "lat": -15.887541,
+   "lng": -48.147153,
+   "tem": true,
+   "dias": 38,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 8 CAVAS DE BAIXO SAO SEBASTIAO",
+   "ra": "São Sebastião",
+   "lat": -15.984492472903673,
+   "lng": -47.69663391164205,
+   "tem": true,
+   "dias": 23,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 01 VICENTE PIRES",
+   "ra": "Vicente Pires",
+   "lat": -15.8193,
+   "lng": -48.020231,
+   "tem": true,
+   "dias": 43,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 05 GUARA",
+   "ra": "Guará",
+   "lat": -15.8493127474169,
+   "lng": -47.97025803544594,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 16 CEILANDIA",
+   "ra": "Ceilândia",
+   "lat": -15.834473,
+   "lng": -48.133699,
+   "tem": true,
+   "dias": 37,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 12 SAMAMBAIA",
+   "ra": "Samambaia",
+   "lat": -15.865519,
+   "lng": -48.07305,
+   "tem": true,
+   "dias": 20,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 17 CEILANDIA",
+   "ra": "Ceilândia",
+   "lat": -15.846983,
+   "lng": -48.114366,
+   "tem": true,
+   "dias": 47,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 11 RECANTO DAS EMAS",
+   "ra": "Recanto das Emas",
+   "lat": -15.941873,
+   "lng": -48.240666,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 9 ZONA RURAL DE BRAZLANDIA",
+   "ra": "Brazlândia",
+   "lat": -15.743074,
+   "lng": -48.170263,
+   "tem": true,
+   "dias": 31,
+   "nivel": "alto"
+  },
+  {
+   "nome": "UBS 18 PLANALTINA",
+   "ra": "Planaltina",
+   "lat": -15.615005775539,
+   "lng": -47.651481628417,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 3 ITAPOA",
+   "ra": "Itapoã",
+   "lat": -15.744862783258741,
+   "lng": -47.76092827157706,
+   "tem": true,
+   "dias": 25,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 3 PARANOA PARQUE",
+   "ra": "Paranoá",
+   "lat": -15.767980272989352,
+   "lng": -47.79170827826765,
+   "tem": true,
+   "dias": 14,
+   "nivel": "baixo"
+  },
+  {
+   "nome": "UBS 18 CAIC BERNARDO SAYAO",
+   "ra": "Ceilândia",
+   "lat": -15.832347,
+   "lng": -48.114516,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 13 SAMAMBAIA",
+   "ra": "Samambaia",
+   "lat": -15.875261,
+   "lng": -48.109817,
+   "tem": false,
+   "dias": null,
+   "nivel": null
+  },
+  {
+   "nome": "UBS 20 PLANALTINA",
+   "ra": "Planaltina",
+   "lat": -15.6123495,
+   "lng": -47.6517498,
+   "tem": true,
+   "dias": 40,
+   "nivel": "alto"
+  }
+ ]
+}

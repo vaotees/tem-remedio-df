@@ -19,14 +19,14 @@ export const fonte = {
 /**
  * Atkinson Hyperlegible Next, do Braille Institute, desenhada para baixa visão (I, l e 1 não se confundem,
  * nem 0 e O). Cada peso é uma família: no Android, `fontWeight` com fonte própria cai na fonte do sistema.
- * A Mono entra nos números que se comparam (distância, contagens).
+ * Os números que se comparam (distância, contagens) vão no peso mais forte da mesma letra.
  */
 export const familia = {
   regular: "AtkinsonHyperlegibleNext_400Regular",
   medio: "AtkinsonHyperlegibleNext_500Medium",
   negrito: "AtkinsonHyperlegibleNext_700Bold",
   extra: "AtkinsonHyperlegibleNext_800ExtraBold",
-  numero: "AtkinsonHyperlegibleMono_700Bold",
+  numero: "AtkinsonHyperlegibleNext_800ExtraBold",
 } as const;
 
 export type Peso = keyof typeof familia;

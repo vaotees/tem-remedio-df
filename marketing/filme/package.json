@@ -1,0 +1,25 @@
+{
+  "name": "tem-remedio-df-filme",
+  "private": true,
+  "type": "module",
+  "description": "Filme de apresentação do Tem Remédio DF (Remotion + Three.js). Projeto separado do app: fica fora do workspace do pnpm e tem as próprias dependências.",
+  "scripts": {
+    "estudio": "remotion studio src/index.ts",
+    "quadro": "remotion still src/index.ts --gl=angle --bundle-cache=false --log=error",
+    "dados": "node dados.mjs"
+  },
+  "dependencies": {
+    "@react-three/fiber": "9.8.2",
+    "@remotion/cli": "4.0.543",
+    "@remotion/three": "4.0.543",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "remotion": "4.0.543",
+    "three": "0.187.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/three": "0.187.0",
+    "typescript": "7.0.2"
+  }
+}

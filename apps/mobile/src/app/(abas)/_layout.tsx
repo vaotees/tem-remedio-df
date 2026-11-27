@@ -1,5 +1,6 @@
 import { Tabs } from "expo-router";
-import { Text, useWindowDimensions, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Animated, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icone, type NomeIcone } from "@/componentes/Icone";
 import {
@@ -12,25 +13,47 @@ import {
   ROTULO_ABA,
   useTema,
 } from "@/tema";
+import { DRIVER_NATIVO, useAnimar } from "@/util/movimento";
 
 function IconeAba({ nome, nomeEscolhida, focused }: { nome: NomeIcone; nomeEscolhida: NomeIcone; focused: boolean }) {
   const { cores } = useTema();
+  const animar = useAnimar();
+  // A pílula cresce do meio quando a aba é escolhida, com uma mola; o ícone dá um pulinho.
+  const [escolha] = useState(() => new Animated.Value(focused ? 1 : 0));
+  useEffect(() => {
+    if (!animar) {
+      escolha.setValue(focused ? 1 : 0);
+      return;
+    }
+    Animated.spring(escolha, { toValue: focused ? 1 : 0, speed: 18, bounciness: 9, useNativeDriver: DRIVER_NATIVO }).start();
+  }, [animar, escolha, focused]);
   // A aba escolhida tem a pílula azul-clara atrás do ícone e o ícone cheio: não depende só da cor.
   return (
-    <View
-      style={{
-        width: 64,
-        height: PILULA_ABA,
-        borderRadius: RAIO_CAPSULA,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: focused ? cores.primariaTinta : "transparent",
-      }}
-    >
-      <Icone name={focused ? nomeEscolhida : nome} size={26} color={focused ? cores.textoTonal : cores.textoSecundario} />
+    <View style={estilos.aba}>
+      <Animated.View
+        style={[
+          StyleSheet.absoluteFill,
+          estilos.pilula,
+          {
+            backgroundColor: cores.primariaTinta,
+            opacity: escolha,
+            transform: [{ scaleX: escolha.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) }],
+          },
+        ]}
+      />
+      <Animated.View
+        style={{ transform: [{ scale: escolha.interpolate({ inputRange: [0, 0.6, 1], outputRange: [1, 1.18, 1] }) }] }}
+      >
+        <Icone name={focused ? nomeEscolhida : nome} size={26} color={focused ? cores.textoTonal : cores.textoSecundario} />
+      </Animated.View>
     </View>
   );
 }
+
+const estilos = StyleSheet.create({
+  aba: { width: 64, height: PILULA_ABA, alignItems: "center", justifyContent: "center" },
+  pilula: { borderRadius: RAIO_CAPSULA },
+});
 
 /** Quatro abas fixas, com rótulo sempre visível e grande. Nada escondido em menu. */
 export default function LayoutAbas() {

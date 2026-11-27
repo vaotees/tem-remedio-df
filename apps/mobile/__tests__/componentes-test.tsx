@@ -1,4 +1,4 @@
-import { render, renderHook, screen, userEvent } from "@testing-library/react-native";
+import { fireEvent, render, renderHook, screen, userEvent, waitFor } from "@testing-library/react-native";
 import { AccessibilityInfo, Platform, StyleSheet } from "react-native";
 import { Botao } from "@/componentes/Botao";
 import { FaixaAtualizacao } from "@/componentes/FaixaAtualizacao";
@@ -162,5 +162,58 @@ describe("saudação do Início", () => {
     expect(saudacao(new Date(2026, 10, 17, 8, 12), null)).toBe("Bom dia");
     expect(saudacao(new Date(2026, 10, 17, 14, 0), "Lúcia")).toBe("Boa tarde, Lúcia");
     expect(saudacao(new Date(2026, 10, 17, 19, 30), "Lúcia")).toBe("Boa noite, Lúcia");
+  });
+});
+
+describe("Abertura", () => {
+  // O jest.setup troca a abertura por nada nos testes de tela; aqui vale a de verdade.
+  const { Abertura } = jest.requireActual<typeof import("@/componentes/Abertura")>("@/componentes/Abertura");
+  const lema = "Veja se tem antes de sair de casa";
+
+  afterEach(() => jest.restoreAllMocks());
+
+  it("fica escondida do leitor de tela e, com Reduzir movimento, aparece montada e parada para dar tempo de ler", async () => {
+    jest.spyOn(AccessibilityInfo, "isReduceMotionEnabled").mockResolvedValue(true);
+    jest.spyOn(AccessibilityInfo, "isScreenReaderEnabled").mockResolvedValue(false);
+    const fim = jest.fn();
+    const inicio = Date.now();
+    await render(<Abertura aoTerminar={fim} />);
+    expect(screen.queryByText(lema)).toBeNull();
+    expect(screen.getByText(lema, { includeHiddenElements: true })).toBeOnTheScreen();
+    await waitFor(() => expect(fim).toHaveBeenCalledTimes(1), { timeout: 3000 });
+    expect(Date.now() - inicio).toBeGreaterThanOrEqual(1000);
+  });
+
+  it("com leitor de tela, é só espera: some logo", async () => {
+    jest.spyOn(AccessibilityInfo, "isReduceMotionEnabled").mockResolvedValue(false);
+    jest.spyOn(AccessibilityInfo, "isScreenReaderEnabled").mockResolvedValue(true);
+    const fim = jest.fn();
+    const inicio = Date.now();
+    await render(<Abertura aoTerminar={fim} />);
+    await waitFor(() => expect(fim).toHaveBeenCalledTimes(1), { timeout: 1000 });
+    expect(Date.now() - inicio).toBeLessThan(800);
+  });
+
+  it("anima o encaixe, mostra o nome com tempo para ler e termina sozinha, em cerca de 3 s", async () => {
+    jest.spyOn(AccessibilityInfo, "isReduceMotionEnabled").mockResolvedValue(false);
+    jest.spyOn(AccessibilityInfo, "isScreenReaderEnabled").mockResolvedValue(false);
+    const fim = jest.fn();
+    const inicio = Date.now();
+    await render(<Abertura aoTerminar={fim} />);
+    // Folga no limite: com todos os testes rodando juntos, o relógio do Jest atrasa.
+    await waitFor(() => expect(fim).toHaveBeenCalledTimes(1), { timeout: 12000 });
+    // Mais que o dobro da abertura antiga (1,15 s): o nome fica tempo bastante para ser lido.
+    expect(Date.now() - inicio).toBeGreaterThan(2000);
+  }, 20000);
+
+  it("um toque pula a abertura", async () => {
+    jest.spyOn(AccessibilityInfo, "isReduceMotionEnabled").mockResolvedValue(false);
+    jest.spyOn(AccessibilityInfo, "isScreenReaderEnabled").mockResolvedValue(false);
+    const fim = jest.fn();
+    const inicio = Date.now();
+    await render(<Abertura aoTerminar={fim} />);
+    await fireEvent.press(await screen.findByTestId("pular-abertura", { includeHiddenElements: true }));
+    await waitFor(() => expect(fim).toHaveBeenCalledTimes(1), { timeout: 1000 });
+    expect(Date.now() - inicio).toBeLessThan(1500);
   });
 });

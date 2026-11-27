@@ -7,6 +7,7 @@ import { enquadrar, resumoDoMapa, type PropsMapaPostos } from "@/postos/mapa";
 import type { PostoComEstoque } from "@/postos/postos";
 import { ALVO_MINIMO, espaco, RAIO_CARTAO, sombraCartao, useTema } from "@/tema";
 import { Botao } from "./Botao";
+import { Dica } from "./Dica";
 import { Icone } from "./Icone";
 import { ICONE_NIVEL, SeloEstoque } from "./SeloEstoque";
 import { SeloHorario } from "./SeloHorario";
@@ -59,29 +60,29 @@ export function MapaPostos({ postos, ordem, aoAbrir }: PropsMapaPostos) {
 
   return (
     <View style={estilos.conteudo}>
-      {/* A legenda vem antes do mapa: quem desce a tela lê o que cada cor quer dizer antes de chegar nele. */}
+      {/*
+        A legenda vem antes do mapa (quem desce a tela lê o que cada cor quer dizer antes de chegar nele), em
+        cápsulas que dividem a linha: o mapa fica grande e a explicação de como mexer nele aparece até o "Entendi".
+      */}
       <View
-        style={[estilos.caixaLegenda, { backgroundColor: cores.superficie }, sombraCartao(cores)]}
+        style={estilos.legenda}
         accessible
         accessibilityLabel={`Cores dos pinos: ${niveis.map((n) => TEXTO_NIVEL[n]).join(", ")}`}
       >
-        <Texto variante="destaque">O que cada cor quer dizer</Texto>
-        <View style={estilos.legenda}>
-          {niveis.map((nivel) => (
-            <View key={nivel} style={estilos.itemLegenda}>
-              <Pino nivel={nivel} tamanho={34} />
-              <Texto peso="negrito" style={estilos.textoLegenda}>
-                {TEXTO_NIVEL[nivel]}
-              </Texto>
-            </View>
-          ))}
-        </View>
+        {niveis.map((nivel) => (
+          <View key={nivel} style={[estilos.itemLegenda, { backgroundColor: cores.superficie }, sombraCartao(cores)]}>
+            <Pino nivel={nivel} tamanho={26} />
+            <Texto variante="legenda" peso="medio" style={estilos.textoLegenda}>
+              {TEXTO_NIVEL[nivel]}
+            </Texto>
+          </View>
+        ))}
       </View>
-      <Texto secundario>
+      <Dica id="mapa-gestos">
         {postos.length === 1
           ? "Toque no pino para ver o posto."
           : "Toque num pino para ver o posto. Com dois dedos, aproxime ou afaste o mapa. Com um dedo, a tela desce normalmente."}
-      </Texto>
+      </Dica>
       <View
         style={[
           estilos.moldura,
@@ -231,9 +232,17 @@ const estilos = StyleSheet.create({
   moldura: { borderRadius: RAIO_CARTAO, borderWidth: 1, overflow: "hidden" },
   alvo: { width: ALVO_MINIMO, height: ALVO_MINIMO, alignItems: "center", justifyContent: "center" },
   pino: { alignItems: "center", justifyContent: "center" },
-  caixaLegenda: { borderRadius: RAIO_CARTAO, padding: espaco.md, gap: espaco.sm },
-  legenda: { flexDirection: "row", flexWrap: "wrap", columnGap: espaco.md, rowGap: espaco.sm },
-  itemLegenda: { flexDirection: "row", alignItems: "center", gap: espaco.xs, maxWidth: "100%" },
+  legenda: { flexDirection: "row", flexWrap: "wrap", gap: espaco.xs },
+  itemLegenda: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    maxWidth: "100%",
+    borderRadius: RAIO_CARTAO,
+    paddingVertical: 4,
+    paddingLeft: 4,
+    paddingRight: espaco.sm + 4,
+  },
   textoLegenda: { flexShrink: 1 },
   cartao: { borderRadius: RAIO_CARTAO, padding: espaco.md, gap: espaco.sm },
 });

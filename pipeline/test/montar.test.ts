@@ -158,6 +158,31 @@ describe("montarSnapshot", () => {
   });
 });
 
+describe("telefone do posto", () => {
+  const comTelefone = (telefone: string | null) =>
+    montarSnapshot({
+      atualizadoEm: "2026-10-17T00:16:33",
+      estoque: [base],
+      regras: [],
+      cadastroUbs: cadastroUbs.map((c) => ({ ...c, telefone })),
+      cnes: { ...cnes, "0010626": { ...cnes["0010626"]!, telefone: null } },
+      cmed,
+      agora: new Date("2026-10-17T04:00:00Z"),
+    });
+
+  it("vai formatado para o snapshot, venha como vier no cadastro", () => {
+    expect(comTelefone("6134497490").snapshot.ubs[0]!.telefone).toBe("(61) 3449-7490");
+    expect(comTelefone("61 2017-2000 (4590)").snapshot.ubs[0]!.telefone).toBe("(61) 2017-2000, ramal 4590");
+  });
+
+  it("fora do formato: o posto fica sem telefone e o log avisa", () => {
+    // Veio assim no cadastro da SES-DF (UBS 1 Asa Norte): um dígito a mais.
+    const { snapshot, avisos } = comTelefone("61334494826");
+    expect(snapshot.ubs[0]!.telefone).toBeNull();
+    expect(avisos.join(" ")).toContain('Telefone fora do formato (o posto fica sem Ligar): 0010626 UBS 05 TAGUATINGA: "61334494826"');
+  });
+});
+
 // Dados reais de 17/10/2026: anlodipino 5 mg numa UBS comum e nas 3 unidades prisionais que tinham
 // estoque (linhas do painel), o cadastro da SES-DF (as 9 unidades com horário "OUTRO/PRISIONAL") e o CNES.
 const prisionais = JSON.parse(

@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native";
 import { espaco, RAIO_CARTAO, useTema } from "@/tema";
 import { diasDesde, formatarAtualizacao } from "@/util/datas";
 import { Icone } from "./Icone";
+import { PontoVivo } from "./Movimento";
 import { Texto } from "./Texto";
 
 interface Props {
@@ -31,7 +32,7 @@ export function FaixaAtualizacao({ atualizadoEm, procurandoNovos, agora = new Da
       {antigo ? (
         <Icone name="warning" size={20} color={cor} />
       ) : (
-        <View style={[estilos.ponto, { backgroundColor: cores.barraSemaforo.alto, borderColor: cores.semaforo.alto.fundo }]} />
+        <PontoVivo cor={cores.barraSemaforo.alto} />
       )}
       <View style={centro && !antigo ? null : estilos.textos}>
         <Texto variante="legenda" cor={cor}>
@@ -55,6 +56,5 @@ export function FaixaAtualizacao({ atualizadoEm, procurandoNovos, agora = new Da
 const estilos = StyleSheet.create({
   faixa: { flexDirection: "row", gap: espaco.sm, alignItems: "center", paddingVertical: espaco.xs, borderRadius: RAIO_CARTAO },
   centro: { justifyContent: "center" },
-  ponto: { width: 16, height: 16, borderRadius: 8, borderWidth: 4 },
   textos: { flex: 1 },
 });

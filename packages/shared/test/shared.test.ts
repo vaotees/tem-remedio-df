@@ -6,6 +6,7 @@ import {
   linkOficialPermitido,
   nivelEstoque,
   normalizar,
+  normalizarTelefone,
   snapshotSchema,
   VERSAO_SCHEMA,
   type Snapshot,
@@ -184,5 +185,32 @@ describe("snapshotSchema: o que vem de fora", () => {
     const muitos = snapshotValido();
     muitos.estoque = Array.from({ length: LIMITES_SNAPSHOT.estoque + 1 }, () => [0, 0, 1, null]);
     expect(snapshotSchema.safeParse(muitos).success).toBe(false);
+  });
+});
+
+describe("normalizarTelefone", () => {
+  it("formata fixo, celular e número sem DDD (DF)", () => {
+    expect(normalizarTelefone("(61) 3563-9176")).toEqual({ exibir: "(61) 3563-9176", discar: "+556135639176" });
+    expect(normalizarTelefone("6134497490")?.exibir).toBe("(61) 3449-7490");
+    expect(normalizarTelefone("61 2017 2074")?.exibir).toBe("(61) 2017-2074");
+    expect(normalizarTelefone("061 3449-5849")?.discar).toBe("+556134495849");
+    expect(normalizarTelefone("3449-5836")?.exibir).toBe("(61) 3449-5836");
+    expect(normalizarTelefone("61991234567")).toEqual({ exibir: "(61) 99123-4567", discar: "+5561991234567" });
+    expect(normalizarTelefone("+55 61 3563-9176")?.discar).toBe("+556135639176");
+  });
+
+  it("guarda o ramal para mostrar; disca o número principal", () => {
+    expect(normalizarTelefone("61 2017-2000 (4590)")).toEqual({ exibir: "(61) 2017-2000, ramal 4590", discar: "+556120172000" });
+    expect(normalizarTelefone("(61) 3449-5849 ramal 2074")?.exibir).toBe("(61) 3449-5849, ramal 2074");
+  });
+
+  it("recusa o que não é telefone brasileiro: um dígito a mais, só o ramal, número curto", () => {
+    // Veio assim no cadastro da SES-DF (UBS 1 Asa Norte): 9 dígitos começando com 3 não existe.
+    expect(normalizarTelefone("61334494826")).toBeNull();
+    expect(normalizarTelefone("RAMAL 2241")).toBeNull();
+    expect(normalizarTelefone("123")).toBeNull();
+    expect(normalizarTelefone("(01) 3563-9176")).toBeNull();
+    expect(normalizarTelefone("")).toBeNull();
+    expect(normalizarTelefone(null)).toBeNull();
   });
 });
