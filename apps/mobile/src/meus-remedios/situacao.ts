@@ -1,4 +1,4 @@
-import type { Produto, Snapshot } from "@tem-remedio/shared";
+import { nivelEstoque, type NivelEstoque, type Produto, type Snapshot } from "@tem-remedio/shared";
 import { indiceProduto } from "@/busca/remedios";
 import { postosComEstoque, type Ordem, type PostoComEstoque } from "@/postos/postos";
 
@@ -6,12 +6,13 @@ import { postosComEstoque, type Ordem, type PostoComEstoque } from "@/postos/pos
  * Como está um remédio guardado nos dados de hoje:
  * - `fora_dos_dados`: o código não aparece no snapshot (o item continua guardado, a pessoa decide se tira);
  * - `nenhum_posto`: aparece, mas nenhum posto tem hoje;
- * - `tem`: quantos postos têm e o primeiro deles na ordem pedida (o mais perto, ou o primeiro da região).
+ * - `tem`: quantos postos têm, quantos em cada nível do semáforo e o primeiro deles na ordem pedida
+ *   (o mais perto, ou o primeiro da região).
  */
 export type SituacaoHoje =
   | { tipo: "fora_dos_dados" }
   | { tipo: "nenhum_posto"; produto: Produto }
-  | { tipo: "tem"; produto: Produto; postos: number; primeiro: PostoComEstoque };
+  | { tipo: "tem"; produto: Produto; postos: number; niveis: Record<NivelEstoque, number>; primeiro: PostoComEstoque };
 
 /**
  * Usa a mesma lista da tela de postos: controlado só nas UBSs que entregam controlados,
@@ -24,7 +25,9 @@ export function situacaoHoje(snapshot: Snapshot, codigo: string, ordem: Ordem): 
   const postos = postosComEstoque(snapshot, iProduto, ordem);
   const primeiro = postos[0];
   if (!primeiro) return { tipo: "nenhum_posto", produto };
-  return { tipo: "tem", produto, postos: postos.length, primeiro };
+  const niveis: Record<NivelEstoque, number> = { alto: 0, baixo: 0, critico: 0, sem_consumo: 0 };
+  for (const p of postos) niveis[nivelEstoque(p.dias)]++;
+  return { tipo: "tem", produto, postos: postos.length, niveis, primeiro };
 }
 
 /** "Em 1 posto hoje", "Em 4 postos hoje" ou "Nenhum posto tem hoje". */

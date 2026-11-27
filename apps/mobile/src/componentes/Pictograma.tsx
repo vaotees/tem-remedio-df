@@ -42,8 +42,11 @@ function Desenho({ forma, cor }: { forma: Forma; cor: string }) {
   }
 }
 
-/** Quadradinho azul-claro com o desenho da forma. É enfeite: o texto ao lado diz a forma. */
-export function Pictograma({ forma, tamanho = 48 }: { forma: string | null; tamanho?: number }) {
+/**
+ * Quadradinho azul-claro com o desenho da forma. É enfeite: o texto ao lado diz a forma.
+ * Na faixa do alto (`sobreFaixa`), de vidro e com o desenho em branco.
+ */
+export function Pictograma({ forma, tamanho = 48, sobreFaixa }: { forma: string | null; tamanho?: number; sobreFaixa?: boolean }) {
   const { cores } = useTema();
   const desenho = Math.round(tamanho * 0.55);
   return (
@@ -54,13 +57,15 @@ export function Pictograma({ forma, tamanho = 48 }: { forma: string | null; tama
         width: tamanho,
         height: tamanho,
         borderRadius: Math.round(tamanho * 0.32),
-        backgroundColor: cores.primariaTinta,
+        backgroundColor: sobreFaixa ? cores.vidroFaixa : cores.primariaTinta,
+        borderWidth: sobreFaixa ? 1.5 : 0,
+        borderColor: cores.bordaVidro,
         alignItems: "center",
         justifyContent: "center",
       }}
     >
       <Svg width={desenho} height={desenho} viewBox="0 0 24 24">
-        <Desenho forma={tipoForma(forma)} cor={cores.textoTonal} />
+        <Desenho forma={tipoForma(forma)} cor={sobreFaixa ? cores.textoFaixa : cores.textoTonal} />
       </Svg>
     </View>
   );

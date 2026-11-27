@@ -7,15 +7,23 @@ import { Texto } from "./Texto";
 
 type Estado = ReturnType<typeof useSnapshot>;
 
+interface Props {
+  children: (snapshot: Snapshot, estado: Estado) => ReactNode;
+  /** Mostrado em cima do "carregando" e do erro (ex.: o Voltar, quando a tela o desenha junto com os dados). */
+  semDados?: ReactNode;
+}
+
 /** Mostra "carregando" ou o erro, e só renderiza o conteúdo quando os dados estão prontos. */
-export function ComDados({ children }: { children: (snapshot: Snapshot, estado: Estado) => ReactNode }) {
+export function ComDados({ children, semDados }: Props) {
   const estado = useSnapshot();
   const { cores } = useTema();
 
   if (estado.snapshot) return <>{children(estado.snapshot, estado)}</>;
 
   return (
-    <View style={estilos.centro} accessibilityLiveRegion="polite">
+    <>
+      {semDados}
+      <View style={estilos.centro} accessibilityLiveRegion="polite">
       {estado.erro ? (
         <Texto>Não consegui abrir os dados do app. Feche e abra de novo.</Texto>
       ) : (
@@ -24,7 +32,8 @@ export function ComDados({ children }: { children: (snapshot: Snapshot, estado: 
           <Texto secundario>Carregando os dados…</Texto>
         </>
       )}
-    </View>
+      </View>
+    </>
   );
 }
 

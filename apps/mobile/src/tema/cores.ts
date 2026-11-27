@@ -25,12 +25,27 @@ export interface Cores {
   divisoria: string;
   /** Trilho de medidores, anéis e do seletor Lista | Mapa. */
   trilho: string;
-  /** Faixa da marca no alto do Início. */
+  /** Faixa da marca no alto das telas (cor de apoio; a faixa é desenhada com o `degrade`). */
   faixa: string;
   textoFaixa: string;
   textoFaixaSecundario: string;
+  /**
+   * Degradê da faixa do alto de todas as telas, em diagonal: do azul-noite ao azul da marca e a um azul
+   * esverdeado. O texto da faixa passa de 4,5:1 em todas as paradas (o teste confere).
+   */
+  degrade: [string, string, string];
+  /** Brilho suave por cima do degradê (enfeite): a menta da marca, quase transparente. */
+  brilho: string;
+  /** Trilho dos anéis desenhados sobre a faixa. */
+  trilhoFaixa: string;
+  /** Vidro: fundo translúcido de botões e selos sobre a faixa. */
+  vidroFaixa: string;
+  /** Contorno do vidro, para o botão aparecer sobre qualquer parte do degradê. */
+  bordaVidro: string;
   /** Cores só da marca (o símbolo). Nunca ao lado do semáforo: o verde seria lido como "tem bastante". */
   marca: { azul: string; verde: string; menta: string };
+  /** Letra sobre a menta (o avatar do Perfil): escura nos dois temas. */
+  textoSobreMenta: string;
   /** Cartões com sombra no tema claro; no escuro, sombra não aparece e o cartão ganha borda. */
   sombra: boolean;
   bordaCartao: string;
@@ -85,7 +100,13 @@ export const coresClaras: Cores = {
   faixa: "#0B5FA5",
   textoFaixa: "#FFFFFF",
   textoFaixaSecundario: "#D3E6F8",
+  degrade: ["#0A2E57", "#0B5FA5", "#0A6382"],
+  brilho: "#86E3BC",
+  trilhoFaixa: "rgba(255, 255, 255, 0.22)",
+  vidroFaixa: "rgba(255, 255, 255, 0.14)",
+  bordaVidro: "rgba(255, 255, 255, 0.45)",
   marca: { azul: "#0B5FA5", verde: "#1F8A5E", menta: "#86E3BC" },
+  textoSobreMenta: "#0E1B2B",
   sombra: true,
   bordaCartao: "transparent",
   veu: "rgba(0, 0, 0, 0.5)",
@@ -119,7 +140,13 @@ export const coresEscuras: Cores = {
   faixa: "#102A44",
   textoFaixa: "#EEF3F8",
   textoFaixaSecundario: "#A9CBEA",
+  degrade: ["#08182B", "#0E2C4A", "#0B3A45"],
+  brilho: "#86E3BC",
+  trilhoFaixa: "rgba(255, 255, 255, 0.16)",
+  vidroFaixa: "rgba(255, 255, 255, 0.10)",
+  bordaVidro: "rgba(255, 255, 255, 0.35)",
   marca: { azul: "#6CB4F5", verde: "#86E3BC", menta: "#86E3BC" },
+  textoSobreMenta: "#0E1B2B",
   sombra: false,
   bordaCartao: "#273240",
   veu: "rgba(0, 0, 0, 0.7)",

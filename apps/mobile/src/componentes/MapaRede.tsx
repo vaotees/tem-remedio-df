@@ -8,6 +8,7 @@ import { ALVO_MINIMO, espaco, RAIO_CARTAO, sombraCartao, useTema } from "@/tema"
 import { Botao } from "./Botao";
 import { Icone } from "./Icone";
 import { SeloHorario } from "./SeloHorario";
+import { Dica } from "./Dica";
 import { Texto } from "./Texto";
 
 /** No celular o mapa existe. Na web, não (ver `MapaRede.web.tsx`). */
@@ -114,7 +115,7 @@ export function MapaRede({ postos, origem, aoAbrir }: PropsMapaRede) {
           <Botao titulo="Ver posto" icone="arrow-forward-circle" dica="Mostra endereço, telefone e como chegar" onPress={() => aoAbrir(atual)} />
         </View>
       ) : (
-        <Texto secundario>Toque num pino para ver o posto. Para ver mais perto, aproxime o mapa com dois dedos.</Texto>
+        <Dica id="mapa-rede-gestos">Toque num pino para ver o posto. Para ver mais perto, aproxime o mapa com dois dedos.</Dica>
       )}
     </View>
   );

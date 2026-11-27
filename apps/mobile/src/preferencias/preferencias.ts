@@ -14,13 +14,15 @@ const preferenciasSchema = z.object({
   nome: z.string().trim().max(30).nullable().catch(null),
   letra: z.enum(["normal", "grande", "maior"]).catch("normal"),
   tema: z.enum(["sistema", "claro", "escuro"]).catch("sistema"),
+  /** Dicas que a pessoa já fechou com "Entendi" (ex.: como mexer no mapa): não aparecem de novo. */
+  dicas: z.array(z.string().max(40)).max(20).catch([]),
 });
 
 export type Preferencias = z.infer<typeof preferenciasSchema>;
 
 /** Fica só neste aparelho (LGPD): não vai para servidor nenhum. */
 export const ARQUIVO_PREFERENCIAS = "preferencias.json";
-export const PADRAO: Preferencias = { nome: null, letra: "normal", tema: "sistema" };
+export const PADRAO: Preferencias = { nome: null, letra: "normal", tema: "sistema", dicas: [] };
 
 /**
  * As preferências ficam num estado do próprio módulo (e não no React Query), porque o tema e a letra
