@@ -116,3 +116,7 @@ A Lei 14.654/2023 obriga o SUS a divulgar o estoque das farmácias públicas. Os
 ## Aviso
 
 O estoque é o registrado pela SES-DF na data indicada e muda ao longo do dia. **Ligue para a UBS antes de ir.** O app não substitui orientação médica ou farmacêutica.
+
+## Direitos
+
+© 2026 Estevão Marques. Todos os direitos reservados. O código está aberto para leitura e avaliação, mas não é de código aberto: copiar, modificar, reaproveitar ou publicar o app (ou um derivado) depende de autorização. Os dados são públicos e seguem as regras das fontes. Detalhes em [LICENSE](LICENSE).

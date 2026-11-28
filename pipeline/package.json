@@ -2,6 +2,7 @@
   "name": "@tem-remedio/pipeline",
   "version": "0.1.0",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "description": "Coletor diário: extrai o estoque da SES-DF, limpa, valida e publica o snapshot do app.",
   "scripts": {

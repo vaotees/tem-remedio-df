@@ -1,6 +1,7 @@
 {
   "name": "tem-remedio-df",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "packageManager": "pnpm@10.33.2",
   "engines": {

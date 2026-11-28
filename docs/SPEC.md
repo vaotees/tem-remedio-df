@@ -231,3 +231,9 @@ O usuário testou a v2 no iPhone e achou o app estático e "amador": sem animaç
 - O GitHub Pages publica o site inteiro de uma vez: o workflow `Coletor diário` exporta o app a cada dado novo e também a cada mudança no app na `main` (com os dados que já estão no ar). O `baseUrl` (`/tem-remedio-df/app`) só vale na exportação para o Pages (`TEM_REMEDIO_BASE_URL` no `app.config.ts`).
 - **APK** pelo EAS Build (perfil `preview`), anexado às Releases do GitHub. Identificador `io.github.vaotees.temremediodf` (Android e iOS), versão 0.1.0; o EAS guarda a chave de assinatura e numera os builds (`appVersionSource: remote`).
 - **Lojas**: perfil `production` pronto (AAB para a Google Play, build de iOS). Falta a conta de desenvolvedor da Apple e a da Google Play, e os itens P0 da revisão de UX. iPad desligado (`supportsTablet: false`).
+
+### Direitos do código (27/11/2026)
+- O repositório continua **público** (é a vitrine do portfólio, e o GitHub Pages e os minutos do Actions do plano gratuito dependem disso), mas **não é de código aberto**: todos os direitos reservados (`LICENSE`, seção "Direitos" do README, `"license": "UNLICENSED"` nos `package.json`). Ver e fazer fork no GitHub pode (Termos do GitHub); copiar, reaproveitar ou publicar o app depende de autorização.
+- Os dados (SES-DF, CNES, CMED) são públicos e ficam fora do aviso; fontes e bibliotecas seguem as próprias licenças.
+- Começar fechado deixa as opções abertas: dá para trocar depois por uma licença não comercial ou aberta, mas não dá para fechar de volta o que alguém já copiou sob licença aberta.
+- O que protege contra um app igual é a marca, não o código: registrar "Tem Remédio DF" (nome e símbolo) no INPI antes das lojas ou de um piloto com a SES-DF. O registro do programa no INPI é opcional (prova de autoria e data).

@@ -1,0 +1,32 @@
+Tem Remédio DF
+© 2026 Estevão Marques. Todos os direitos reservados.
+
+O código-fonte, o design, o símbolo, as telas, os textos e o filme de
+apresentação deste repositório são obra do autor, protegidos pela Lei
+9.609/1998 (programas de computador) e pela Lei 9.610/1998 (direitos
+autorais).
+
+Este repositório é público só para leitura e avaliação. Você pode ver o
+código e, dentro do GitHub, fazer fork, como permitem os Termos de Serviço
+do GitHub. Qualquer outro uso depende de autorização por escrito do autor,
+inclusive:
+
+- copiar, modificar ou reaproveitar o código, no todo ou em parte;
+- publicar o app, ou um derivado dele, em loja de aplicativos ou na web;
+- usar o nome "Tem Remédio DF", o símbolo ou as telas.
+
+Para pedir autorização: https://github.com/vaotees
+
+Não são do autor e seguem as próprias regras:
+
+- os dados de estoque, de cadastro e de preços, que são públicos (Secretaria
+  de Saúde do DF, CNES/Ministério da Saúde e CMED/Anvisa);
+- as fontes Atkinson Hyperlegible, do Braille Institute, sob a SIL Open Font
+  License 1.1 (marketing/filme/public/fontes/OFL.txt);
+- as bibliotecas de terceiros instaladas pelo pnpm e pelo npm, cada uma com
+  a sua licença.
+
+In English: © 2026 Estevão Marques. All rights reserved. This repository is
+public for viewing and evaluation only. Any other use, including copying,
+modifying, or publishing the app or a derivative, requires the author's
+written permission.
