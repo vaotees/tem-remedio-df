@@ -430,8 +430,9 @@ function PainelRede({ snapshot }: { snapshot: Snapshot }) {
           <View style={estilos.linha}>
             <Rosca contagem={rede.niveis} tamanho={128} espessura={18}>
               <NumeroAnimado valor={porcentagemAlto} formatar={(n) => `${n}%`} peso="numero" tamanho={28} cor={cores.texto} />
+              {/* Curto: dentro da rosca, "com bastante" encostava no anel. A legenda ao lado diz por extenso. */}
               <Texto variante="legenda" tamanho={12} peso="medio" secundario>
-                com bastante
+                bastante
               </Texto>
             </Rosca>
             <View style={estilos.flex}>

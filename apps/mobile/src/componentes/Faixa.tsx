@@ -18,7 +18,9 @@ export function FundoDegrade({ simbolo = true }: { simbolo?: boolean }) {
   const { cores } = useTema();
   const id = useId().replace(/[^a-zA-Z0-9]/g, "");
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+    // Camada que recorta o símbolo (ele passa da borda). Sem ela, na web, focar a busca faz o navegador
+    // rolar a faixa para o lado.
+    <View style={estilos.recorte} pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
       <Svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
         <Defs>
           <LinearGradient id={`fundo${id}`} x1="0" y1="0" x2="1" y2="1">
@@ -138,6 +140,7 @@ const estilos = StyleSheet.create({
     borderBottomRightRadius: RAIO_FAIXA,
   },
   porCima: { paddingBottom: espaco.xl + espaco.lg },
+  recorte: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, overflow: "hidden" },
   simbolo: { position: "absolute", right: -90, top: -30, opacity: 0.07 },
   topo: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: espaco.sm },
   titulo: { gap: 2 },
