@@ -39,6 +39,7 @@ App React Native (Expo) que mostra o estoque de remédios das UBSs do Distrito F
 - TypeScript estrito (`noUncheckedIndexedAccess`). Sem `any` fora das respostas cruas do Power BI.
 - Testes com dados reais em `pipeline/test/fixtures/` (respostas do Power BI, trechos da CMED e das regras). Nada de rede nos testes.
 - Mudou o formato do snapshot? Suba `VERSAO_SCHEMA` em `packages/shared/src/snapshot.ts` e ajuste o app.
+- zod 4 (a partir da 4.6.6, que para de validar uma lista maior que o `.max()` logo no tamanho). `pnpm.overrides` no `package.json` da raiz força glob ≥ 14.0.2 e minimatch ≥ 11.0.1, por alertas do Dependabot em ferramentas de desenvolvimento (jest, eslint, `@expo/fingerprint`). Os seletores só pegam faixas vulneráveis: quando o jest e o Expo pedirem as versões corrigidas, o override deixa de valer e pode sair. Correção dentro da faixa que o pacote já aceita (ex.: node-forge do `@expo/cli`) vai pelo lockfile, sem override.
 
 ## Regras do domínio (não quebrar)
 - O app **nunca** consulta o Power BI; só lê o snapshot publicado.
