@@ -12,10 +12,12 @@ Projeto de portfólio em React Native (Expo SDK 58) + TypeScript.
 - **No Android:** baixe o APK em [Releases](https://github.com/vaotees/tem-remedio-df/releases/latest) e abra no celular. O Android vai pedir para permitir a instalação de fora da Play Store.
 - **No iPhone:** pelo navegador, no link acima. A versão da App Store depende da conta de desenvolvedor da Apple (o projeto já está configurado para o build).
 
-![Telas do Tem Remédio DF: Início, postos que têm o remédio hoje, mapa, detalhe do posto e Meus remédios](docs/telas/vitrine.png)
+![Telas do Tem Remédio DF: Início, painel "A rede agora", postos que têm o remédio hoje, detalhe do posto e Meus remédios](docs/telas/vitrine.png)
+
+<sub>Capturas da versão web (o mapa aparece só no app do celular), com o relógio às 17h30 para mostrar postos abertos. Dados reais da SES-DF.</sub>
 
 <details>
-<summary>Ver o fluxo animado (busca → postos → mapa → detalhe → Meus remédios)</summary>
+<summary>Ver o fluxo animado (Início → painel da rede → postos → detalhe → Meus remédios → Perfil)</summary>
 
 ![Fluxo do app em GIF](docs/telas/fluxo.gif)
 
@@ -23,7 +25,7 @@ Projeto de portfólio em React Native (Expo SDK 58) + TypeScript.
 
 O processo de design e as decisões estão no [estudo de caso](https://emsolucoesdigitais.com.br/cases/tem-remedio-df). Para apresentar o projeto (pitch, roteiro de vídeo e perguntas de entrevista), veja [`docs/APRESENTACAO.md`](docs/APRESENTACAO.md).
 
-Status: coletor de dados, busca → dose → postos mais perto → detalhe, mapa, Meus remédios, acessibilidade revisada (leitor de tela, letra grande, alvos de toque de 56) e redesenho visual (marca, gráficos de cobertura e de dias de estoque, Perfil sem cadastro). Antes das lojas faltam os itens de confiança da revisão de UX (aviso de versão, dado antigo, tela "Sobre").
+Status: coletor de dados, busca → dose → postos mais perto → detalhe, mapa, Meus remédios, acessibilidade revisada (leitor de tela, letra grande, alvos de toque de 56) e redesenho visual (faixa da marca em todas as telas, painel da rede com gráficos animados, arco dos dias de estoque, abertura animada, Perfil sem cadastro). Antes das lojas faltam os itens de confiança da revisão de UX (aviso de versão, dado antigo, tela "Sobre").
 
 ## Como funciona
 
