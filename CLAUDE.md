@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-App React Native (Expo) que mostra o estoque de remédios das UBSs do Distrito Federal, para idosos e cuidadores. Projeto de portfólio. A especificação está em `docs/SPEC.md`: siga o escopo de lá e atualize-o quando uma decisão mudar.
+App React Native (Expo) que mostra o estoque de remédios das UBSs do Distrito Federal, para toda a população que retira remédio na UBS. O idoso (e quem cuida dele) é a régua do design, não o limite do público: nos textos, o app não se apresenta como "para idosos". Projeto de portfólio. A especificação está em `docs/SPEC.md`: siga o escopo de lá e atualize-o quando uma decisão mudar.
 
 ## Estrutura
 - `packages/shared` — formato do snapshot (schemas zod), semáforo, regras de retirada, `normalizar()`. Usado pelo coletor e pelo app.

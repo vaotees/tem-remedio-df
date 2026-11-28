@@ -9,7 +9,7 @@
 
 ## Em 30 segundos
 
-> Muita gente idosa no DF sai de casa para buscar remédio na UBS e volta sem ele. A Secretaria de Saúde publica o estoque de cada farmácia, mas num painel difícil até para quem tem prática. O Tem Remédio DF lê esses dados públicos todo dia e responde, em letra grande: em qual posto perto de você tem o seu remédio hoje, como chegar e o telefone para ligar antes. Não pede cadastro nem senha, e a lista de remédios fica só no celular.
+> Muita gente no DF sai de casa para buscar remédio na UBS e volta sem ele. A Secretaria de Saúde publica o estoque de cada farmácia, mas num painel difícil até para quem tem prática. O Tem Remédio DF lê esses dados públicos todo dia e responde, em letra grande: em qual posto perto de você tem o seu remédio hoje, como chegar e o telefone para ligar antes. Foi pensado para quem enxerga pouco ou tem pouca prática com o celular, e por isso fica fácil para todo mundo. Não pede cadastro nem senha, e a lista de remédios fica só no celular.
 
 ## Vídeo (60 a 90 segundos)
 
@@ -31,8 +31,9 @@ Para o LinkedIn, sobra espaço para uma frase sobre o porquê ("fiz para a minha
 
 ## Perguntas de entrevista que o projeto responde
 
+- **É um app para idosos?** É para todo mundo que retira remédio na farmácia da UBS, de qualquer idade. O idoso foi a régua do design: o que funciona para quem enxerga pouco e tem pouca prática com o celular funciona para todos, como a rampa da calçada, que foi feita para a cadeira de rodas e serve também ao carrinho de bebê e à mala.
 - **De onde vêm os dados?** Do painel de estoque da SES-DF (Power BI público), do CNES e da tabela CMED. Um coletor em GitHub Actions confere de hora em hora, valida tudo com zod e publica um arquivo estático no GitHub Pages. Se a SES-DF publicar dado quebrado, o anterior continua no ar.
-- **Por que não tem servidor nem login?** A lista de remédios de uma pessoa é dado de saúde (LGPD, art. 11). Sem servidor, não há o que vazar; sem senha, não há a principal porta de golpe contra idosos.
+- **Por que não tem servidor nem login?** A lista de remédios de uma pessoa é dado de saúde (LGPD, art. 11). Sem servidor, não há o que vazar; sem senha, não há a principal porta de golpe, que mira sobretudo os mais velhos.
 - **E sem internet?** O app vem com um snapshot embutido e guarda o último baixado; diz sempre de quando é o dado.
 - **Acessibilidade?** Letra de 18 pt ou mais, que cresce com o celular e com o Perfil; fonte Atkinson Hyperlegible; contraste testado automaticamente nos dois temas; alvos de toque de 56; leitor de tela revisado (VoiceOver e TalkBack).
 - **Qualidade?** Cerca de 300 testes (coletor, regras e telas), TypeScript estrito, CI em todo PR, e a versão web exportada a cada mudança.

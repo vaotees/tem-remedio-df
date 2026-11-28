@@ -6,7 +6,13 @@ Nome provisório. Documento vivo: atualize quando uma decisão mudar.
 
 ## Objetivo
 
-Em até 3 toques, a pessoa (idosa, ou o filho/cuidador) descobre **qual posto de saúde perto dela tem o remédio hoje** e como chegar lá. Começa só no Distrito Federal, com dados oficiais da SES-DF.
+Em até 3 toques, quem retira remédio na farmácia da UBS (para si ou para alguém de quem cuida) descobre **qual posto de saúde perto tem o remédio hoje** e como chegar lá. Começa só no Distrito Federal, com dados oficiais da SES-DF.
+
+### Para quem (27/11/2026)
+
+O app é para toda a população que usa a farmácia da UBS: quem trata doença crônica (diabetes, pressão, tireoide, epilepsia, saúde mental), quem busca remédio para um filho, quem pega anticoncepcional ou insulina, o agente comunitário que orienta as famílias. O idoso é a régua do design, não o limite do público. Letra grande, contraste alto, alvos de toque de 56, texto que nunca é cortado e nada de login atendem também quem enxerga pouco, tem pouca prática com o celular, está com pressa ou no sol.
+
+Por isso o app não se apresenta como "para idosos": muita gente mais velha evita produto com esse rótulo, e o filho que instala o app e mostra para o pai também é público. As escolhas de acessibilidade continuam as mesmas; muda só o texto de apresentação (README, guia de apresentação, descrição do repositório e, quando for escrita, a das lojas). Com mais gente usando, a privacidade pesa ainda mais (anticoncepcional, remédio psiquiátrico): a lista continua só no aparelho.
 
 ## Escopo
 
