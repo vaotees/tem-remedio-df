@@ -2,7 +2,7 @@
 
 > **"Em se tratando de medicamentos, a informação é o melhor remédio."**
 
-App para idosos (e seus cuidadores) descobrirem **qual posto de saúde do DF tem o remédio hoje**, antes de sair de casa. Usa só dados públicos e oficiais da Secretaria de Saúde do DF.
+App para descobrir **qual posto de saúde do DF tem o remédio hoje**, antes de sair de casa. É para quem retira remédio na farmácia da UBS, para si ou para alguém de quem cuida, e foi feito para ser fácil para quem enxerga pouco ou tem pouca prática com o celular. Usa só dados públicos e oficiais da Secretaria de Saúde do DF.
 
 Projeto de portfólio em React Native (Expo SDK 58) + TypeScript.
 
